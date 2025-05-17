@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Page A</title>
+  <link rel="stylesheet" href="./resources/defaults.css" />
+  <!-- spx -->
+  <script type="module" spx-eval="false">
+  import spx from '/resources/spx/index.js';
+
+  const domReady = spx({
+    fragment: [
+      'main',  // #menu is dynamic and will morph
+      'footer'   // #main is dynamic and will morph
+    ],
+    logLevel: 3,
+  });
+  export default domReady(function(session) {
+    // You initialize third party js in this callback
+    console.log(session);
+  })
+  </script>
+  <!-- spx -->
+</head>
+<body>
+<div class="progress-bar"></div>
+<style>
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 5px;
+    background: red;
+    animation: move 4s linear infinite;
+    z-index: 1000;
+}
+@keyframes move {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+main, footer, header {
+  padding: 1rem;
+  margin: 6rem;
+  background: #eee;
+}
+</style>
+</div>
+
+<header>
+  <nav>
+    <a href="/index.html" spx-target>Page index</a>
+    <a href="/otherpage.html" spx-target>Page A</a>
+  </nav>
+</header>
+
+<main id="main">
+  <h1>This is Page A</h1>
+  <p>Animation should continue smoothly if SPX works.</p>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem ipsum eos veritatis omnis nemo adipisci alias in voluptatibus maiores sit, assumenda quod earum quos cumque tenetur a maxime beatae impedit corrupti id natus. Illum ab provident hic nobis voluptates pariatur culpa ea voluptatem sequi officia, id, magnam aperiam ullam sunt, nostrum explicabo corporis labore ex repellendus natus voluptate. Quae odit iusto, molestiae eligendi illo pariatur autem optio impedit rerum facere voluptatum quam, nemo accusantium cum quasi, tenetur nam voluptatem quia delectus id harum deleniti. At nulla magnam ipsam enim hic quas voluptatibus earum, iusto nostrum cum natus laudantium sapiente, voluptatem quo quidem. Corrupti dolorum nam at perspiciatis neque ea dolorem aspernatur repudiandae sapiente enim deleniti doloremque suscipit repellendus alias nemo sunt odio ratione, dignissimos totam facilis. Animi dolorem molestias sunt temporibus quasi quos sequi, maxime autem ea vero deleniti reprehenderit nobis dignissimos laboriosam alias similique asperiores perspiciatis. Laboriosam veniam esse praesentium a cupiditate dolores non nostrum soluta pariatur est eaque, provident ducimus ratione. Tempore odio sunt, perspiciatis quibusdam recusandae neque nesciunt, atque est dolorum asperiores sapiente voluptatum amet minima quos ullam tempora totam quasi ipsum autem, ratione provident explicabo architecto illo? Quisquam vero, molestias esse commodi quaerat impedit perspiciatis sit repudiandae magni harum voluptate, rem dolore cum odio sequi. Ab tempora consectetur optio excepturi esse vitae, quisquam perferendis, laudantium quod explicabo tenetur voluptas numquam libero. Deserunt tempore neque exercitationem ipsum ratione. Odio dignissimos consequatur reprehenderit, vitae voluptate a fugiat voluptatibus. Molestiae non et sed ipsa blanditiis, ut, magnam quis molestias libero soluta culpa voluptas, similique sequi sint cum quo voluptatibus dolorum odit quos eligendi perspiciatis nesciunt. Vero dignissimos quae delectus non, deserunt dolorum recusandae facilis dolore enim reprehenderit amet quasi, ratione atque velit ipsum? Ullam quasi, asperiores minus commodi id et quos adipisci a, error assumenda maiores inventore, quod cupiditate. Accusamus aperiam dolore, magni facere sit suscipit quidem ea dolorum saepe, nihil blanditiis fugit rem neque fugiat accusantium ex at eaque cumque sed dolorem hic soluta. Molestias nisi impedit totam itaque saepe laborum eum fugiat optio libero accusantium eaque id soluta enim vel delectus hic debitis, dolore nemo mollitia. Ea, cupiditate aspernatur. Laboriosam natus doloribus exercitationem, quo, reprehenderit veritatis esse impedit sit quos, voluptates accusantium rerum eligendi sed rem. Tenetur a ratione libero sequi animi excepturi harum beatae id perferendis minima eum in neque nam consequatur recusandae, ipsa autem quia corrupti amet voluptatibus deleniti mollitia non aliquam. Iste, esse exercitationem incidunt cupiditate voluptatum repellendus ex? Vitae saepe itaque possimus fugiat fuga eius natus laudantium quidem, ipsa blanditiis, eos rerum sunt, cumque quisquam. Magni, laboriosam nam ipsa laborum saepe accusamus sint possimus incidunt aspernatur neque consequuntur voluptatum distinctio ea! Aspernatur consectetur omnis labore deserunt doloremque, cupiditate natus quis possimus placeat nulla saepe nam suscipit, consequatur neque impedit iusto tempora iste? Dolore totam dolor deleniti omnis, distinctio suscipit! Aperiam, totam enim ipsam ipsa, qui minus eveniet sint nisi quaerat eius corrupti in ullam placeat neque quod, a sed accusantium accusamus. Doloribus labore veniam rerum expedita cum quaerat quidem. Doloremque eius facere sequi similique eligendi. Reprehenderit, quisquam enim! Illo nulla nam voluptatum voluptatem deleniti quos odit tempora quaerat incidunt laboriosam accusamus facilis natus, culpa quia, veritatis molestias! Eaque aspernatur ipsum praesentium, aperiam dolore reiciendis perferendis quasi aut natus et quo quam nihil laborum cumque maxime saepe. Mollitia omnis quae saepe accusamus hic quia expedita atque odit ut amet.</p>
+</main>
+
+<footer>
+  <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Perferendis reiciendis veritatis ipsam.</p>
+</footer>
+
+</body>
+</html>
