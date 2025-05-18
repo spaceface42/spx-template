@@ -1,0 +1,40 @@
+:root {
+    --gap: 10rem;
+    --padding: min(1rem, 3vw);
+}
+
+
+body {
+    padding: --var(--padding);
+    background-color: #f0f0f0;
+
+    display: flex;
+    flex-wrap: wrap
+    gap: --var(--gap);
+    flex: 1 1 auto;
+}
+
+
+header, main, footer {
+    margin: 3rem auto;
+    padding: 3rem;
+    background-color: white;
+    border-radius: 1rem;
+    min-height: 10vh;
+    min-width: 30vw
+}
+
+h1 {
+    font-size: clamp(2rem, 10vw, 5rem);
+    font-size: clamp(2rem, calc(7vw + 1rem), 5rem);
+}
+
+/* site specific image size */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background-color: aliceblue;
+}
