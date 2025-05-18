@@ -11,6 +11,7 @@
         "spx.enable": true,
         "editor.wordWrap": "on",
 		"liveServer.settings.CustomBrowser" : "chrome",
-        "git.confirmSync": true
+        "git.confirmSync": true,
+        "files.eol": "\n"
     }
 }
