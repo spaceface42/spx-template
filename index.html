@@ -13,20 +13,23 @@
 
 <div class="progress-bar" spx-persist>
 <style>
-    .progress-bar {
+.progress-bar {
     position: fixed;
     top: 0; left: 0;
     width: 100vw;
     height: 3rem;
-    background: rgb(222, 222, 222);
     background: #2A7B9B;
     background: linear-gradient(90deg,rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(237, 221, 83, 1) 100%);
     animation: move 22s linear infinite;
     z-index: 1;
 }
 @keyframes move {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% { 
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
 }
 </style>
 </div>

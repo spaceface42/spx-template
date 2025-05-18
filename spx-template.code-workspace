@@ -8,6 +8,7 @@
         "emmet.syntaxProfiles": {
             "html": "xhtml"
         },
+        "spx.enable": true,
         "editor.wordWrap": "on",
 		"liveServer.settings.CustomBrowser" : "chrome",
         "git.confirmSync": true

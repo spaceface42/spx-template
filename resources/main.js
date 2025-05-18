@@ -6,7 +6,9 @@
       'footer'   // #main is dynamic and will morph
     ],
     logLevel: 3,
+    cache: true,
     style: ['link[href*="main.css"]'],
+    scripts: ['script[src*="main.js"]'],
   });
   export default domReady(function(session) {
     // You initialize third party js in this callback
