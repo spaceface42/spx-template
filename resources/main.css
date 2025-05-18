@@ -1,0 +1,22 @@
+    .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 3rem;
+background: #2a9b90;
+background: linear-gradient(90deg,rgba(42, 155, 144, 1) 0%, rgba(87, 89, 199, 1) 50%, rgba(237, 160, 83, 1) 100%);
+    animation: move 22s linear infinite;
+    z-index: 1;
+}
+@keyframes move {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+
+main, footer, header {
+  padding: 1rem;
+  margin: 6rem;
+  background: #eee;
+}
+

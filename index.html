@@ -5,60 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spa test</title>
   <link rel="stylesheet" href="./resources/defaults.css" />
-  <!-- spx -->
-  <script type="module" spx-eval="false">
-  import spx from '/resources/spx/index.js';
+  <link rel="stylesheet" href="./resources/main.css" />
 
-  const domReady = spx({
-    fragment: [
-      'main',  // #menu is dynamic and will morph
-      'footer'   // #main is dynamic and will morph
-    ],
-    logLevel: 3,
-  });
-  export default domReady(function(session) {
-    // You initialize third party js in this callback
-    console.log(session);
-  })
-  </script>
-  <!-- spx -->
+  <script type="module" src="./resources/main.js"></script>
 </head>
 <body>
 
-
-
-<div class="progress-bar"></div>
+<div class="progress-bar" spx-persist>
 <style>
-.progress-bar {
+    .progress-bar {
     position: fixed;
     top: 0; left: 0;
     width: 100vw;
-    height: 5px;
-    background: red;
-    animation: move 4s linear infinite;
-    z-index: 1000;
+    height: 3rem;
+    background: rgb(222, 222, 222);
+    background: #2A7B9B;
+    background: linear-gradient(90deg,rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(237, 221, 83, 1) 100%);
+    animation: move 22s linear infinite;
+    z-index: 1;
 }
 @keyframes move {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
-}
-main, footer, header {
-  padding: 1rem;
-  margin: 6rem;
-  background: #eee;
 }
 </style>
 </div>
 
 <header>
   <nav>
-    <a href="/index.html" spx-target>Page index</a>
-    <a href="/otherpage.html" spx-target>Page A</a>
+    <a href="/index.html" spx-target>index</a>
+    <a href="/otherpage.html" spx-target>otherpage</a>
   </nav>
 </header>
 
 <main id="main">
-  <h1>This is Page INDEX</h1>
+  <h1>This is INDEX page</h1>
   <p>Animation should continue smoothly if SPX works.</p>
   <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nesciunt accusamus nobis architecto modi fuga perspiciatis velit doloremque id voluptatibus suscipit, dolor, sapiente illum, impedit ullam officia? Sequi eveniet omnis, quisquam consequuntur est aspernatur vitae provident nam temporibus aliquam harum quis culpa nostrum deserunt et odit ipsa laborum minima? Mollitia exercitationem iste ipsum veritatis, totam distinctio facere repellendus nesciunt voluptate temporibus hic ratione magni, quasi quo sequi quam, dolores assumenda optio quaerat! Vitae, rem. Et, unde illo? Veniam esse cumque eligendi perspiciatis quaerat nobis sunt? Libero incidunt, laudantium quo fuga asperiores aperiam voluptas perspiciatis eligendi suscipit? Officiis ipsum cumque aliquid quia voluptates! Sapiente unde minus, est, quibusdam repudiandae totam exercitationem dicta, sed debitis suscipit aut sit. Sed vero facere enim. Aspernatur commodi dolorem magnam. Ut sequi harum fuga unde rem velit, animi excepturi iusto officiis rerum quis aperiam numquam corporis optio deserunt, perferendis voluptate in molestiae facilis enim odio eligendi. Eaque, magni enim ab, itaque doloribus reprehenderit vel tenetur vero molestiae illum veniam. Quasi illo saepe officia et eum, cupiditate excepturi quam reprehenderit doloribus maxime asperiores eos a incidunt repellendus id, corporis possimus maiores rem repudiandae aliquam explicabo. Atque, doloremque quam facilis saepe at facere nesciunt officiis, incidunt aliquid veritatis ex veniam magni, corporis dicta expedita ab tenetur? Dicta, laborum ex sit non ab officiis itaque id? Perferendis neque animi mollitia iusto illo!</p>
 </main>
