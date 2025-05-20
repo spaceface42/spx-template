@@ -18,6 +18,7 @@
         "editor.wordWrap": "on",
 		"liveServer.settings.CustomBrowser" : "chrome",
         "git.confirmSync": true,
-        "files.eol": "\n"
+        "files.eol": "\n",
+        "liveServer.settings.multiRootWorkspaceName": "spx-template"
     }
 }
