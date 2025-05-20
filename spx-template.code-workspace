@@ -2,13 +2,19 @@
 	"folders": [
 		{
 			"path": "."
+		},
+        {
+			"path": "docs"
+		},
+                {
+			"path": "tmp"
 		}
 	],
     "settings": {
         "emmet.syntaxProfiles": {
             "html": "xhtml"
         },
-        "spx.enable": true,
+        "spx.enable": false,
         "editor.wordWrap": "on",
 		"liveServer.settings.CustomBrowser" : "chrome",
         "git.confirmSync": true,

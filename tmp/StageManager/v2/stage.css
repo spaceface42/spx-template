@@ -1,0 +1,23 @@
+.position {
+  position: fixed;
+  z-index: 1000;
+}
+
+/* Corners */
+.top-left     { top: 0; left: 0; }
+.top-right    { top: 0; right: 0; }
+.bottom-left  { bottom: 0; left: 0; }
+.bottom-right { bottom: 0; right: 0; }
+
+/* Centered edges */
+.top-center    { top: 0; left: 50%; transform: translateX(-50%); }
+.bottom-center { bottom: 0; left: 50%; transform: translateX(-50%); }
+.left-center   { left: 0; top: 50%; transform: translateY(-50%); }
+.right-center  { right: 0; top: 50%; transform: translateY(-50%); }
+
+/* Centered middle */
+.center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

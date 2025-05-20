@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Position Presets Demo</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #f8f8f8;
+      font-family: sans-serif;
+    }
+
+    section {
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin: 20px;
+      min-height: 80vh;
+    }
+
+    .position {
+      position: fixed;
+      z-index: 1000;
+      background: #333;
+      color: white;
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      opacity: 0.9;
+      transition: all 0.3s ease;
+    }
+
+    /* Corners */
+    .top-left     { top: 0; left: 0; }
+    .top-right    { top: 0; right: 0; }
+    .bottom-left  { bottom: 0; left: 0; }
+    .bottom-right { bottom: 0; right: 0; }
+
+    /* Edges with centering */
+    .top-center    { top: 0; left: 50%; transform: translateX(-50%); }
+    .bottom-center { bottom: 0; left: 50%; transform: translateX(-50%); }
+    .left-center   { left: 0; top: 50%; transform: translateY(-50%); }
+    .right-center  { right: 0; top: 50%; transform: translateY(-50%); }
+
+    /* True center */
+    .center {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #e91e63;
+    }
+
+    /* manual offset */
+    :root {
+        --offset: 60px;
+    }
+
+    section .top-left {
+        top: var(--offset);
+        left: var(--offset);
+        background-color: #e91e63;
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <div class="position top-left">top-left</div>
+  <div class="position top-center">top-center</div>
+  <div class="position top-right">top-right</div>
+
+  <div class="position left-center">left-center</div>
+  <div class="position center">center</div>
+  <div class="position right-center">right-center</div>
+
+  <div class="position bottom-left">bottom-left</div>
+  <div class="position bottom-center">bottom-center</div>
+  <div class="position bottom-right">bottom-right</div>
+
+<div id="tooltip">TOOLTIP</div>
+
+<main>
+
+<section>
+      <div class="position top-left" draggable-tag>LOGO</div>
+</section>
+<section>
+    section
+</section>
+<section>
+    section
+</section>
+<section>
+    section
+</section>
+<section>
+    section
+</section>
+<section>
+    section
+</section>
+<section>
+    section
+</section>
+<section>
+    section
+</section>
+<section>
+    section
+</section>
+<section>
+    section
+</section>
+
+</main>
+
+
+
+
+
+<script type="module">
+import { StageManager } from './stage-manager.js';
+
+const stage = new StageManager();
+
+stage.register('#tooltip', {
+  vertical: 'top',
+  horizontal: 'right',
+  offsetX: '10px',
+  offsetY: '20px'
+});
+
+
+    import { DraggableTag } from './DraggableTag.js';
+    new DraggableTag();
+
+
+</script>
+
+
+
+
+</body>
+</html>

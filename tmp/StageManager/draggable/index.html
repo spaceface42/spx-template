@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage Manager</title>
+    <style>
+        /* Reset and basic styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333;
+            color: white;
+        }
+        
+        /* Stage container */
+        .stage-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #222;
+            border: 2px solid #444;
+        }
+        
+        /* Stage positions */
+        .stage-element {
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #666;
+            border-radius: 4px;
+            color: white;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        /* Top positions */
+        .stage-top-left {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        
+        .stage-top-center {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .stage-top-right {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        /* Middle positions */
+        .stage-middle-left {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+        }
+        
+        .stage-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .stage-middle-right {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+        }
+        
+        /* Bottom positions */
+        .stage-bottom-left {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+        }
+        
+        .stage-bottom-center {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .stage-bottom-right {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
+        
+        /* Controls panel */
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #111;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="stage-container">
+        <div class="stage-element stage-top-left">Top Left</div>
+        <div class="stage-element stage-top-center">Top Center</div>
+        <div class="stage-element stage-top-right">Top Right</div>
+        
+        <div class="stage-element stage-middle-left">Middle Left</div>
+        <div class="stage-element stage-center">Center</div>
+        <div class="stage-element stage-middle-right">Middle Right</div>
+        
+        <div class="stage-element stage-bottom-left">Bottom Left</div>
+        <div class="stage-element stage-bottom-center">Bottom Center</div>
+        <div class="stage-element stage-bottom-right">Bottom Right</div>
+    </div>
+    
+    <div class="controls">
+        <button id="reset-btn">Reset Layout</button>
+        <button id="add-element">Add Element</button>
+    </div>
+
+    <script>
+        // Make elements draggable (basic implementation)
+        const elements = document.querySelectorAll('.stage-element');
+        
+        elements.forEach(element => {
+            let isDragging = false;
+            let offsetX, offsetY;
+            
+            element.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - element.getBoundingClientRect().left;
+                offsetY = e.clientY - element.getBoundingClientRect().top;
+                element.style.cursor = 'grabbing';
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const x = e.clientX - offsetX;
+                const y = e.clientY - offsetY;
+                
+                element.style.left = `${x}px`;
+                element.style.top = `${y}px`;
+                element.style.transform = 'none'; // Remove any transform when dragging
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                element.style.cursor = 'grab';
+            });
+            
+            // Add grab cursor
+            element.style.cursor = 'grab';
+        });
+        
+        // Reset button functionality
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            location.reload();
+        });
+        
+        // Add element button functionality
+        document.getElementById('add-element').addEventListener('click', () => {
+            const newElement = document.createElement('div');
+            newElement.className = 'stage-element';
+            newElement.textContent = 'New Element';
+            newElement.style.position = 'absolute';
+            newElement.style.left = '50%';
+            newElement.style.top = '50%';
+            newElement.style.transform = 'translate(-50%, -50%)';
+            newElement.style.cursor = 'grab';
+            
+            document.querySelector('.stage-container').appendChild(newElement);
+            
+            // Make the new element draggable
+            let isDragging = false;
+            let offsetX, offsetY;
+            
+            newElement.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - newElement.getBoundingClientRect().left;
+                offsetY = e.clientY - newElement.getBoundingClientRect().top;
+                newElement.style.cursor = 'grabbing';
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const x = e.clientX - offsetX;
+                const y = e.clientY - offsetY;
+                
+                newElement.style.left = `${x}px`;
+                newElement.style.top = `${y}px`;
+                newElement.style.transform = 'none';
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                newElement.style.cursor = 'grab';
+            });
+        });
+    </script>
+</body>
+</html>
