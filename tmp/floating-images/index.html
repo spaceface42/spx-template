@@ -79,13 +79,36 @@
     </style>
 </head>
 <body>
-    <div class="container" id="container">
-        <!-- Here are your pre-defined image elements -->
-        <img src="./1.jpeg" class="floating-image" alt="Floating Image 1">
-        <img src="./2.jpeg" class="floating-image" alt="Floating Image 2">
-        <img src="./3.jpeg" class="floating-image" alt="Floating Image 3">
-        <img src="./4.jpeg" class="floating-image" alt="Floating Image 4">
-    </div>
+
+    <style>
+        nav {
+            position: absolute;
+                top: 100px;
+                left: 100px;
+                z-index: 10;
+        }
+        object {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
+
+<div class="container" id="container">
+
+    <nav>
+        <h1>
+            <object data="./logo-sandorzsolt-620.svg" type=""></object>
+        </h1>
+    </nav>
+
+
+    <!-- Here are your pre-defined image elements -->
+    <img src="./gong.png" class="floating-image" alt="Floating Image 1">
+    <img src="./cloud.png" class="floating-image" alt="Floating Image 2">
+    <img src="./image-2.jpg" class="floating-image" alt="Floating Image 3">
+    <img src="./image-3.jpg" class="floating-image" alt="Floating Image 4">
+    <img src="./image-4.jpg" class="floating-image" alt="Floating Image 5">
+</div>
     
     <div class="controls">
         <button id="speedUp">Speed Up</button>
