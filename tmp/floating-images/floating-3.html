@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floating Images with Gentle Bounce</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            width: 100vw;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .floating-image {
+            position: absolute;
+            /* Initially hidden until positioned by JS */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            max-height: 30vh;
+        }
+
+        .controls {
+            position: sticky;
+            bottom: 20px;
+            left: 50%;
+            width: fit-content;
+            transform: translate(-50%, 0);
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #3a7bc8;
+        }
+
+        .stage {
+            position: relative;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <!-- Here are your pre-defined image elements -->
+        <img src="./1.jpeg" class="floating-image" alt="Floating Image 1">
+        <img src="./2.jpeg" class="floating-image" alt="Floating Image 2">
+        <img src="./3.jpeg" class="floating-image" alt="Floating Image 3">
+        <img src="./4.jpeg" class="floating-image" alt="Floating Image 4">
+    </div>
+    
+    <div class="controls">
+        <button id="speedUp">Speed Up</button>
+        <button id="slowDown">Slow Down</button>
+    </div>
+
+    <div class="stage">
+        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vero eaque quos velit odit quis officiis, itaque maiores deserunt expedita nobis et nam! Maiores dolores, omnis cum libero voluptatem id saepe laudantium atque quidem est amet placeat eveniet illo iusto doloremque temporibus beatae eaque recusandae quod repellat aliquam vero? Provident, laudantium eaque accusantium nulla iure natus, eos illo esse maiores exercitationem tenetur pariatur dolore, atque repudiandae deserunt blanditiis voluptates earum sit! Voluptates dolores iusto ipsa! Repellat neque laudantium debitis excepturi vitae officiis harum corrupti, tempora commodi quo molestiae ipsam ipsum, inventore, obcaecati nulla. Ducimus iste et sapiente accusamus nisi ad quo numquam, commodi temporibus voluptate laudantium enim totam quas, quasi eius quod velit aliquid, consequuntur veniam sunt earum! Ducimus ab nam dignissimos consectetur repudiandae labore quisquam beatae reiciendis, doloremque quae quia ea distinctio consequuntur. Quo cum odit delectus cupiditate, voluptate adipisci eaque magnam distinctio nulla voluptas tenetur molestias est deserunt mollitia impedit numquam iure autem inventore iusto at? Placeat quae, pariatur minima maxime et fuga quod adipisci odit ratione corporis nihil consequuntur vitae molestias laboriosam deserunt culpa dolorem dolor nemo quos natus vero, ex recusandae? Dolores fugiat vero perferendis quia sit eum animi facere fugit voluptates, alias ex ea cumque nesciunt officiis nisi sed facilis obcaecati quis cum earum necessitatibus voluptatum ullam possimus. Excepturi magnam quas, recusandae quo itaque quibusdam vel cum atque nam aperiam assumenda necessitatibus voluptatem asperiores animi corrupti numquam omnis sapiente. Quia minus optio necessitatibus non, iusto perferendis explicabo fuga suscipit fugit? Eligendi nam id rem omnis itaque reprehenderit eius nostrum, nesciunt odio repellendus minus commodi corporis et, laborum explicabo voluptatibus, aperiam dignissimos deleniti. Neque, iste eligendi nam obcaecati ratione quas facere provident, sunt totam placeat assumenda a eos odit cum aspernatur eveniet, quasi dolores consectetur. Accusantium eum temporibus minima quia necessitatibus ad tempora dicta, sapiente facere id veniam maiores eos, mollitia ducimus, illo saepe quam nulla enim quaerat natus qui error inventore iste molestiae? Laboriosam consequatur, obcaecati dolorum aperiam ipsa minima ducimus eius sunt distinctio voluptas quaerat cum unde illo voluptatum, velit illum exercitationem facilis pariatur! Maiores cupiditate modi veniam amet odio sit optio, nesciunt obcaecati. Sunt dolores aliquid odit necessitatibus expedita tempora culpa veritatis illo, repudiandae porro veniam similique alias, esse facilis earum enim officia sit harum obcaecati omnis vero reprehenderit voluptatibus? Distinctio consequatur repudiandae officia architecto excepturi dicta possimus saepe, ullam nesciunt earum nisi odit debitis doloribus. Incidunt voluptate repellat facilis sed velit ea, inventore vero iure tempora ab a nulla consequatur libero sunt error quos unde tenetur explicabo soluta. Eos consequuntur doloribus earum molestiae nemo expedita laudantium enim aut perferendis cumque sunt unde dolores totam ex similique voluptatem quis, reprehenderit voluptatum iste ipsa incidunt, ut, eius ea? Explicabo quibusdam consectetur voluptatum eveniet. Cupiditate suscipit repellendus perferendis, corporis molestias architecto fuga. Aperiam excepturi debitis quod molestias ad cumque autem veritatis ea, dolores magnam natus exercitationem voluptates laboriosam eius quia nisi sint labore qui doloremque voluptate numquam similique recusandae aspernatur. Aut maiores, nihil debitis omnis explicabo exercitationem temporibus illo ipsa natus commodi voluptatum nesciunt recusandae eum sit iusto ullam repudiandae magni fugit vero in voluptates enim dolorem quod dolorum. Animi sunt magnam voluptatem deserunt laborum odit modi ex ipsam deleniti corporis soluta nemo excepturi illum rerum ducimus, harum perspiciatis ad nesciunt laudantium molestias sit placeat. Ab ex fuga vitae in nemo doloremque iste sed cumque quas numquam laboriosam, eius placeat iure nisi maxime dicta et aspernatur ea asperiores a hic dolores! Ullam incidunt nesciunt assumenda ad inventore illo itaque aperiam laborum asperiores minus excepturi quidem cum exercitationem, quam, doloremque, esse illum optio numquam! Ratione similique, consequuntur modi provident beatae deleniti impedit dolores dolorem architecto magni, debitis soluta odit eveniet commodi sapiente nisi quasi vero aut vitae. Porro culpa nemo fuga expedita! Autem harum laborum ratione suscipit impedit illo minima necessitatibus reiciendis architecto accusantium, maiores molestias amet voluptatum voluptate, recusandae inventore? Explicabo magni quisquam architecto eius asperiores dolore possimus voluptas vel voluptate, quod ab earum ipsum natus reiciendis magnam quae, rerum praesentium totam? Labore incidunt alias fugit, consectetur quasi, sit cum hic animi perspiciatis totam esse dicta ex aspernatur qui provident laborum adipisci omnis repudiandae mollitia officia tenetur ut sapiente eos. Odit tempore corporis deleniti maxime quia incidunt natus ad a dignissimos unde facilis, commodi animi, voluptatum expedita! Consectetur blanditiis quaerat alias nam incidunt nulla, atque repellendus minus voluptas praesentium, excepturi, eaque voluptates aliquam distinctio quos tempore modi! Pariatur debitis nostrum quas praesentium nesciunt consectetur saepe accusamus! Ex temporibus itaque et dignissimos voluptates facere rem nam quia excepturi quod! Laborum culpa est deleniti mollitia! Eos cum magni praesentium, enim provident sint quia. Aliquam, ut, ex quibusdam illum iusto deleniti molestiae, animi magnam provident recusandae sunt? Illum cum quae autem assumenda itaque molestiae id nemo quidem placeat quam error sit vel odit, ratione, incidunt eum similique amet, veniam a. Odio fugiat, perferendis in voluptatibus at explicabo similique magni sint assumenda. Harum eum dolor placeat aperiam? Nisi veritatis nam impedit minus repellendus sequi dicta at perspiciatis. Dolor voluptas provident non excepturi necessitatibus ab suscipit quae, quidem qui, expedita natus quam earum officia accusantium quibusdam debitis accusamus reiciendis! Temporibus perferendis id earum doloremque. Delectus ipsam, vitae obcaecati tempore non vero ex, consequuntur doloribus tenetur voluptatum, facilis excepturi alias sapiente eveniet enim unde laudantium! Inventore vero rerum fugit laudantium maiores ad, optio a reprehenderit ullam quisquam mollitia!</p>
+    </div>
+
+
+    <script>
+        class FloatingImage {
+            constructor(element, container) {
+                this.element = element;
+                this.container = container;
+                
+                // Get actual image dimensions
+                this.size = {
+                    width: this.element.width || this.element.offsetWidth,
+                    height: this.element.height || this.element.offsetHeight
+                };
+                
+                // Get container dimensions from manager
+                const containerWidth = container.manager.containerWidth;
+                const containerHeight = container.manager.containerHeight;
+                
+                // True random initial position within the container
+                this.x = Math.random() * (containerWidth - this.size.width);
+                this.y = Math.random() * (containerHeight - this.size.height);
+                
+                // Random velocity with variation in speed and direction
+                this.vx = (Math.random() - 0.5) * 3;  // Between -1.5 and 1.5
+                this.vy = (Math.random() - 0.5) * 3;  // Between -1.5 and 1.5
+                
+                // Apply initial position
+                this.updatePosition();
+                
+                // Make the image visible now that it's positioned
+                this.element.style.opacity = '1';
+            }
+            
+            updatePosition() {
+                this.element.style.left = `${this.x}px`;
+                this.element.style.top = `${this.y}px`;
+            }
+            
+            update(speedMultiplier = 1) {
+                // Update position based on velocity
+                this.x += this.vx * speedMultiplier;
+                this.y += this.vy * speedMultiplier;
+                
+                // Get current container dimensions from the manager
+                const containerWidth = this.container.manager.containerWidth;
+                const containerHeight = this.container.manager.containerHeight;
+                
+                // Bounce off the edges with a gentle effect
+                if (this.x <= 0 || this.x + this.size.width >= containerWidth) {
+                    this.vx = -this.vx * 0.8; // Reduce velocity slightly for more natural bounce
+                    
+                    // Ensure the image stays within bounds
+                    if (this.x <= 0) {
+                        this.x = 0;
+                    } else {
+                        this.x = containerWidth - this.size.width;
+                    }
+                }
+                
+                if (this.y <= 0 || this.y + this.size.height >= containerHeight) {
+                    this.vy = -this.vy * 0.8; // Reduce velocity slightly for more natural bounce
+                    
+                    // Ensure the image stays within bounds
+                    if (this.y <= 0) {
+                        this.y = 0;
+                    } else {
+                        this.y = containerHeight - this.size.height;
+                    }
+                }
+                
+                // Add a small random fluctuation to make movement more organic
+                this.vx += (Math.random() - 0.5) * 0.05;
+                this.vy += (Math.random() - 0.5) * 0.05;
+                
+                // Limit max speed to prevent images from moving too fast
+                const maxSpeed = 2;
+                const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (currentSpeed > maxSpeed) {
+                    this.vx = (this.vx / currentSpeed) * maxSpeed;
+                    this.vy = (this.vy / currentSpeed) * maxSpeed;
+                }
+                
+                // Apply the new position
+                this.updatePosition();
+            }
+        }
+        
+        class FloatingImageManager {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                this.images = [];
+                this.speedMultiplier = 1;
+                
+                // Store container dimensions
+                this.updateContainerDimensions();
+                
+                // Find all images with the floating-image class inside the container
+                const imageElements = this.container.querySelectorAll('.floating-image');
+                
+                // Initialize all found images
+                imageElements.forEach(imgElement => {
+                    // Wait for image to load to get proper dimensions
+                    if (imgElement.complete) {
+                        this.addExistingImage(imgElement);
+                    } else {
+                        imgElement.onload = () => this.addExistingImage(imgElement);
+                    }
+                });
+                
+                // Start the animation loop
+                this.animate();
+                
+                // Set up event listeners for controls
+                document.getElementById('speedUp').addEventListener('click', () => this.changeSpeed(1.5));
+                document.getElementById('slowDown').addEventListener('click', () => this.changeSpeed(0.6));
+                
+                // Create a ResizeObserver to monitor the container's size changes
+                this.resizeObserver = new ResizeObserver(entries => {
+                    for (let entry of entries) {
+                        if (entry.target === this.container) {
+                            // Small delay to ensure correct calculations
+                            setTimeout(() => {
+                                this.updateContainerDimensions();
+                                this.handleResize();
+                            }, 50);
+                        }
+                    }
+                });
+                
+                // Start observing the container
+                this.resizeObserver.observe(this.container);
+                
+                // Also handle window resize events that might affect the container
+                window.addEventListener('resize', () => {
+                    setTimeout(() => {
+                        this.updateContainerDimensions();
+                        this.handleResize();
+                    }, 50);
+                });
+            }
+            
+            updateContainerDimensions() {
+                this.containerWidth = this.container.clientWidth;
+                this.containerHeight = this.container.clientHeight;
+                console.log(`Container dimensions updated: ${this.containerWidth}x${this.containerHeight}`);
+            }
+            
+            addExistingImage(imgElement) {
+                // Store reference to the manager in the container for images to access
+                this.container.manager = this;
+                
+                const newFloatingImage = new FloatingImage(imgElement, this.container);
+                this.images.push(newFloatingImage);
+            }
+            
+            changeSpeed(factor) {
+                this.speedMultiplier *= factor;
+                // Limit the speed to reasonable bounds
+                if (this.speedMultiplier > 5) this.speedMultiplier = 5;
+                if (this.speedMultiplier < 0.2) this.speedMultiplier = 0.2;
+            }
+            
+            handleResize() {
+                // Ensure all images are within the new container bounds
+                this.images.forEach(image => {
+                    // Check if image is outside the new boundaries
+                    if (image.x + image.size.width > this.containerWidth) {
+                        // Reposition inside the boundary
+                        image.x = this.containerWidth - image.size.width;
+                    }
+                    if (image.y + image.size.height > this.containerHeight) {
+                        // Reposition inside the boundary
+                        image.y = this.containerHeight - image.size.height;
+                    }
+                    
+                    // Apply the new position immediately
+                    image.updatePosition();
+                });
+                
+                console.log(`Container resized to: ${this.containerWidth}x${this.containerHeight}`);
+            }
+            
+            animate() {
+                // Update all images
+                this.images.forEach(image => {
+                    image.update(this.speedMultiplier);
+                });
+                
+                // Request the next animation frame
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+        
+        // Initialize when the window loads
+        window.addEventListener('load', () => {
+            const manager = new FloatingImageManager('container');
+        });
+    </script>
+</body>
+</html>

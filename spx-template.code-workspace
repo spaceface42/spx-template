@@ -2,6 +2,12 @@
 	"folders": [
 		{
 			"path": "."
+		},
+        {
+			"path": "docs"
+		},
+                {
+			"path": "tmp"
 		}
 	],
     "settings": {

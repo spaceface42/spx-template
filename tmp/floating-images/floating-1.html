@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floating Images with Gentle Bounce</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .floating-image {
+            position: absolute;
+            /* Initially hidden until positioned by JS */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            max-width: 20vw;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #3a7bc8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <!-- Here are your pre-defined image elements -->
+        <img src="./1.jpeg" class="floating-image" alt="Floating Image 1">
+        <img src="./2.jpeg" class="floating-image" alt="Floating Image 2">
+        <img src="./3.jpeg" class="floating-image" alt="Floating Image 3">
+        <img src="./4.jpeg" class="floating-image" alt="Floating Image 4">
+    </div>
+    
+    <div class="controls">
+        <button id="speedUp">Speed Up</button>
+        <button id="slowDown">Slow Down</button>
+    </div>
+
+    <script>
+        class FloatingImage {
+            constructor(element, container) {
+                this.element = element;
+                this.container = container;
+                
+                // Get actual image dimensions
+                this.size = {
+                    width: this.element.width || this.element.offsetWidth,
+                    height: this.element.height || this.element.offsetHeight
+                };
+                
+                // True random initial position within the container
+                this.x = Math.random() * (container.clientWidth - this.size.width);
+                this.y = Math.random() * (container.clientHeight - this.size.height);
+                
+                // Random velocity with variation in speed and direction
+                this.vx = (Math.random() - 0.5) * 3;  // Between -1.5 and 1.5
+                this.vy = (Math.random() - 0.5) * 3;  // Between -1.5 and 1.5
+                
+                // Apply initial position
+                this.updatePosition();
+                
+                // Make the image visible now that it's positioned
+                this.element.style.opacity = '1';
+            }
+            
+            updatePosition() {
+                this.element.style.left = `${this.x}px`;
+                this.element.style.top = `${this.y}px`;
+            }
+            
+            update(speedMultiplier = 1) {
+                // Update position based on velocity
+                this.x += this.vx * speedMultiplier;
+                this.y += this.vy * speedMultiplier;
+                
+                // Bounce off the edges with a gentle effect
+                if (this.x <= 0 || this.x + this.size.width >= this.container.clientWidth) {
+                    this.vx = -this.vx * 0.8; // Reduce velocity slightly for more natural bounce
+                    
+                    // Ensure the image stays within bounds
+                    if (this.x <= 0) {
+                        this.x = 0;
+                    } else {
+                        this.x = this.container.clientWidth - this.size.width;
+                    }
+                }
+                
+                if (this.y <= 0 || this.y + this.size.height >= this.container.clientHeight) {
+                    this.vy = -this.vy * 0.8; // Reduce velocity slightly for more natural bounce
+                    
+                    // Ensure the image stays within bounds
+                    if (this.y <= 0) {
+                        this.y = 0;
+                    } else {
+                        this.y = this.container.clientHeight - this.size.height;
+                    }
+                }
+                
+                // Add a small random fluctuation to make movement more organic
+                this.vx += (Math.random() - 0.5) * 0.05;
+                this.vy += (Math.random() - 0.5) * 0.05;
+                
+                // Limit max speed to prevent images from moving too fast
+                const maxSpeed = 2;
+                const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (currentSpeed > maxSpeed) {
+                    this.vx = (this.vx / currentSpeed) * maxSpeed;
+                    this.vy = (this.vy / currentSpeed) * maxSpeed;
+                }
+                
+                // Apply the new position
+                this.updatePosition();
+            }
+        }
+        
+        class FloatingImageManager {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                this.images = [];
+                this.speedMultiplier = 3;
+                
+                // Find all images with the floating-image class inside the container
+                const imageElements = this.container.querySelectorAll('.floating-image');
+                
+                // Initialize all found images
+                imageElements.forEach(imgElement => {
+                    // Wait for image to load to get proper dimensions
+                    if (imgElement.complete) {
+                        this.addExistingImage(imgElement);
+                    } else {
+                        imgElement.onload = () => this.addExistingImage(imgElement);
+                    }
+                });
+                
+                // Start the animation loop
+                this.animate();
+                
+                // Set up event listeners for controls
+                document.getElementById('speedUp').addEventListener('click', () => this.changeSpeed(1.5));
+                document.getElementById('slowDown').addEventListener('click', () => this.changeSpeed(0.6));
+                
+                // Adjust images when window is resized
+                window.addEventListener('resize', () => this.handleResize());
+            }
+            
+            addExistingImage(imgElement) {
+                const newFloatingImage = new FloatingImage(imgElement, this.container);
+                this.images.push(newFloatingImage);
+            }
+            
+            changeSpeed(factor) {
+                this.speedMultiplier *= factor;
+                // Limit the speed to reasonable bounds
+                if (this.speedMultiplier > 5) this.speedMultiplier = 5;
+                if (this.speedMultiplier < 0.2) this.speedMultiplier = 0.2;
+            }
+            
+            handleResize() {
+                // Ensure all images are within the new container bounds
+                this.images.forEach(image => {
+                    if (image.x + image.size.width > this.container.clientWidth) {
+                        image.x = this.container.clientWidth - image.size.width;
+                    }
+                    if (image.y + image.size.height > this.container.clientHeight) {
+                        image.y = this.container.clientHeight - image.size.height;
+                    }
+                    image.updatePosition();
+                });
+            }
+            
+            animate() {
+                // Update all images
+                this.images.forEach(image => {
+                    image.update(this.speedMultiplier);
+                });
+                
+                // Request the next animation frame
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+        
+        // Initialize when the window loads
+        window.addEventListener('load', () => {
+            const manager = new FloatingImageManager('container');
+        });
+    </script>
+</body>
+</html>

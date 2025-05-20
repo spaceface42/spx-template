@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stage Manager Demo</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+
+    .stage-element {
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    #nav {
+      background: #3b82f6;
+    }
+
+    #modal {
+      background: #16a34a;
+    }
+
+    #box {
+      background: #d97706;
+    }
+    #logo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 2rem;
+      color: #3b82f6;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="nav">Navigation Bar</div>
+  <div id="modal">Centered Modal</div>
+  <div id="box">Floating Box</div>
+
+
+   <div id="logo">logo</div>
+
+
+  <script type="module">
+    import { StageManager } from './stage-manager.js';
+
+    const stage = new StageManager();
+
+    stage.register('#nav', 'bottom 20px center');
+    stage.register('#modal', 'middle -30px center 20px');
+    stage.register('#box', 'top 10% right 30px');
+    stage.register('#logo', 'top 400px left 5%');
+  </script>
+</body>
+</html>

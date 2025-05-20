@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Default values
+PORT="8000"
+ROOT="docs"
+
+# Parse command-line arguments
+for arg in "$@"; do
+    case $arg in
+        --port=*)
+            PORT="${arg#*=}"
+            shift
+            ;;
+        --root=*)
+            ROOT="${arg#*=}"
+            shift
+            ;;
+        *)
+            echo "Unknown option: $arg"
+            echo "Usage: $0 [--port=PORT] [--root=ROOT]"
+            exit 1
+            ;;
+    esac
+done
+
+# Check if command exists
+command_exists () {
+    type "$1" &> /dev/null
+}
+
+# Start PHP server
+if command_exists php; then
+    php -S localhost:"$PORT" -t "$ROOT"
+else
+    /opt/homebrew/bin/php -S localhost:"$PORT" -t "$ROOT"
+fi
