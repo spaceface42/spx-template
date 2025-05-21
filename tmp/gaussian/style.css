@@ -24,11 +24,13 @@ body {
 /* site */
 body {
   background-color: #f0f0f0;
+      position: absolute;
+  inset: 30px;
 }
 #portfolio {
-  width: 100%;
+    position: absolute;
   height: 80vh;
-  background: #fff;
+  background-color: white;
 }
 
 .portfolio-item {
