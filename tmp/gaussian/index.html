@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gaussian Portfolio</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="hover-image-container">
+  <style>
+    #hover-image-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 0; /* Always behind everything */
+}
+  </style>
+</div>
+<div>
+  hello world. please hover on the images
+</div>
+<div id="portfolio">
+
+    <div class="portfolio-item">
+      <a href="#">Facade<img src="./image-1.jpg" alt="some-alt-text" /></a>
+    </div>
+    <div class="portfolio-item">
+      <a href="#">Portrait<img src="./image-2.jpg" alt="some-alt-text" /></a>
+    </div>
+        <div class="portfolio-item">
+      <a href="#">Facade xxxxx<img src="./polaroid-2.jpg" alt="some-alt-text" /></a>
+    </div>
+    <div class="portfolio-item">
+      <a href="#">Other<img src="./image-3.jpg" alt="some-alt-text" /></a>
+    </div>
+    <div class="portfolio-item">
+      <a href="#">Other<img src="./cloud.png" alt="some-alt-text" /></a>
+    </div>
+    <div class="portfolio-item">
+      <a href="#">Long name of<img src="./image-4.jpg" alt="some-alt-text" /></a>
+    </div>
+    <div class="portfolio-item">
+      <a href="#">Facade<img src="./polaroid-6.jpg" alt="some-alt-text" /></a>
+    </div>
+    <div class="portfolio-item">
+      <a href="#">Portrait<img src="./w.jpg" alt="some-alt-text" /></a>
+    </div>
+
+
+
+</div>
+
+
+
+
+<script type="module">
+  import { GaussianPortfolio } from './main.js';
+  new GaussianPortfolio('#portfolio', {
+    stdDevX: 20,
+    stdDevY: 15,
+    marginBuffer: 5,
+    avoidOverlap: true
+  });
+</script>
+</body>
+</html>
