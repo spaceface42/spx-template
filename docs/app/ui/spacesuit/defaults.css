@@ -1,0 +1,27 @@
+/* reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* defaults */
+body {
+    min-height: 100vh; /* fallback */
+    min-height: 100dvh; /* dynamic viewport height */
+    min-height: 100svh; /* small viewport height */
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+/* responsive images */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}

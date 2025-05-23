@@ -75,6 +75,9 @@ export default class FloatingImageManager {
                 this.handleResize();
             }, 50);
         });
+
+        // Pause on hover
+        this.isPausedByHover = false;
     }
     
     /**
@@ -97,6 +100,14 @@ export default class FloatingImageManager {
         
         const newFloatingImage = new FloatingImage(imgElement, this.container);
         this.images.push(newFloatingImage);
+
+        // Pause on hover
+        imgElement.addEventListener('mouseenter', () => {
+            this.isPausedByHover = true;
+        });
+        imgElement.addEventListener('mouseleave', () => {
+            this.isPausedByHover = false;
+        });
     }
     
     /**
@@ -138,12 +149,11 @@ export default class FloatingImageManager {
      * Called automatically after initialization.
      */
     animate() {
-        // Pause animation if container is not in the viewport
-        if (!this.isInViewport) {
+        // Pause animation if container is not in the viewport or paused by hover
+        if (!this.isInViewport || this.isPausedByHover) {
             requestAnimationFrame(() => this.animate());
             return;
         }
-        // If speedMultiplier is 0, skip updating positions but keep requesting frames for UI responsiveness
         if (this.speedMultiplier === 0) {
             requestAnimationFrame(() => this.animate());
             return;
