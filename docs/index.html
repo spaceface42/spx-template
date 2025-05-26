@@ -11,28 +11,13 @@
 </head>
 <body>
 
-<div class="progress-bar" spx-persist>
-<style>
-.progress-bar {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 3rem;
-    background: #2A7B9B;
-    background: linear-gradient(90deg,rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(237, 221, 83, 1) 100%);
-    animation: move 22s linear infinite;
-    z-index: 1;
-}
-@keyframes move {
-    0% { 
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-}
-</style>
-</div>
+
+
+<!-- progressbar -->
+<link rel="partial" src="./app/partials/progressbar.html" />
+<!-- / progressbar -->
+
+
 
 <header>
   <nav>
@@ -50,6 +35,249 @@
 <footer>
   <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro eaque necessitatibus delectus ratione quaerat tempora enim nemo, consequatur quod saepe totam quia aperiam iste qui harum? Minus, nemo, debitis neque laborum suscipit minima repellat eos excepturi mollitia optio, eum fugiat unde magnam autem. Accusantium!</p>
 </footer>
+
+
+
+<!-- Screensaver overlay -->
+<div class="screensaver" data-delay="3000" data-ssdelay="5000">
+  <style>
+
+        /* Screensaver Styles */
+        .screensaver {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .screensaver.temp-shown {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .screensaver-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .screensaver-info {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.7);
+            font-family: 'Courier New', monospace;
+        }
+
+        .screensaver-info span {
+            margin: 0 10px;
+        }
+
+        .screensaver-layouts {
+            width: 100%;
+            height: 60vh;
+            position: relative;
+        }
+
+        .screensaver-layout {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .screensaver-layout.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .column {
+            flex: 1;
+            height: 100%;
+            margin: 0 10px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .image.cover {
+            object-fit: cover;
+        }
+
+        .image.lazypreload {
+            opacity: 0.7;
+        }
+
+        .image.lazyloaded {
+            opacity: 1;
+        }
+
+        .layout-title {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            font-weight: 300;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+            white-space: nowrap;
+        }
+
+        .layout-description {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            opacity: 0.8;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+            max-width: 80%;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .screensaver-layout {
+                flex-direction: column;
+                height: auto;
+                padding: 20px;
+            }
+            
+            .column {
+                height: 200px;
+                margin: 10px 0;
+            }
+            
+            .layout-title {
+                font-size: 1.5rem;
+                position: static;
+                transform: none;
+                margin-top: 20px;
+            }
+            
+            .layout-description {
+                position: static;
+                transform: none;
+                margin-top: 10px;
+            }
+        }
+  </style>
+
+    <div class="screensaver-info">
+        <span>Resolution: <span class="width">1920</span>x<span class="height">1080</span></span>
+    </div>
+    <div class="screensaver-content">
+        <div class="screensaver-layouts">
+            <!-- Layout 1: Nature Scene -->
+            <div class="screensaver-layout">
+                <div class="column">
+                    <img class="image" 
+                            src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop" 
+                            alt="Mountain landscape"
+                            data-prop="1.33">
+                </div>
+                <div class="column">
+                    <img class="image" 
+                            src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop" 
+                            alt="Forest path"
+                            data-prop="1.33">
+                </div>
+                <div class="layout-description">Serene natural landscapes</div>
+                <div class="layout-title">Nature Collection</div>
+            </div>
+
+            <!-- Layout 2: Urban Architecture -->
+            <div class="screensaver-layout hide">
+                <div class="column">
+                    <img class="image" 
+                            src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=600&fit=crop" 
+                            alt="City skyline"
+                            data-prop="1.33">
+                </div>
+                <div class="column">
+                    <img class="image" 
+                            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop" 
+                            alt="Modern building"
+                            data-prop="1.33">
+                </div>
+                <div class="layout-description">Modern urban architecture</div>
+                <div class="layout-title">City Views</div>
+            </div>
+
+            <!-- Layout 3: Abstract Art -->
+            <div class="screensaver-layout hide">
+                <div class="column">
+                    <img class="image" 
+                            src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=600&fit=crop" 
+                            alt="Abstract colors"
+                            data-prop="1.33">
+                </div>
+                <div class="column">
+                    <img class="image" 
+                            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop" 
+                            alt="Geometric patterns"
+                            data-prop="1.33">
+                </div>
+                <div class="layout-description">Creative abstract compositions</div>
+                <div class="layout-title">Abstract Art</div>
+            </div>
+
+            <!-- Layout 4: Ocean Scenes -->
+            <div class="screensaver-layout hide">
+                <div class="column">
+                    <img class="image" 
+                            src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=600&fit=crop" 
+                            alt="Ocean waves"
+                            data-prop="1.33">
+                </div>
+                <div class="column">
+                    <img class="image" 
+                            src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&h=600&fit=crop" 
+                            alt="Tropical beach"
+                            data-prop="1.33">
+                </div>
+                <div class="layout-description">Peaceful ocean scenes</div>
+                <div class="layout-title">Ocean Dreams</div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+
+
+
+
 
 </body>
 </html>

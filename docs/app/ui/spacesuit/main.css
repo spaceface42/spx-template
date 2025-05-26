@@ -1,25 +1,4 @@
-    .progress-bar {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 3rem;
-    background: #2a9b90;
-    background: linear-gradient(90deg,rgba(42, 155, 144, 1) 0%, rgba(87, 89, 199, 1) 50%, rgba(237, 160, 83, 1) 100%);
-    animation: move 22s linear infinite;
-    z-index: 1;
-}
-@keyframes move {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-
-main, footer, header {
-  padding: 1rem;
-  margin: 6rem;
-  background: #eee;
-}
-
+/* fonts and tipo */
 @font-face {
   font-family: 'Arrival';
   src: url('./fonts/ArrivalApercuMonoPro-Regular.woff2') format('woff2');
@@ -27,37 +6,49 @@ main, footer, header {
 
 
 
+/* site specific settings */
 :root {
+    --neutron: .3rem;
+    --atom: 1rem;
+    --molecule: 3rem;
+    --color-light: #f9f9f9;
     --gap: 10rem;
     --padding: min(1rem, 3vw);
 }
 
 
+
+/* layout */
 body {
-    padding: --var(--padding);
-    background-color: #f0f0f0;
-
-    display: flex;
-    flex-wrap: wrap
-    gap: 3rem;
-    flex: 1 1 auto;
+    padding: var(--molecule);
+    background-color: var(--color-light);
 }
-
 
 header, main, footer {
     margin: 3rem auto;
-    padding: 3rem;
+    padding: var(--molecule);
     background-color: white;
-    border-radius: 1rem;
-    min-height: 10vh;
-    min-width: 30vw;
-
 }
+
+header {
+    background-color: lightpink;
+}
+
+main {
+    background-color: lightsteelblue
+};
 
 footer {
-    width: 100vw;
-    background-color: aliceblue;
-}
+    background-color: lightgrey;
+};
+
+
+
+
+
+
+
+
 
 
 
@@ -68,9 +59,6 @@ h1 {
 
 /* site specific image size */
 img, picture, video, canvas, svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
   aspect-ratio: 16 / 9;
   object-fit: contain;
   background-color: aliceblue;
