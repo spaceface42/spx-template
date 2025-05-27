@@ -15,7 +15,7 @@ body {
     min-height: 100vh; /* fallback */
     min-height: 100dvh; /* dynamic viewport height */
     min-height: 100svh; /* small viewport height */
-    max-width: 100%;
+    /* max-width: 100%; */
     overflow-x: clip;
 }
 
