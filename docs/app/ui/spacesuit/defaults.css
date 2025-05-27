@@ -17,6 +17,13 @@ body {
     min-height: 100svh; /* small viewport height */
     /* max-width: 100%; */
     overflow-x: clip;
+    scroll-behavior:smooth
+}
+
+body * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering:optimizeLegibility
 }
 
 /* responsive images */

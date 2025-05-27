@@ -1,9 +1,15 @@
 /* fonts and tipo */
+@import url(https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@312&display=swap);
 @font-face {
   font-family: 'Arrival';
   src: url('./fonts/ArrivalApercuMonoPro-Regular.woff2') format('woff2');
 }
 
+@font-face {
+    font-family: 'SCTO';
+    font-weight: 300;
+    src: url(./fonts/scto-grotesk-a-light-2.woff2) format("woff2")
+}
 
 
 /* site specific settings */
@@ -14,6 +20,7 @@
     --color-light: #f9f9f9;
     --gap: 10rem;
     --padding: min(1rem, 3vw);
+    --font-family: "SCTO", serif;
 }
 
 
@@ -46,6 +53,12 @@ footer {
 
 
 
+/* typography */
+html, body {
+    font-family: var(--font-family), 'Noto Sans SC', sans-serif;
+    font-weight: 300;
+    letter-spacing: -.05em;
+}
 
 
 
