@@ -3,7 +3,7 @@
  * Usage:
  *   await DomReady.ready();
  */
-export default class DomReadyPromise {
+export class DomReadyPromise {
     /**
      * Returns a Promise that resolves when the DOM is ready.
      * @returns {Promise<void>}

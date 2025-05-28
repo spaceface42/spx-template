@@ -3,7 +3,7 @@
  * Loads HTML partials marked with link[rel="partial"] tags
  * Uses fetch API, caching, and modern JavaScript features
  */
-class PartialLoader {
+export class PartialLoader {
   constructor(options = {}) {
     this.cache = new Map();
     this.loadingPromises = new Map();
@@ -249,6 +249,3 @@ if (typeof module !== 'undefined' && module.exports) {
   // Browser global
   window.PartialLoader = PartialLoader;
 }
-
-// ESM export (add this only if you're sure you're in an ESM environment)
-export default PartialLoader;
