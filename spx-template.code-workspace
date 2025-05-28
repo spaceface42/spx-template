@@ -16,9 +16,10 @@
         },
         "spx.enable": false,
         "editor.wordWrap": "on",
-		"liveServer.settings.CustomBrowser" : "chrome",
         "git.confirmSync": true,
         "files.eol": "\n",
-        "liveServer.settings.multiRootWorkspaceName": "spx-template"
+        "liveServer.settings.CustomBrowser" : "chrome",
+        "liveServer.settings.multiRootWorkspaceName": "spx-template",
+        "liveServer.settings.root": "/docs"
     }
 }
