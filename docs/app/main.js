@@ -83,7 +83,7 @@ Object.assign(screensaverDiv.style, {
   left: '0',
   width: '100vw',
   height: '100vh',
-  zIndex: '9999',
+  zIndex: '1',
   display: 'none' // hidden by default, let JS controller show it
 });
 
@@ -93,7 +93,7 @@ document.body.appendChild(screensaverDiv);
 // import InactivityScreensaverController from './resources/features/FloatingImages/ScreensaverController.js';
 
 const controller = new ScreensaverController({
-  partialUrl: '/app/partials/screensaver.html',
+  partialUrl: '/content/screensaver/screensaver.html',
   targetSelector: `#${uniqueId}`,
   inactivityDelay: 3000
 });

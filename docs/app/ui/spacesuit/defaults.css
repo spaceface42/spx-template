@@ -32,3 +32,16 @@ img, picture, video, canvas, svg {
   max-width: 100%;
   height: auto;
 }
+
+/* Right now, SVGs, images, and videos are block elements, but inline images (like icons) might be affected.
+Consider adding vertical-align: middle to svg for better inline handling. */
+svg {
+  vertical-align: middle; /* for better inline handling */
+}
+
+/* simple tipo stuff */
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;
+}
+
+

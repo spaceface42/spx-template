@@ -1,0 +1,33 @@
+<style>
+/*
+#screensaver { 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+}
+*/
+#floating-images-container {
+    /* background-color: #f9f9f9db; */
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.floating-image {
+    position: absolute;
+    /* Initially hidden until positioned by JS */
+    opacity: 0;
+    transition: opacity .75s ease;
+    max-height: 30vh;
+}
+</style>
+<div class="blur-overlay" id="floating-images-container">
+    <img src="./content/screensaver/gong.png" class="floating-image" alt="Floating Image 1" />
+    <img src="./content/screensaver/cloud.png" class="floating-image" alt="Floating Image 2" />
+    <img width="200px" height="200px" src="./content/screensaver/image-2.jpg" class="floating-image" alt="Floating Image 3" />
+    <img src="./content/screensaver/image-3.jpg" class="floating-image" alt="Floating Image 4" />
+    <img src="./content/screensaver/image-4.jpg" class="floating-image" alt="Floating Image 5" />
+    <img src="./app/ui/spacesuit/icons/sp-radiation.svg" width="200px" height="200px" class="floating-image" alt="Floating Image 5" />
+</div>
