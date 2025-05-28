@@ -49,3 +49,20 @@ export class ScreensaverController {
         this.watcher.destroy();
     }
 }
+
+/**
+ * usage:
+<!-- screensaver -->
+<div id="screensaver">screensaver
+</div>
+<script type="module">
+import { ScreensaverController } from 'ScreensaverController.js';
+
+const controller = new ScreensaverController({
+    partialUrl: './app/components/floating-images/screensaver.html',
+    targetSelector: '#screensaver',
+    inactivityDelay: 3000 // 20 seconds
+});
+</script>
+<!-- / progressbar -->
+ */

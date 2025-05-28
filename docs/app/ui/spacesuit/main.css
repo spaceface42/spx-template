@@ -29,24 +29,28 @@
 body {
     padding: var(--molecule);
     background-color: var(--color-light);
+    background-image: url('./svg/diagonal.svg');
 }
 
 header, main, footer {
     margin: 3rem auto;
     padding: var(--molecule);
-    background-color: white;
 }
 
 header {
-    background-color: lightpink;
+    background-color: white;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 1rem;
 }
 
 main {
-    background-color: lightsteelblue
 };
 
 footer {
-    background-color: lightgrey;
 };
 
 
@@ -74,7 +78,6 @@ h1 {
 img, picture, video, canvas, svg {
   aspect-ratio: 16 / 9;
   object-fit: contain;
-  background-color: aliceblue;
 }
 
 
