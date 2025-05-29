@@ -1,6 +1,7 @@
 /**
  * main.js
  */
+console.time('app-initialization');
 const config = { production: false };
 
 
@@ -104,7 +105,7 @@ function screensaver() {
 }
 
 
-
+console.timeEnd('app-initialization');
 
 
 
