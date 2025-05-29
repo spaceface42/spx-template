@@ -1,6 +1,14 @@
-import { DomReadyPromise } from './resources/_42/DomReadyPromise.js';
+/**
+ * main.js
+ */
+
+// spx
 import spx from './resources/spx/index.js'
+
+// 42
+import { DomReadyPromise } from './resources/_42/DomReadyPromise.js';
 import { PartialLoader } from './resources/_42/PartialLoader.js';
+
 
 
 
@@ -67,38 +75,34 @@ import { ScreensaverController } from './resources/features/FloatingImages/Scree
  */
 function screensaver() {
 
-// Generate a unique ID
-// const uniqueId = `screensaver-${Math.random().toString(36).slice(2, 11)}`;
-const uniqueId = generateId('screensaver', 9);
+  // Generate a unique ID
+  const uniqueId = generateId('screensaver', 9);
 
-// Create the fullscreen screensaver div
-const screensaverDiv = Object.assign(document.createElement('div'), {
-  id: uniqueId
-});
+  // Create the screensaver div
+  const screensaverDiv = Object.assign(document.createElement('div'), {
+    id: uniqueId
+  });
 
-// Apply fullscreen styles
-Object.assign(screensaverDiv.style, {
-  position: 'fixed',
-  top: '0',
-  left: '0',
-  width: '100vw',
-  height: '100vh',
-  zIndex: '1',
-  display: 'none' // hidden by default, let JS controller show it
-});
+  // Apply styles
+  Object.assign(screensaverDiv.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '100vw',
+    height: '100vh',
+    zIndex: '1',
+    display: 'none' // hidden by default, let JS controller show it
+  });
 
-document.body.appendChild(screensaverDiv);
+  document.body.appendChild(screensaverDiv);
 
-// Initialize the screensaver controller
-// import InactivityScreensaverController from './resources/features/FloatingImages/ScreensaverController.js';
+  const controller = new ScreensaverController({
+    partialUrl: '/content/screensaver/screensaver.html',
+    targetSelector: `#${uniqueId}`,
+    inactivityDelay: 6000
+  });
 
-const controller = new ScreensaverController({
-  partialUrl: '/content/screensaver/screensaver.html',
-  targetSelector: `#${uniqueId}`,
-  inactivityDelay: 3000
-});
-
-console.log('Screensaver controller initialized id = ', uniqueId);
+  console.log('Screensaver controller initialized id = ', uniqueId);
 
 }
 
