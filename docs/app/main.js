@@ -1,6 +1,8 @@
 /**
  * main.js
  */
+import { logMessage } from './resources/_42/utils.js'
+logMessage('info', 'App loaded');
 
 // spx
 import spx from './resources/spx/index.js'
@@ -12,9 +14,13 @@ import { PartialLoader } from './resources/_42/PartialLoader.js';
 
 
 
+
+
+
+
 (async () => {
     await DomReadyPromise.ready(); // Wait for DOMContentLoaded
-    console.log('DOM is ready');
+    logMessage('info', 'DOM is ready');
     screensaver();
 })();
 
@@ -102,7 +108,7 @@ function screensaver() {
     inactivityDelay: 6000
   });
 
-  console.log('Screensaver controller initialized id = ', uniqueId);
+  logMessage('info', 'Screensaver initialized id ', uniqueId);
 
 }
 
