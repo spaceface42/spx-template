@@ -25,13 +25,30 @@ body {
     min-height: 100vh;
     min-height: 100dvh;
     gap: 10px;
+    padding: 3rem;
 }
+
+/* header */
+headerX {
+  flex: 0 0 auto;           /* take only as much space as needed */
+  flex-direction: column;   /* optional: keeps header items stacked */
+}
+/* header */
+
 main {
-    flex: 1;
+    flex: 1;                /* take up remaining space */ 
 }
 footer {
-    width: 100%;
+    /* width: 100%; */
+    flex-basis: 100%;
 }
+
+
+
+
+
+
+
 @media (max-width: 768px) {
   body {
     flex-direction: column;
@@ -44,20 +61,45 @@ footer {
 }
 </style>
 
+
+
+<!-- header -->
 <header class="header">
 <!-- logo, nav -->
- header
+<ul>
+  <li>1</li>
+  <li>2</li>
+  <li>3</li>
+</ul>
 </header>
+<!-- header -->
 
+
+
+<!-- main -->
 <main class="main-content">
 <!-- main content -->
- main
+<ul>
+  <li>1</li>
+  <li>2</li>
+  <li>3</li>
+</ul>
 </main>
+<!-- main -->
 
+
+
+<!-- footer -->
 <footer class="footer">
-<!-- footer content -->
- footer
+<ul>
+  <li>1</li>
+  <li>2</li>
+  <li>3</li>
+</ul>
 </footer>
+<!-- footer -->
+
+
 
 </body>
 </html>

@@ -4,13 +4,11 @@
   font-family: 'Arrival';
   src: url('./fonts/ArrivalApercuMonoPro-Regular.woff2') format('woff2');
 }
-
 @font-face {
     font-family: 'SCTO';
     font-weight: 300;
     src: url(./fonts/scto-grotesk-a-light-2.woff2) format("woff2")
 }
-
 
 /* site specific settings */
 :root {
@@ -74,8 +72,8 @@ h1 {
 
 /* site specific image size */
 img, picture, video, canvas, svg {
-  aspect-ratio: 16 / 9;
-  object-fit: contain;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
 }
 
 
@@ -90,10 +88,8 @@ body {
     font-family: var(--font-family);
     font-weight: 300;
     letter-spacing: -.05em;
-
     font-size: var(--fs-body);
     line-height: 1.6;
-
 }
 
 nav a {
