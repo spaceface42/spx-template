@@ -4,7 +4,6 @@
 *::after {
   box-sizing: border-box;
 }
-
 * {
   margin: 0;
   padding: 0;
@@ -19,29 +18,29 @@ body {
     overflow-x: clip;
     scroll-behavior:smooth
 }
-
 body * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering:optimizeLegibility
 }
 
-/* responsive images */
+/**
+ * atomic stuff
+ * img: responsive images
+ * svg: for better inline handling
+ * hx: simple tipo stuff
+ */
 img, picture, video, canvas, svg {
   display: block;
   max-width: 100%;
   height: auto;
 }
-
-/* Right now, SVGs, images, and videos are block elements, but inline images (like icons) might be affected.
-Consider adding vertical-align: middle to svg for better inline handling. */
 svg {
-  vertical-align: middle; /* for better inline handling */
+  vertical-align: middle;
 }
-
-/* simple tipo stuff */
 h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
 }
-
-
+ul {
+  list-style-type: none;
+}

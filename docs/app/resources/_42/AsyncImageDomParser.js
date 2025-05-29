@@ -21,7 +21,7 @@ export class AsyncImageDomParser {
      */
     getImages(selector = 'img') {
         const images = Array.from(this.container.querySelectorAll(selector));
-        console.log('getImages', images);
+        // console.log('getImages', images);
         return images;
     }
 

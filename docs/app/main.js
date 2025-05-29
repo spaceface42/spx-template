@@ -5,7 +5,7 @@ const config = { production: false };
 
 
 
-import { logMessage } from './resources/_42/utils.js'
+import { logMessage, generateId } from './resources/_42/utils.js'
 logMessage('info', 'App loaded', config);
 
 // spx
@@ -29,13 +29,13 @@ import { PartialLoader } from './resources/_42/PartialLoader.js';
 })();
 
 
-// This is the main entry point for your app
+// spx setup
 const domReady = spx({
   fragments: [
     'main',  // #menu is dynamic and will morph
     'footer'   // #main is dynamic and will morph
   ],
-  logLevel: 3,
+  logLevel: 0,
   cache: true,
   style: ['link[href*="main.css"]'],
   scripts: ['script[src*="main.js"]'],
@@ -44,9 +44,7 @@ const domReady = spx({
 // This is the main entry point for your app
 export default domReady(function(session) {
   // You initialize third party js in this callback
-
-  console.log(session);
-
+  // console.log(session);
 })
 
 
@@ -61,17 +59,6 @@ const loader = new PartialLoader({
 });
 */
 await loader.init();
-
-
-
-
-
-/**
- * utils
- */
-function generateId(prefix = 'id', length = 9) {
-  return `${prefix}-${Math.random().toString(36).slice(2, 2 + length)}`;
-}
 
 
 

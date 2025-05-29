@@ -1,4 +1,4 @@
-import { clamp } from './utils.js';
+import { clamp } from '/app/resources/_42/utils.js';
 import { FloatingImage } from './FloatingImage.js';
 
 

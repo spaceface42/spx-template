@@ -21,6 +21,9 @@
     --gap: 10rem;
     --padding: min(1rem, 3vw);
     --font-family: "Arrival" , "SCTO", "Noto Sans SC", sans-serif;
+
+    --fs-body: clamp(1rem, 1.5vw, 1.125rem);
+    --fs-h1: clamp(2rem, 4vw, 3rem);
 }
 
 
@@ -32,7 +35,7 @@ body {
     background-image: url('./svg/diagonal.svg');
 }
 
-header, main, footer {
+header, main {
     margin: 3rem auto;
     padding: var(--molecule);
 }
@@ -78,13 +81,22 @@ img, picture, video, canvas, svg {
 
 
 /* typography */
-html, body {
+html {
+    font-size: 16px;
+}
+
+
+body {
     font-family: var(--font-family);
     font-weight: 300;
     letter-spacing: -.05em;
+
+    font-size: var(--fs-body);
+    line-height: 1.6;
+
 }
 
 nav a {
     text-transform: uppercase;
-    font-size: 14px;
+    font-size: 12px;
 }
