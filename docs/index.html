@@ -16,12 +16,15 @@
 
 <header>
   <nav>
-    <a href="/" spx-target>spaceface.org</a>
-    <a href="/otherpage.html" spx-target>otherpage</a>
+    <ul class="nav">
+      <li><a spx-target href="/" >spaceface.org</a></li>
+      <li><a spx-target href="/otherpage.html">otherpage</a></li>
+    </ul>
   </nav>
+  <img src="./app/ui/spacesuit/icons/logo-sandorzsolt.svg" width="128px" height="128px" alt="sandor zsolt graphic designer" />
 </header>
 
-<img src="./app/ui/spacesuit/icons/logo-sandorzsolt.svg" width="128px" height="128px" alt="sandor zsolt graphic designer" />
+
 
 <main id="main">
   <h1>spaceface</h1>
@@ -37,14 +40,11 @@
 
 
 <script type="module">
-import { RandomThemeLoader } from './app/resources/features/RandomTheme/RandomThemeLoader.js';
-
-const loader = new RandomThemeLoader(['./test/dark.css', './test/light.css', './test/retro.css']);
-await loader.loadRandomTheme();
-
-
-
-
+  import { InspectorXray } from './app/resources/_42/InspectorXray.js';
+  const xray = new InspectorXray();
 </script>
+
+
+
 </body>
 </html>

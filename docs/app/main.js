@@ -1,111 +1,101 @@
 /**
  * main.js
  */
-console.time('app-initialization');
-const config = { production: false };
+import spx from './resources/spx/index.js';
 
-
-
-import { logMessage, generateId } from './resources/_42/utils.js'
-logMessage('info', 'App loaded', config);
-
-// spx
-import spx from './resources/spx/index.js'
-
-// 42
+import { logMessage, generateId } from './resources/_42/utils.js';
 import { DomReadyPromise } from './resources/_42/DomReadyPromise.js';
 import { PartialLoader } from './resources/_42/PartialLoader.js';
+import { ScreensaverController } from './resources/features/FloatingImages/ScreensaverController.js';
+import { RandomThemeLoader } from './resources/features/RandomTheme/RandomThemeLoader.js';
 
-
-
-
-
-
-
-
+// Main async initialization
 (async () => {
-    await DomReadyPromise.ready(); // Wait for DOMContentLoaded
+    console.time('app-initialization');
+    const config = { production: false };
+    logMessage('info', 'App loaded', config);
+
+    await DomReadyPromise.ready();
     logMessage('info', 'DOM is ready', config);
-    screensaver();
+
+    // Initialize partial loader
+    const loader = new PartialLoader();
+    await loader.init();
+
+
+
+    /**
+     * Screensaver feature
+     */    
+    const screensaver = async () => {
+        const uniqueId = generateId('screensaver', 9);
+        const screensaverDiv = Object.assign(document.createElement('div'), { id: uniqueId });
+        Object.assign(screensaverDiv.style, {
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: '100vw',
+            height: '100vh',
+            zIndex: '1',
+            display: 'none'
+        });
+        document.body.appendChild(screensaverDiv);
+
+        // Await ScreensaverController if it returns a promise for loading
+        const controller = new ScreensaverController({
+            partialUrl: '/content/screensaver/screensaver.html',
+            targetSelector: `#${uniqueId}`,
+            inactivityDelay: 6000
+        });
+        if (typeof controller.init === 'function') {
+            await controller.init(); // If your controller has an async init
+        }
+
+        // Wait for images in the partial to load
+        const container = document.getElementById(uniqueId);
+        if (container) {
+            const images = container.querySelectorAll('img');
+            await Promise.all(Array.from(images).map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(resolve => {
+                    img.onload = img.onerror = resolve;
+                });
+            }));
+        }
+
+        logMessage('info', 'screensaver id: ', uniqueId, config);
+    };
+
+    /**
+     * Random CSS loader
+     */    
+    const randomcss = async () => {
+        const loader = new RandomThemeLoader([
+            './app/ui/spacesuit/random/one.css',
+            './app/ui/spacesuit/random/two.css',
+            './app/ui/spacesuit/random/three.css'
+        ]);
+        await loader.loadRandomTheme();
+    };
+
+    await screensaver();
+    await randomcss();
+
+    console.timeEnd('app-initialization');
 })();
 
-
-// spx setup
+// spx setup (can stay outside if needed globally)
 const domReady = spx({
-  fragments: [
-    'main',  // #menu is dynamic and will morph
-    'footer'   // #main is dynamic and will morph
-  ],
-  logLevel: 0,
-  cache: true,
-  style: ['link[href*="main.css"]'],
-  scripts: ['script[src*="main.js"]'],
+    fragments: ['main', 'footer'],
+    logLevel: 0,
+    cache: true,
+    style: ['link[href*="main.css"]'],
+    scripts: ['script[src*="main.js"]'],
 });
 
-// This is the main entry point for your app
-export default domReady(function(session) {
-  // You initialize third party js in this callback
-  // console.log(session);
-})
-
-
-
-// load partials if any are defined in the document
-const loader = new PartialLoader();
-/*
-const loader = new PartialLoader({
-  baseUrl: '/partials',
-  timeout: 5000,
-  cacheEnabled: true
-});
-*/
-await loader.init();
-
-
-
-// Initialize the screensaver controller
-import { ScreensaverController } from './resources/features/FloatingImages/ScreensaverController.js';
-
-/**
- * screensaver feature
- * This feature creates a fullscreen div that acts as a screensaver.
- * It is shown after a period of inactivity.
- */
-function screensaver() {
-
-  // Generate a unique ID
-  const uniqueId = generateId('screensaver', 9);
-
-  // Create the screensaver div
-  const screensaverDiv = Object.assign(document.createElement('div'), {
-    id: uniqueId
-  });
-
-  // Apply styles
-  Object.assign(screensaverDiv.style, {
-    position: 'fixed',
-    top: '0',
-    left: '0',
-    width: '100vw',
-    height: '100vh',
-    zIndex: '1',
-    display: 'none' // hidden by default, let JS controller show it
-  });
-
-  document.body.appendChild(screensaverDiv);
-
-  const controller = new ScreensaverController({
-    partialUrl: '/content/screensaver/screensaver.html',
-    targetSelector: `#${uniqueId}`,
-    inactivityDelay: 6000
-  });
-
-  logMessage('info', 'screensaver id: ', uniqueId, config);
-
-}
-
-
-console.timeEnd('app-initialization');
+// export default domReady(function(session) {
+    // Third-party JS initialization
+// });
 
 
 
