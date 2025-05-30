@@ -76,13 +76,10 @@ img, picture, video, canvas, svg {
     object-fit: contain;
 }
 
-
-
 /* typography */
 html {
     font-size: 16px;
 }
-
 
 body {
     font-family: var(--font-family);
