@@ -1,95 +1,15 @@
-/* fonts and tipo */
-@import url(https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@312&display=swap);
-@font-face {
-  font-family: 'Arrival';
-  src: url('./fonts/ArrivalApercuMonoPro-Regular.woff2') format('woff2');
-}
-@font-face {
-    font-family: 'SCTO';
-    font-weight: 300;
-    src: url(./fonts/scto-grotesk-a-light-2.woff2) format("woff2")
-}
-
-/* site specific settings */
-:root {
-    --neutron: .3rem;
-    --atom: 1rem;
-    --molecule: 3rem;
-    --color-light: #f9f9f9;
-    --gap: 10rem;
-    --padding: min(1rem, 3vw);
-    --font-family: "Arrival" , "SCTO", "Noto Sans SC", sans-serif;
-
-    --fs-body: clamp(1rem, 1.5vw, 1.125rem);
-    --fs-h1: clamp(2rem, 4vw, 3rem);
-}
-
-
-
-/* layout */
-body {
-    padding: var(--molecule);
-    background-color: var(--color-light);
-    background-image: url('./svg/diagonal.svg');
-}
-
-header, main {
-    margin: 3rem auto;
-    padding: var(--molecule);
-}
-
-header {
-    background-color: white;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    margin: 0;
-    padding: 1rem;
-}
-
-main {
-};
-
-footer {
-};
+@import url("./defaults.css");
+@import url("./variables.css");
+@import url("./layout.css");
+@import url("./tipography.css");
+@import url("./feature.css");
 
 
 
 
 
 
-
-
-
-
-
-
-h1 {
-    font-size: clamp(2rem, 10vw, 5rem);
-    font-size: clamp(2rem, calc(7vw + 1rem), 5rem);
-}
-
-/* site specific image size */
-img, picture, video, canvas, svg {
-    aspect-ratio: 16 / 9;
-    object-fit: contain;
-}
-
-/* typography */
-html {
-    font-size: 16px;
-}
-
-body {
-    font-family: var(--font-family);
-    font-weight: 300;
-    letter-spacing: -.05em;
-    font-size: var(--fs-body);
-    line-height: 1.6;
-}
 
 nav a {
     text-transform: uppercase;
-    font-size: 12px;
 }

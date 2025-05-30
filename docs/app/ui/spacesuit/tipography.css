@@ -1,0 +1,31 @@
+@import url(https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@312&display=swap);
+@font-face {
+  font-family: 'Arrival';
+  src: url('./fonts/ArrivalApercuMonoPro-Regular.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'SCTO';
+    font-weight: 300;
+    src: url(./fonts/scto-grotesk-a-light-2.woff2) format("woff2")
+}
+
+/**
+ *
+ * tipography
+ *
+ */
+html {
+    font-size: 16px;
+}
+
+body {
+    font-family: var(--font-family);
+    font-weight: 300;
+    letter-spacing: -.05em;
+    font-size: var(--fs-body);
+    line-height: 1.6;
+}
+
+h1 {
+    font-size: var(--fs-h1);
+}

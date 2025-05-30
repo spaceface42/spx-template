@@ -1,4 +1,6 @@
-/* reset */
+/**
+ * reset
+ */
 *,
 *::before,
 *::after {
@@ -9,19 +11,22 @@
   padding: 0;
 }
 
-/* defaults */
+/**
+ * defaults
+ *
+ */
 body {
-    min-height: 100vh; /* fallback */
-    min-height: 100dvh; /* dynamic viewport height */
-    min-height: 100svh; /* small viewport height */
-    /* max-width: 100%; */
-    overflow-x: clip;
-    scroll-behavior:smooth
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh; /* dynamic viewport height */
+  min-height: 100svh; /* small viewport height */
+  /* max-width: 100%; */
+  overflow-x: clip;
+  scroll-behavior:smooth
 }
 body * {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering:optimizeLegibility
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering:optimizeLegibility
 }
 
 /**
@@ -35,12 +40,22 @@ img, picture, video, canvas, svg {
   max-width: 100%;
   height: auto;
 }
+
+/* site specific image size */
+img, picture, video {
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
 svg {
   vertical-align: middle;
 }
+
+/* tipo */
 h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
 }
+
+/* lists */
 ul {
   list-style-type: none;
 }

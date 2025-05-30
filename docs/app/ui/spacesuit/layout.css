@@ -1,0 +1,24 @@
+/**
+ *
+ * layout
+ *
+ */
+body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 3rem;
+}
+
+header {
+}
+
+main {
+};
+
+footer {
+};
+
+header, main, footer {
+    background: url("./debug/marching-ants-of-manhattan.svg");
+}
