@@ -60,4 +60,18 @@ export {
     logMessage
 };
 
-
+/**
+ * Debounces a function, delaying its execution until after a specified delay
+ * has elapsed since the last time it was invoked.
+ * @param {Function} func - The function to debounce.
+ * @param {number} delay - The delay in milliseconds.
+ * @returns {Function} A debounced version of the function.
+ */
+export function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
