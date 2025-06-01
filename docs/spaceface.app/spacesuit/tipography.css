@@ -1,0 +1,49 @@
+/**
+ *
+ * tipography
+ *
+ */
+@import url(https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@312&display=swap);
+@font-face {
+  font-family: 'Arrival';
+  src: url('./fonts/ArrivalApercuMonoPro-Regular.woff2') format('woff2');
+}
+
+:root {
+  /* Base font sizes for fluid scaling */
+  --fs-body: clamp(1rem, 0.9rem + 0.5vw, 1.2rem);
+  --fs-h3: clamp(1.25rem, 1.1rem + 0.7vw, 1.75rem);
+  --fs-h2: clamp(1.5rem, 1.3rem + 1vw, 2.25rem);
+  --fs-h1: clamp(2rem, 1.5rem + 2vw, 3rem);
+
+  /* Optional: font weights */
+  --fw-body: 400;
+  --fw-heading: 700;
+}
+
+body {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-body);
+  line-height: 1.6;
+  color: #333;
+  font-family: system-ui, sans-serif;
+}
+
+h1, h2, h3 {
+  font-weight: var(--fw-heading);
+  line-height: 1.2;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: var(--fs-h1);
+}
+
+h2 {
+  font-size: var(--fs-h2);
+}
+
+h3 {
+  font-size: var(--fs-h3);
+}

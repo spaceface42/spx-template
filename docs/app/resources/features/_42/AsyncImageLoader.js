@@ -2,14 +2,14 @@
  * Utility class for parsing and handling <img> elements inside a DOM container.
  * Supports synchronous querying, asynchronous image loading, and extraction of image metadata.
  */
-export class AsyncImageDomParser {
+export class AsyncImageLoader {
     /**
      * @param {Element} container - The DOM element within which to search for images.
      * @throws {Error} If the container is not a valid DOM Element.
      */
     constructor(container) {
         if (!container || !(container instanceof Element)) {
-            throw new Error('AsyncImageDomParser: container must be a valid DOM Element.');
+            throw new Error('ImageLoader: container must be a valid DOM Element.');
         }
         this.container = container;
     }

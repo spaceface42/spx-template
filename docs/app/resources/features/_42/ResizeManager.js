@@ -119,4 +119,5 @@ class ResizeManager {
 
 // Export singleton instance
 const resizeManager = new ResizeManager();
-export default resizeManager;
+export { resizeManager }; // Named export
+// export default resizeManager; /

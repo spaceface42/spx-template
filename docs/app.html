@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spaceface</title>
+  <link rel="stylesheet" href="./spaceface.app/spacesuit/main.css" />
+
+  <script type="module" src="./spaceface.app/main.js"></script>
+</head>
+<body>
+
+<!-- progressbar -->
+<link rel="partial" src="./content/partials/progressbar.html" />
+<!-- / progressbar -->
+
+<header>
+  <nav>
+    <ul class="nav">
+      <li><a spx-target href="/" >home</a></li>
+      <li><a spx-target href="/otherpage.html">otherpage</a></li>
+    </ul>
+  </nav>
+  <img src="./spaceface.app/spacesuit/icons/logo-sandorzsolt.svg" width="128px" height="128px" alt="sandor zsolt graphic designer" />
+</header>
+
+
+
+<main id="main">
+  <h1>spaceface</h1>
+  <p>dolor sit amet</p>
+  <img width="400px" src="./content/mov-loop-slow.webp" alt="" />
+</main>
+
+<!-- footer -->
+<footer>
+<link rel="partial" src="./content/partials/footer.html" />
+</footer>
+<!-- / footer -->
+
+
+<script type="module">
+  import { InspectorXray } from './spaceface.app/system/42/InspectorXray.js';
+  const xray = new InspectorXray();
+</script>
+
+
+
+</body>
+</html>
