@@ -44,6 +44,7 @@ nav li {
 nav a {
     color: var(--text-color);
     text-transform: uppercase;
+    font-size: inherit;
 }
 
 

@@ -5,10 +5,6 @@
  */
 @import url(https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@312&display=swap);
 @font-face {
-  font-family: 'Arrival';
-  src: url('./fonts/ArrivalApercuMonoPro-Regular.woff2') format('woff2');
-}
-@font-face {
     font-family: PP Fraktion Mono;
     src: url(./fonts/PPFraktionMono-Regular.woff2) format("woff2");
     font-style: normal;
@@ -18,7 +14,7 @@
 
 :root {
   /* Base font sizes for fluid scaling */
-  --fs-body: clamp(1rem, 0.9rem + 0.5vw, 1.2rem);
+  --fs-body: clamp(.75rem, 0.4rem + 0.5vw, 1rem);
   --fs-h3: clamp(1.25rem, 1.1rem + 0.7vw, 1.75rem);
   --fs-h2: clamp(1.5rem, 1.3rem + 1vw, 2.25rem);
   --fs-h1: clamp(2rem, 1.5rem + 2vw, 3rem);
