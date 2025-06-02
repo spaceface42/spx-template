@@ -2,12 +2,15 @@ import { clamp } from '../_42/utils.js';
 import { FloatingImage } from './FloatingImage.js';
 import { resizeManager } from '../_42/ResizeManager.js';
 import { AsyncImageLoader } from '../_42/AsyncImageLoader.js';
+import { PerformanceMonitor } from '../_42/PerformanceMonitor.js';
 
 /**
- * Manages floating images using centralized resize management.
+ * Manages floating images using centralized resize management
+ * Enhanced FloatingImageManager with performance monitoring and 
+ * better memory management
  */
 export class FloatingImageManager {
-    constructor(containerOrId) {
+    constructor(containerOrId, options = {}) {
         // Get container element
         this.container = typeof containerOrId === 'string'
             ? document.getElementById(containerOrId)
@@ -17,11 +20,19 @@ export class FloatingImageManager {
             throw new Error('Container not found');
         }
 
-        // Initialize properties
+        // Initialize performance monitor
+        this.performanceMonitor = new PerformanceMonitor();
+        
+        // Initialize properties with performance-aware defaults
         this.images = [];
         this.speedMultiplier = 1;
         this.isInViewport = true;
         this._destroyed = false;
+        this._animationId = null;
+        
+        // Performance settings
+        this.performanceSettings = this.performanceMonitor.getRecommendedSettings();
+        this.maxImages = options.maxImages || this.performanceSettings.maxImages;
 
         // Set up intersection observer for viewport detection
         this.intersectionObserver = new IntersectionObserver(entries => {
@@ -29,15 +40,19 @@ export class FloatingImageManager {
         }, { threshold: 0 });
         this.intersectionObserver.observe(this.container);
 
-        // Subscribe to resize events using the new API
-        this.unsubscribeWindow = resizeManager.onWindow(() => this.handleResize());
-        this.unsubscribeElement = resizeManager.onElement(this.container, () => this.handleResize());
+        // Initialize resize handling (assuming resizeManager exists or fallback to window)
+        this.setupResizeHandling();
 
         // Initialize
         this.imageLoader = new AsyncImageLoader(this.container);
         this.updateContainerDimensions();
         this.initializeImages();
         this.animate();
+    }
+
+    setupResizeHandling() {
+        this.unsubscribeWindow = resizeManager.onWindow(() => this.handleResize());
+        this.unsubscribeElement = resizeManager.onElement(this.container, () => this.handleResize());
     }
 
     updateContainerDimensions() {
@@ -47,16 +62,31 @@ export class FloatingImageManager {
     }
 
     async initializeImages() {
-        const imageElements = await this.imageLoader.waitForImagesToLoad('.floating-image');
-
-        imageElements.forEach(imgElement => {
-            this.addExistingImage(imgElement);
-        });
+        try {
+            const imageElements = await this.imageLoader.waitForImagesToLoad('.floating-image');
+            
+            // Limit number of images based on performance
+            const limitedImages = imageElements.slice(0, this.maxImages);
+            
+            limitedImages.forEach(imgElement => {
+                this.addExistingImage(imgElement);
+            });
+        } catch (error) {
+            console.warn('Failed to initialize some images:', error);
+        }
     }
 
     addExistingImage(imgElement) {
+        if (this.images.length >= this.maxImages) {
+            console.warn('Maximum number of images reached, skipping additional images');
+            return;
+        }
+        
         this.container.manager = this;
-        const floatingImage = new FloatingImage(imgElement, this.container);
+        const performanceSettings = this.performanceMonitor.getRecommendedSettings();
+        const floatingImage = new FloatingImage(imgElement, this.container, {
+            useSubpixel: performanceSettings.useSubpixel
+        });
         this.images.push(floatingImage);
     }
 
@@ -69,33 +99,76 @@ export class FloatingImageManager {
 
         this.updateContainerDimensions();
 
-        this.images.forEach(image => {
-            // Update image size
-            image.size.width = image.element.offsetWidth;
-            image.size.height = image.element.offsetHeight;
+        // Clean up invalid images and update valid ones
+        this.images = this.images.filter(image => {
+            const isValid = image.update(0, false); // Update without applying position
+            if (isValid) {
+                // Update image size
+                const element = image._elementRef?.deref();
+                if (element) {
+                    image.size.width = element.offsetWidth;
+                    image.size.height = element.offsetHeight;
+                }
 
-            // Clamp position to new container bounds
-            image.x = clamp(image.x, 0, this.containerWidth - image.size.width);
-            image.y = clamp(image.y, 0, this.containerHeight - image.size.height);
-            image.updatePosition();
+                // Clamp position to new container bounds
+                image.x = clamp(image.x, 0, this.containerWidth - image.size.width);
+                image.y = clamp(image.y, 0, this.containerHeight - image.size.height);
+                image.updatePosition();
+                return true;
+            } else {
+                // Clean up destroyed image
+                image.destroy();
+                return false;
+            }
         });
     }
 
     animate() {
         if (this._destroyed) return;
 
-        if (!this.isInViewport || this.speedMultiplier === 0) {
-            requestAnimationFrame(() => this.animate());
+        // Update performance monitoring
+        const shouldSkipFrame = this.performanceMonitor.update();
+        
+        // Skip frame if performance is poor
+        if (shouldSkipFrame || !this.isInViewport || this.speedMultiplier === 0) {
+            this._animationId = requestAnimationFrame(() => this.animate());
             return;
         }
 
-        // Update positions (calculations only)
-        this.images.forEach(image => image.update(this.speedMultiplier, false));
+        // Update performance settings periodically
+        if (this.performanceMonitor.frameCount % 60 === 0) {
+            this.performanceSettings = this.performanceMonitor.getRecommendedSettings();
+        }
 
-        // Apply DOM updates
+        // Batch DOM updates for better performance
+        const validImages = [];
+        
+        // Update positions (calculations only)
+        this.images.forEach(image => {
+            const isValid = image.update(
+                this.speedMultiplier * this.performanceSettings.speedMultiplier, 
+                false
+            );
+            if (isValid) {
+                validImages.push(image);
+            }
+        });
+
+        // Update the images array if any were invalidated
+        if (validImages.length !== this.images.length) {
+            // Clean up destroyed images
+            this.images.forEach(image => {
+                if (!validImages.includes(image)) {
+                    image.destroy();
+                }
+            });
+            this.images = validImages;
+        }
+
+        // Apply DOM updates in a single batch
         this.images.forEach(image => image.updatePosition());
 
-        requestAnimationFrame(() => this.animate());
+        this._animationId = requestAnimationFrame(() => this.animate());
     }
 
     resetAllImagePositions() {
@@ -109,15 +182,35 @@ export class FloatingImageManager {
     destroy() {
         this._destroyed = true;
 
-        // Unsubscribe from resize events
+        // Cancel animation
+        if (this._animationId) {
+            cancelAnimationFrame(this._animationId);
+            this._animationId = null;
+        }
+
+        // Clean up resize handling
         if (this.unsubscribeWindow) this.unsubscribeWindow();
         if (this.unsubscribeElement) this.unsubscribeElement();
+        // No fallback resizeHandler to remove
 
         // Clean up intersection observer
         if (this.intersectionObserver) {
             this.intersectionObserver.disconnect();
+            this.intersectionObserver = null;
         }
 
-        this.images = [];
+        // Clean up images
+        this.images.forEach(image => image.destroy());
+        this.images.length = 0; // Clear array efficiently
+
+        // Clean up image loader
+        if (this.imageLoader) {
+            this.imageLoader.destroy();
+            this.imageLoader = null;
+        }
+
+        // Clear references
+        this.container = null;
+        this.performanceMonitor = null;
     }
 }
