@@ -1,6 +1,6 @@
-import { InactivityWatcher } from '../../_42/InactivityWatcher.js';
-import { PartialFetcher } from '../../_42/PartialFetcher.js';
-import { FloatingImageManager } from './FloatingImageManager.js';
+import { InactivityWatcher } from '../_42/InactivityWatcher.js';
+import { PartialFetcher } from '../../../system/42/PartialFetcher.js';
+import { FloatingImageManager } from '../FloatingImages/FloatingImageManager.js';
 
 export class ScreensaverController {
     constructor({ partialUrl, targetSelector, inactivityDelay = 30000 }) {
@@ -9,7 +9,11 @@ export class ScreensaverController {
         this.inactivityDelay = inactivityDelay;
         this.screensaverManager = null;
         this.partialLoaded = false;
+        this.watcher = null; // Will be set in init()
+    }
 
+    async init() {
+        // Set up the inactivity watcher
         this.watcher = new InactivityWatcher({
             inactivityDelay: this.inactivityDelay,
             onInactivity: () => this.showScreensaver(),
@@ -49,20 +53,3 @@ export class ScreensaverController {
         this.watcher.destroy();
     }
 }
-
-/**
- * usage:
-<!-- screensaver -->
-<div id="screensaver">screensaver
-</div>
-<script type="module">
-import { ScreensaverController } from 'ScreensaverController.js';
-
-const controller = new ScreensaverController({
-    partialUrl: './app/components/floating-images/screensaver.html',
-    targetSelector: '#screensaver',
-    inactivityDelay: 3000 // 20 seconds
-});
-</script>
-<!-- / progressbar -->
- */

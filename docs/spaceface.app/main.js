@@ -9,10 +9,12 @@ import spx from './system/spx/index.js';
 import { logMessage, generateId } from './system/42/utils.js';
 import { DomReadyPromise } from './system/42/DomReadyPromise.js';
 import { PartialLoader } from './system/42/PartialLoader.js';
+
+// xray debug for css
 import { InspectorXray } from './system/42/InspectorXray.js';
 
 // features
-import { ScreensaverController } from './app/features/Screensaver/ScreensaverController.js';
+import { ScreensaverController } from './app/features/FloatingImages/ScreensaverController.js';
 import { RandomThemeLoader } from './app/features/RandomTheme/RandomThemeLoader.js';
 
 /*
@@ -25,7 +27,7 @@ const device = new DeviceDetect({
 */
 
 
-
+// debug // comment for production
 function debug(config) {
     if (config.production) return;
     const xray = new InspectorXray();
