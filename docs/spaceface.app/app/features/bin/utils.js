@@ -5,8 +5,8 @@ function generateId(prefix = 'id', length = 9) {
 function logMessage(level, ...args) {
   const styles = {
     info:  { emoji: '•', color: 'gray' },
-    warn:  { emoji: 'doh!', color: 'orange' },
-    error: { emoji: 'grrr', color: 'red' }
+    warn:  { emoji: '⚠️', color: 'orange' },
+    error: { emoji: '❌', color: 'red' }
   };
 
   // Check if last arg is a config object
