@@ -4,11 +4,19 @@
  *   import InactivityWatcher from './InactivityWatcher.js';
  *   const watcher = new InactivityWatcher({
  *     inactivityDelay: 30000, // ms
- *     onInactivity: () => { /* start your slideshow class here *\/ },
- *     onActivity: () => { /* stop your slideshow class here *\/ }
+ *     onInactivity: () => { /* start your slideshow class here */ },
+ *     onActivity: () => { /* stop your slideshow class here */ }
  *   });
  */
 export class InactivityWatcher {
+  #inactivityDelay;
+  #onInactivity;
+  #onActivity;
+  #inactivityTimer = null;
+  #isInactive = false;
+  #activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+  #handleUserActivity = this.#handleActivity.bind(this);
+
   /**
    * @param {Object} options
    * @param {number} [options.inactivityDelay=30000] - Delay in ms before considering the user inactive.
@@ -16,53 +24,101 @@ export class InactivityWatcher {
    * @param {Function} options.onActivity - Called when user becomes active again.
    */
   constructor({ inactivityDelay = 30000, onInactivity, onActivity }) {
-    this.inactivityDelay = inactivityDelay;
-    this.onInactivity = onInactivity;
-    this.onActivity = onActivity;
-    this.inactivityTimer = null;
-    this.isInactive = false;
+    if (typeof onInactivity !== 'function' || typeof onActivity !== 'function') {
+      throw new Error('onInactivity and onActivity must be functions');
+    }
 
-    this.handleUserActivity = this.handleUserActivity.bind(this);
+    this.#inactivityDelay = Math.max(1000, inactivityDelay); // Minimum 1 second
+    this.#onInactivity = onInactivity;
+    this.#onActivity = onActivity;
 
-    this.activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
-    this.activityEvents.forEach(event =>
-      document.addEventListener(event, this.handleUserActivity, { passive: true })
+    this.#addEventListeners();
+    this.#startInactivityTimer();
+  }
+
+  #addEventListeners() {
+    this.#activityEvents.forEach(event =>
+      document.addEventListener(event, this.#handleUserActivity, { 
+        passive: true,
+        capture: false 
+      })
     );
-
-    this.startInactivityTimer();
   }
 
-  startInactivityTimer() {
-    this.clearInactivityTimer();
-    this.inactivityTimer = setTimeout(() => {
-      this.isInactive = true;
-      if (typeof this.onInactivity === 'function') {
-        this.onInactivity();
-      }
-    }, this.inactivityDelay);
+  #removeEventListeners() {
+    this.#activityEvents.forEach(event =>
+      document.removeEventListener(event, this.#handleUserActivity, { capture: false })
+    );
   }
 
-  clearInactivityTimer() {
-    if (this.inactivityTimer) {
-      clearTimeout(this.inactivityTimer);
-      this.inactivityTimer = null;
+  #startInactivityTimer() {
+    this.#clearInactivityTimer();
+    this.#inactivityTimer = setTimeout(() => {
+      this.#isInactive = true;
+      this.#onInactivity();
+    }, this.#inactivityDelay);
+  }
+
+  #clearInactivityTimer() {
+    if (this.#inactivityTimer) {
+      clearTimeout(this.#inactivityTimer);
+      this.#inactivityTimer = null;
     }
   }
 
-  handleUserActivity() {
-    if (this.isInactive) {
-      this.isInactive = false;
-      if (typeof this.onActivity === 'function') {
-        this.onActivity();
-      }
+  #handleActivity() {
+    if (this.#isInactive) {
+      this.#isInactive = false;
+      this.#onActivity();
     }
-    this.startInactivityTimer();
+    this.#startInactivityTimer();
   }
 
+  /**
+   * Updates the inactivity delay
+   * @param {number} delay - New delay in milliseconds
+   */
+  setInactivityDelay(delay) {
+    this.#inactivityDelay = Math.max(1000, delay);
+    this.#startInactivityTimer(); // Restart timer with new delay
+  }
+
+  /**
+   * Get current inactivity status
+   * @returns {boolean} - True if currently inactive
+   */
+  get isInactive() {
+    return this.#isInactive;
+  }
+
+  /**
+   * Manually trigger activity (useful for custom events)
+   */
+  triggerActivity() {
+    this.#handleActivity();
+  }
+
+  /**
+   * Pause the inactivity watcher
+   */
+  pause() {
+    this.#clearInactivityTimer();
+    this.#removeEventListeners();
+  }
+
+  /**
+   * Resume the inactivity watcher
+   */
+  resume() {
+    this.#addEventListeners();
+    this.#startInactivityTimer();
+  }
+
+  /**
+   * Clean up event listeners and timers
+   */
   destroy() {
-    this.clearInactivityTimer();
-    this.activityEvents.forEach(event =>
-      document.removeEventListener(event, this.handleUserActivity)
-    );
+    this.#clearInactivityTimer();
+    this.#removeEventListeners();
   }
 }

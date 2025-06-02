@@ -1,4 +1,4 @@
-import { InactivityWatcher } from '../_42/InactivityWatcher.js';
+import { InactivityWatcher } from '../bin/InactivityWatcher.js';
 import { PartialFetcher } from '../../../system/42/PartialFetcher.js';
 import { FloatingImageManager } from '../FloatingImages/FloatingImageManager.js';
 

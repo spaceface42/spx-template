@@ -1,5 +1,5 @@
-import { resizeManager } from '../_42/ResizeManager.js';
-import { debounce } from '../../_42/utils.js';
+import { resizeManager } from '../bin/ResizeManager.js';
+import { debounce } from '../../bin/utils.js';
 
 export class GaussianProjectDistributor {
     constructor(containerSelector) {
