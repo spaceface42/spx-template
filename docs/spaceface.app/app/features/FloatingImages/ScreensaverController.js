@@ -22,22 +22,26 @@ export class ScreensaverController {
     }
 
     async showScreensaver() {
-        if (!this.partialLoaded) {
-            await PartialFetcher.load(this.partialUrl, this.targetSelector);
-            this.partialLoaded = true;
-        }
-        const container = document.querySelector(this.targetSelector);
-        if (container) container.style.display = '';
+        try {
+            if (!this.partialLoaded) {
+                await PartialFetcher.load(this.partialUrl, this.targetSelector);
+                this.partialLoaded = true;
+            }
+            const container = document.querySelector(this.targetSelector);
+            if (container) container.style.display = '';
 
-        // Always destroy previous manager if exists
-        if (this.screensaverManager) {
-            this.screensaverManager.destroy();
-            this.screensaverManager = null;
-        }
+            // Always destroy previous manager if exists
+            if (this.screensaverManager) {
+                this.screensaverManager.destroy();
+                this.screensaverManager = null;
+            }
 
-        // Create a new manager and randomize positions
-        this.screensaverManager = new FloatingImageManager(container);
-        this.screensaverManager.resetAllImagePositions();
+            // Create a new manager and randomize positions
+            this.screensaverManager = new FloatingImageManager(container);
+            this.screensaverManager.resetAllImagePositions();
+        } catch (error) {
+            console.error('Failed to load screensaver partial:', error);
+        }
     }
 
     hideScreensaver() {
@@ -50,6 +54,10 @@ export class ScreensaverController {
     }
 
     destroy() {
-        this.watcher.destroy();
+        this.hideScreensaver();
+        if (this.watcher) {
+            this.watcher.destroy();
+            this.watcher = null;
+        }
     }
 }
