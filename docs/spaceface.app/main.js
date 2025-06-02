@@ -124,3 +124,8 @@ await swManager.register();
 
 // Clear cache
 await swManager.postMessage({ type: 'CLEAR_CACHE' });
+
+
+
+
+

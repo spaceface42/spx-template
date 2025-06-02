@@ -2,35 +2,134 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Page A</title>
-  <link rel="stylesheet" href="./app/ui/spacesuit/defaults.css" />
-  <link rel="stylesheet" href="./app/ui/spacesuit/main.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spaceface</title>
+  <link rel="stylesheet" href="./spaceface.app/spacesuit/main.css" />
 
-  <script type="module" src="./app/main.js"></script>
-
+  <script type="module" src="./spaceface.app/main.js"></script>
 </head>
 <body>
 
 <!-- progressbar -->
-<link rel="partial" src="./app/partials/progressbar.html" />
+<link rel="partial" src="./content/partials/progressbar.html" />
 <!-- / progressbar -->
 
 <header>
   <nav>
-    <a href="/index.html" spx-target>index</a>
-    <a href="/otherpage.html" spx-target>otherpage</a>
+    <ul class="nav">
+      <li><a spx-target href="/" >home</a></li>
+      <li><a spx-target href="/app.html">app</a></li>
+    </ul>
   </nav>
-  <img src="./content/placeholder.png" alt="" />
+  <img src="./spaceface.app/spacesuit/icons/logo-sandorzsolt.svg" width="128px" height="128px" alt="sandor zsolt graphic designer" />
 </header>
 
+    <style>
+      * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}   
+
+html {
+    font-size: 22px;
+}
+
+body.no-js {
+
+}
+
+body {
+  padding: 10vw;
+  line-height: 1.8;
+  color: #454545;
+  background-color: rgb(240, 240, 240);
+}
+  
+.scrapbook span, .off {
+    display: none;
+}
+.scrapbook span.on {
+    display: inline;
+}
+
+/* links */
+a {
+    color: #8729cf;
+    padding: 2px 0 2px 0;
+    text-decoration-color: #454545;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.30rem;
+    transition: all 250ms ease-in;
+}
+
+a.visited {
+    color: #454545;
+}
+
+img {
+    border-radius: 10px;
+    max-width: 9rem;
+    display:inline-block;
+    vertical-align:top;
+}
+    </style>
+
 <main id="main">
-  <img src="./app/ui/spacesuit/icons/sp-empty2.svg" alt="" />
+  <section class="scrapbook">
+
+
+
+
+
+    <span class="on" id="start">
+    Everything will be fine <a href="#" class="on" data-id-reference="next1">maybe.</a>
+    </span>
+
+
+
+
+
+    <span id="next1">
+        <a href="#" class="on" data-id-reference="next2">
+            <img src="./content/contentrevealer/everything-will-be-fine.jpg" alt="" />
+        </a>
+        
+    </span>
+
+
+    <span id="next2">
+    So at night, he climbed the rooftops and chased moonlight until he reached the forest. There, an owl greeted him and whispered, <a href="#" data-id-reference="next3">"The key lies beneath the stone."</a>
+    </span>
+    <span id="next3">
+    Whiskers scratched at the ground, uncovered an old key, and ran home. That night, his attic door creaked open for the <img src="./content/contentrevealer/rickandmorty2.jpeg" alt="" /> first time in years... <a href="#" data-id-reference="next4">"Finally"</a>
+    </span>
+
+    <span id="next4">
+        <p>Lorem ipsum dolor sit amet consectetur.</p>
+        <img src="./content/contentrevealer/rickandmorty1.jpeg" alt="" />
+        <p>Lorem, ipsum dolor.</p>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatibus.</p>
+        
+    </span>
+
+</section>
+
 </main>
 
+<!-- footer -->
 <footer>
-  <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Perferendis reiciendis veritatis ipsam.</p>
+<link rel="partial" src="./content/partials/footer.html" />
 </footer>
+<!-- / footer -->
 
+<script type="module">
+  import { ContentRevealer } from './spaceface.app/app/features/ContentRevealer/ImprovedContentRevealer.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const revealer = new ContentRevealer();
+});
+</script>
 
 
 </body>

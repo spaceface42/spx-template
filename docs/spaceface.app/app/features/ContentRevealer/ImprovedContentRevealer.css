@@ -1,0 +1,48 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}   
+
+html {
+    font-size: 22px;
+}
+
+body.no-js {
+
+}
+
+body {
+  padding: 10vw;
+  line-height: 1.8;
+  color: #454545;
+  background-color: rgb(240, 240, 240);
+}
+  
+.scrapbook span, .off {
+    display: none;
+}
+.scrapbook span.on {
+    display: inline;
+}
+
+/* links */
+a {
+    color: #8729cf;
+    padding: 2px 0 2px 0;
+    text-decoration-color: #454545;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.30rem;
+    transition: all 250ms ease-in;
+}
+
+a.visited {
+    color: #454545;
+}
+
+img {
+    border-radius: 10px;
+    max-width: 9rem;
+    display:inline-block;
+    vertical-align:top;
+}

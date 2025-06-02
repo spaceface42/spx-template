@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ImprovedeContentRevealer</title>
+    <link rel="stylesheet" href="./ImprovedContentRevealer.css" />
+</head>
+<body>
+
+<h1>Hello</h1>
+
+<section class="scrapbook">
+
+
+
+
+    <span class="on" id="start">
+    Everything will be fine <a href="#" class="on" data-id-reference="next1">maybe.</a>
+    </span>
+
+
+
+
+
+    <span id="next1">
+        <a href="#" class="on" data-id-reference="next2">
+            <img src="./content/everything-will-be-fine.jpg" alt="" />
+        </a>
+        
+    </span>
+
+
+    <span id="next2">
+    So at night, he climbed the rooftops and chased moonlight until he reached the forest. There, an owl greeted him and whispered, <a href="#" data-id-reference="next3">"The key lies beneath the stone."</a>
+    </span>
+    <span id="next3">
+    Whiskers scratched at the ground, uncovered an old key, and ran home. That night, his attic door creaked open for the first time in years... <a href="#" data-id-reference="next4">"Finally"</a>
+    </span>
+
+    <span id="next4">
+        <p>Lorem ipsum dolor sit amet consectetur.</p>
+        <img src="./content/rickandmorty1.jpeg" alt="" />
+        <p>Lorem, ipsum dolor.</p>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatibus.</p>
+        <img src="./content/rickandmorty2.jpeg" alt="" />
+    </span>
+
+</section>
+<script type="module">
+import { ContentRevealer } from './ImprovedContentRevealer.js';
+// const revealer = new ContentRevealer({ ensureExists: true });
+
+document.addEventListener('DOMContentLoaded', () => new ContentRevealer({ ensureExists: true }));
+</script>
+
+
+
+</body>
+</html>
