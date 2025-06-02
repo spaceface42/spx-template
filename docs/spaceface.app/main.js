@@ -88,9 +88,9 @@ function debug(config) {
         // Random CSS loader
         const randomcss = async () => {
             const loader = new RandomThemeLoader([
-                './app/ui/spacesuit/random/one.css',
-                './app/ui/spacesuit/random/two.css',
-                './app/ui/spacesuit/random/three.css'
+                '/spaceface.app/spacesuit/random/one.css',
+                '/spaceface.app/spacesuit/random/two.css',
+                '/spaceface.app/spacesuit/random/three.css'
             ]);
             await loader.loadRandomTheme();
         };
