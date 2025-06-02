@@ -15,16 +15,19 @@ import { InspectorXray } from './system/42/InspectorXray.js';
 import { ScreensaverController } from './app/features/Screensaver/ScreensaverController.js';
 import { RandomThemeLoader } from './app/features/RandomTheme/RandomThemeLoader.js';
 
+/*
 import { DeviceDetect } from './system/42/DeviceDetect.js';
 
 const device = new DeviceDetect({
   onSwipe: direction => console.log(`Swiped ${direction}`),
   onResize: () => console.log('Resized or orientation changed'),
 });
+*/
+
+
 
 function debug(config) {
     if (config.production) return;
-    // Debug code here
     const xray = new InspectorXray();
 }
 
@@ -60,7 +63,7 @@ function debug(config) {
             const controller = new ScreensaverController({
                 partialUrl: '/content/screensaver/screensaver.html',
                 targetSelector: `#${uniqueId}`,
-                inactivityDelay: 6000
+                inactivityDelay: 3000
             });
             if (typeof controller.init === 'function') {
                 await controller.init();

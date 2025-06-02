@@ -9,7 +9,11 @@ export class ScreensaverController {
         this.inactivityDelay = inactivityDelay;
         this.screensaverManager = null;
         this.partialLoaded = false;
+        this.watcher = null; // Will be set in init()
+    }
 
+    async init() {
+        // Set up the inactivity watcher
         this.watcher = new InactivityWatcher({
             inactivityDelay: this.inactivityDelay,
             onInactivity: () => this.showScreensaver(),
