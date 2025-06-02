@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /resources/
+
+Sitemap: https://spaceface.org/sitemap.xml

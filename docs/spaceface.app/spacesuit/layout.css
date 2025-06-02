@@ -66,5 +66,5 @@ nav a {
 
 /* debug */
 header, main, footer {
-    background-image: url("./debug/marching-ants-of-manhattan.svg");
+    /* background-image: url("./debug/marching-ants-of-manhattan.svg"); */
 }

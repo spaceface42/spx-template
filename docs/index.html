@@ -4,24 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spaceface</title>
-  <link rel="stylesheet" href="./app/ui/spacesuit/main.css" />
+  <link rel="stylesheet" href="./spaceface.app/spacesuit/main.css" />
 
-  <script type="module" src="./app/main.js"></script>
+  <script type="module" src="./spaceface.app/main.js"></script>
 </head>
 <body>
 
 <!-- progressbar -->
-<link rel="partial" src="./app/partials/progressbar.html" />
+<link rel="partial" src="./content/partials/progressbar.html" />
 <!-- / progressbar -->
 
 <header>
   <nav>
     <ul class="nav">
       <li><a spx-target href="/" >home</a></li>
-      <li><a spx-target href="/otherpage.html">otherpage</a></li>
+      <li><a spx-target href="/app.html">app</a></li>
     </ul>
   </nav>
-  <img src="./app/ui/spacesuit/icons/logo-sandorzsolt.svg" width="128px" height="128px" alt="sandor zsolt graphic designer" />
+  <img src="./spaceface.app/spacesuit/icons/logo-sandorzsolt.svg" width="128px" height="128px" alt="sandor zsolt graphic designer" />
 </header>
 
 
@@ -34,15 +34,9 @@
 
 <!-- footer -->
 <footer>
-<link rel="partial" src="./app/partials/footer.html" />
+<link rel="partial" src="./content/partials/footer.html" />
 </footer>
 <!-- / footer -->
-
-
-<script type="module">
-  import { InspectorXray } from './app/resources/_42/InspectorXray.js';
-  const xray = new InspectorXray();
-</script>
 
 
 

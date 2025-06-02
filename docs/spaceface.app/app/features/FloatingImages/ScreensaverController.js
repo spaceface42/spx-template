@@ -8,7 +8,6 @@ export class ScreensaverController {
         this.targetSelector = targetSelector;
         this.inactivityDelay = inactivityDelay;
         this.screensaverManager = null;
-        this.partialLoaded = false;
         this.watcher = null; // Will be set in init()
     }
 
@@ -23,10 +22,9 @@ export class ScreensaverController {
 
     async showScreensaver() {
         try {
-            if (!this.partialLoaded) {
-                await PartialFetcher.load(this.partialUrl, this.targetSelector);
-                this.partialLoaded = true;
-            }
+            // Always load the partial for a fresh DOM
+            await PartialFetcher.load(this.partialUrl, this.targetSelector);
+
             const container = document.querySelector(this.targetSelector);
             if (container) container.style.display = '';
 

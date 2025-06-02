@@ -116,3 +116,11 @@ const domReady = spx({
 
 
 
+// In your main app
+import ServiceWorkerManager from './app/ServiceWorker.js';
+
+const swManager = new ServiceWorkerManager('/sw.js');
+await swManager.register();
+
+// Clear cache
+await swManager.postMessage({ type: 'CLEAR_CACHE' });

@@ -5,3 +5,6 @@
 @import url("./feature.css");
 
 
+body {
+    background: url('./icons/sp-tv-face.svg') no-repeat center / 10% auto;
+}
