@@ -8,6 +8,13 @@
   font-family: 'Arrival';
   src: url('./fonts/ArrivalApercuMonoPro-Regular.woff2') format('woff2');
 }
+@font-face {
+    font-family: PP Fraktion Mono;
+    src: url(./fonts/PPFraktionMono-Regular.woff2) format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap
+}
 
 :root {
   /* Base font sizes for fluid scaling */
@@ -26,7 +33,7 @@ body {
   font-weight: var(--fw-body);
   line-height: 1.6;
   color: #333;
-  font-family: system-ui, sans-serif;
+  font-family: "PP Fraktion Mono", system-ui, sans-serif;
 }
 
 h1, h2, h3 {

@@ -6,5 +6,5 @@
 
 
 body {
-    background: url('./icons/sp-tv-face.svg') no-repeat center / 10% auto;
+    background: rgb(240, 240, 240) url('./icons/sp-tv-face.svg') no-repeat center / 10% auto;
 }
