@@ -32,29 +32,43 @@ export class PerformanceMonitor {
     update() {
         const now = performance.now();
         const delta = now - this.lastTime;
-
-        // Skip update if delta is zero
-        if (delta === 0) return this.shouldSkipFrame;
-
+        
+        // Skip update if delta is too small (prevents division by very small numbers)
+        if (delta < 1) return this.shouldSkipFrame;
+        
         const currentFPS = 1000 / delta;
-
+        
         // Update moving average using circular buffer
-        const index = this.sampleIndex;
-        const oldSample = this.samples[index];
-        this.samples[index] = currentFPS;
-
-        // Optimized moving average calculation (branchless)
-        this.fpsSum += currentFPS - (this.samplesFilled < this.samples.length ? 0 : oldSample);
-        this.samplesFilled = Math.min(this.samplesFilled + 1, this.samples.length);
-
-        this.sampleIndex = (index + 1) % this.samples.length;
+        const oldSample = this.samples[this.sampleIndex];
+        this.samples[this.sampleIndex] = currentFPS;
+        
+        if (this.samplesFilled < this.samples.length) {
+            this.fpsSum += currentFPS;
+            this.samplesFilled++;
+        } else {
+            this.fpsSum = this.fpsSum - oldSample + currentFPS;
+        }
+        
+        this.sampleIndex = (this.sampleIndex + 1) % this.samples.length;
         this.fps = this.fpsSum / this.samplesFilled;
-
+        
         this.lastTime = now;
         this.frameCount++;
 
-        // Simplified frame skipping logic
-        this.shouldSkipFrame = this.fps < this.frameSkipThreshold;
+        // Improved frame skipping with hysteresis to prevent oscillation
+        const wasSkipping = this.shouldSkipFrame;
+        if (wasSkipping) {
+            // Stop skipping if performance improves significantly
+            this.shouldSkipFrame = this.fps < (this.frameSkipThreshold + 5);
+        } else {
+            // Start skipping if performance drops
+            this.shouldSkipFrame = this.fps < this.frameSkipThreshold;
+        }
+        
+        // Only skip every other frame to maintain some visual continuity
+        if (this.shouldSkipFrame) {
+            this.shouldSkipFrame = this.frameCount % 2 === 0;
+        }
 
         return this.shouldSkipFrame;
     }
@@ -87,7 +101,6 @@ export class PerformanceMonitor {
         }
         
         const level = this.getPerformanceLevel();
-
         console.log(level);
         
         switch (level) {
