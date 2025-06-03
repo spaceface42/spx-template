@@ -2,9 +2,9 @@
  * AppInitializer - Page-aware progressive enhancement
  * Simple approach: detect page type and load accordingly
  */
-import spx from './library/spx/index.js';
-import { logMessage, generateId } from './system/sbin/Utilities.js';
-import { DomReadyPromise } from './system/sbin/DomReadyPromise.js';
+import spx from '../../library/spx/index.js';
+import { logMessage, generateId } from '../../system/sbin/Utilities.js';
+import { DomReadyPromise } from '../../system/sbin/DomReadyPromise.js';
 
 export class Spaceface {
     constructor(options = {}) {
@@ -67,7 +67,7 @@ export class Spaceface {
         if (!this.config.features.screensaver) return;
         
         try {
-            const module = await this.lazyImport('./app/FloatingImages/ScreensaverController.js');
+            const module = await this.lazyImport('../FloatingImages/ScreensaverController.js');
             const ScreensaverController = module?.ScreensaverController;
             
             if (!ScreensaverController) return;
@@ -102,7 +102,7 @@ export class Spaceface {
         if (!this.config.features.randomTheme) return;
         
         try {
-            const module = await this.lazyImport('./app/RandomTheme/RandomThemeLoader.js');
+            const module = await this.lazyImport('../RandomTheme/RandomThemeLoader.js');
             const RandomThemeLoader = module?.RandomThemeLoader;
             
             if (!RandomThemeLoader) return;
@@ -126,7 +126,7 @@ export class Spaceface {
         if (this.config.production) return;
         
         try {
-            const module = await this.lazyImport('./system/sbin/InspectorXray.js');
+            const module = await this.lazyImport('../../system/sbin/InspectorXray.js');
             const InspectorXray = module?.InspectorXray;
             
             if (InspectorXray) {
@@ -142,7 +142,7 @@ export class Spaceface {
         if (!this.config.features.serviceWorker) return;
         
         try {
-            const module = await this.lazyImport('./app/ServiceWorker.js');
+            const module = await this.lazyImport('../ServiceWorker.js');
             const ServiceWorkerManager = module?.default;
             
             if (!ServiceWorkerManager) return;
@@ -157,7 +157,7 @@ export class Spaceface {
 
     async initPartialLoader() {
         try {
-            const module = await this.lazyImport('./system/sbin/PartialLoader.js');
+            const module = await this.lazyImport('../../system/sbin/PartialLoader.js');
             const PartialLoader = module?.PartialLoader;
             
             if (!PartialLoader) return;
@@ -190,7 +190,7 @@ export class Spaceface {
                     // if (initHome) await initHome();
                     break;
 
-
+/*
                 case 'dashboard':
                     // Load heavy dashboard features in parallel
                     const [charts, tables, realtime] = await Promise.allSettled([
@@ -209,7 +209,7 @@ export class Spaceface {
                         await realtime.value.initRealtime();
                     }
                     break;
-                    
+                  
                 case 'product':
                     const productId = this.getProductId();
                     const { initProduct } = await this.lazyImport('./pages/product.js') || {};
@@ -225,7 +225,7 @@ export class Spaceface {
                     const { initContactForm } = await this.lazyImport('.contact-form.js') || {};
                     if (initContactForm) await initContactForm();
                     break;
-                    
+                      */
                 default:
                     // Common enhancements for all pages
                     const { initCommon } = await this.lazyImport('.common.js') || {};
