@@ -9,9 +9,9 @@ const app = new Spaceface({
         screensaver: { delay: 3000 },
         randomTheme: {
             themes: [
-                '/spaceface.app/spacesuit/random/one.css',
-                '/spaceface.app/spacesuit/random/two.css',
-                '/spaceface.app/spacesuit/random/three.css'
+                '/spaceface/spacesuit/random/one.css',
+                '/spaceface/spacesuit/random/two.css',
+                '/spaceface/spacesuit/random/three.css'
             ]
         },
         serviceWorker: true

@@ -1,8 +1,8 @@
-import { clamp } from '../bin/utils.js';
+import { clamp } from '../../system/sbin/Utilities.js';
 import { FloatingImage } from './FloatingImage.js';
-import { resizeManager } from '../bin/ResizeManager.js';
-import { AsyncImageLoader } from '../bin/AsyncImageLoader.js';
-import { PerformanceMonitor } from '../bin/PerformanceMonitor.js';
+import { resizeManager } from '../../system/bin/ResizeManager.js';
+import { AsyncImageLoader } from '../../system/bin/AsyncImageLoader.js';
+import { PerformanceMonitor } from '../../system/bin/PerformanceMonitor.js';
 
 /**
  * Manages floating images using centralized resize management

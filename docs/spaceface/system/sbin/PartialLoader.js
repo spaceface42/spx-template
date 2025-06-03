@@ -3,6 +3,8 @@
  * Loads HTML partials marked with link[rel="partial"] tags
  * Uses fetch API, caching, and modern JavaScript features
  */
+import { debounce } from './Utilities.js';
+
 export class PartialLoader {
   constructor(options = {}) {
     this.cache = new Map();
@@ -222,19 +224,15 @@ export class PartialLoader {
   watch(container = document.body) {
     if (!window.MutationObserver) return;
 
-    const observer = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        mutation.addedNodes.forEach(node => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            this.init(node).catch(console.error);
-          }
-        });
-      });
-    });
+    const debouncedInit = debounce(() => {
+        this.init(container).catch(console.error);
+    }, 100);
+
+    const observer = new MutationObserver(debouncedInit);
 
     observer.observe(container, {
-      childList: true,
-      subtree: true
+        childList: true,
+        subtree: true
     });
 
     return observer;

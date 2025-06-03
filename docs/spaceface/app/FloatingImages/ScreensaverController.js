@@ -1,6 +1,6 @@
-import { InactivityWatcher } from '../bin/InactivityWatcher.js';
-import { PartialFetcher } from '../../../system/42/PartialFetcher.js';
-import { FloatingImageManager } from '../FloatingImages/FloatingImageManager.js';
+import { InactivityWatcher } from '../../system/bin/InactivityWatcher.js';
+import { PartialFetcher } from '../../system/sbin/PartialFetcher.js';
+import { FloatingImageManager } from './FloatingImageManager.js';
 
 /**
  * Enhanced ScreensaverController with better error handling and cleanup

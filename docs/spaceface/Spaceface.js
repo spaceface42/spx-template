@@ -3,8 +3,8 @@
  * Simple approach: detect page type and load accordingly
  */
 import spx from './system/spx/index.js';
-import { logMessage, generateId } from './system/42/utils.js';
-import { DomReadyPromise } from './system/42/DomReadyPromise.js';
+import { logMessage, generateId } from './system/sbin/Utilities.js';
+import { DomReadyPromise } from './system/sbin/DomReadyPromise.js';
 
 export class Spaceface {
     constructor(options = {}) {
@@ -67,7 +67,7 @@ export class Spaceface {
         if (!this.config.features.screensaver) return;
         
         try {
-            const module = await this.lazyImport('./app/features/FloatingImages/ScreensaverController.js');
+            const module = await this.lazyImport('./app/FloatingImages/ScreensaverController.js');
             const ScreensaverController = module?.ScreensaverController;
             
             if (!ScreensaverController) return;
@@ -102,16 +102,16 @@ export class Spaceface {
         if (!this.config.features.randomTheme) return;
         
         try {
-            const module = await this.lazyImport('./app/features/RandomTheme/RandomThemeLoader.js');
+            const module = await this.lazyImport('./app/RandomTheme/RandomThemeLoader.js');
             const RandomThemeLoader = module?.RandomThemeLoader;
             
             if (!RandomThemeLoader) return;
 
             const loader = new RandomThemeLoader(
                 this.config.features.randomTheme.themes || [
-                    '/spaceface.app/spacesuit/random/one.css',
-                    '/spaceface.app/spacesuit/random/two.css',
-                    '/spaceface.app/spacesuit/random/three.css'
+                    '/spaceface/spacesuit/random/one.css',
+                    '/spaceface/spacesuit/random/two.css',
+                    '/spaceface/spacesuit/random/three.css'
                 ]
             );
             
@@ -126,7 +126,7 @@ export class Spaceface {
         if (this.config.production) return;
         
         try {
-            const module = await this.lazyImport('./system/42/InspectorXray.js');
+            const module = await this.lazyImport('./system/sbin/InspectorXray.js');
             const InspectorXray = module?.InspectorXray;
             
             if (InspectorXray) {
@@ -157,7 +157,7 @@ export class Spaceface {
 
     async initPartialLoader() {
         try {
-            const module = await this.lazyImport('./system/42/PartialLoader.js');
+            const module = await this.lazyImport('./system/sbin/PartialLoader.js');
             const PartialLoader = module?.PartialLoader;
             
             if (!PartialLoader) return;
@@ -194,9 +194,9 @@ export class Spaceface {
                 case 'dashboard':
                     // Load heavy dashboard features in parallel
                     const [charts, tables, realtime] = await Promise.allSettled([
-                        this.lazyImport('./features/charts.js'),
-                        this.lazyImport('./features/data-tables.js'),
-                        this.lazyImport('./features/realtime.js')
+                        this.lazyImport('.charts.js'),
+                        this.lazyImport('.data-tables.js'),
+                        this.lazyImport('.realtime.js')
                     ]);
                     
                     if (charts.status === 'fulfilled' && charts.value?.initCharts) {
@@ -222,13 +222,13 @@ export class Spaceface {
                     break;
                     
                 case 'contact':
-                    const { initContactForm } = await this.lazyImport('./features/contact-form.js') || {};
+                    const { initContactForm } = await this.lazyImport('.contact-form.js') || {};
                     if (initContactForm) await initContactForm();
                     break;
                     
                 default:
                     // Common enhancements for all pages
-                    const { initCommon } = await this.lazyImport('./features/common.js') || {};
+                    const { initCommon } = await this.lazyImport('.common.js') || {};
                     if (initCommon) await initCommon();
             }
             
