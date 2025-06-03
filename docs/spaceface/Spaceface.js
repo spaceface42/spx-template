@@ -2,7 +2,7 @@
  * AppInitializer - Page-aware progressive enhancement
  * Simple approach: detect page type and load accordingly
  */
-import spx from './system/spx/index.js';
+import spx from './library/spx/index.js';
 import { logMessage, generateId } from './system/sbin/Utilities.js';
 import { DomReadyPromise } from './system/sbin/DomReadyPromise.js';
 

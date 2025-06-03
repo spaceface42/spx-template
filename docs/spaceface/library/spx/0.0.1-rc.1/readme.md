@@ -1,7 +1,7 @@
 <br>
 <p align="center">
 <a href="https://spx.js.org">
-<img src="https://raw.githubusercontent.com/panoply/spx/13d4440296f86ca276c7de7b710dcd714f69b94f/docs/site/assets/svg/logo.svg"
+<img src="https://raw.githubusercontent.com/panoply/library/spx/13d4440296f86ca276c7de7b710dcd714f69b94f/docs/site/assets/svg/logo.svg"
 width="160px">
 </a>
 </p>
