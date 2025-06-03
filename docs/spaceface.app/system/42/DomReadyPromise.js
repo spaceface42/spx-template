@@ -18,32 +18,39 @@ export class DomReadyPromise {
         return Promise.resolve();
     }
 
-    static waitForElement(selector, timeout = 5000) {
-        return new Promise((resolve, reject) => {
+static waitForElement(selector, timeout = 5000) {
+    return new Promise((resolve, reject) => {
+        const element = document.querySelector(selector);
+        if (element) {
+            resolve(element);
+            return;
+        }
+
+        let timeoutId;
+        let observer;
+
+        const cleanup = () => {
+            if (observer) observer.disconnect();
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+
+        timeoutId = setTimeout(() => {
+            cleanup();
+            reject(new Error(`Element ${selector} not found within ${timeout}ms`));
+        }, timeout);
+
+        observer = new MutationObserver(() => {
             const element = document.querySelector(selector);
             if (element) {
+                cleanup();
                 resolve(element);
-                return;
             }
-
-            const timeoutId = setTimeout(() => {
-                observer.disconnect();
-                reject(new Error(`Element ${selector} not found within ${timeout}ms`));
-            }, timeout);
-
-            const observer = new MutationObserver(() => {
-                const element = document.querySelector(selector);
-                if (element) {
-                    observer.disconnect();
-                    clearTimeout(timeoutId); // <-- add this
-                    resolve(element);
-                }
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
         });
-    }
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+}
 }
