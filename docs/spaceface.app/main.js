@@ -1,6 +1,27 @@
 /**
  * main.js
  */
+import { LoadingScreen } from './LoadingScreen.js';
+
+// Simple usage
+const loader = new LoadingScreen();
+loader.show('Loading...');
+loader.hide();
+
+// With custom options
+const loader = new LoadingScreen({
+  spinnerType: 'spin', // 'pulse', 'spin', 'dots', 'bars'
+  theme: 'light',     // 'dark', 'light'
+  fadeSpeed: 300,
+  blur: true
+});
+
+// Quick static method
+LoadingScreen.show('Fetching data...');
+
+
+
+
 
 // pjax page loading stuff
 import spx from './system/spx/index.js';
@@ -98,6 +119,9 @@ function debug(config) {
         await screensaver();
         await randomcss();
         debug(config);
+
+        // document.getElementById('splash-screen')?.remove();
+
 
         console.timeEnd('app-initialization');
     } catch (error) {
