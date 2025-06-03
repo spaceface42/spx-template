@@ -11,14 +11,19 @@ function logMessage(level, ...args) {
 
   // Check if last arg is a config object
   const lastArg = args[args.length - 1];
-  const hasConfig = typeof lastArg === 'object' && lastArg !== null && 'production' in lastArg;
+  const hasConfig = typeof lastArg === 'object' && 
+                   lastArg !== null && 
+                   !Array.isArray(lastArg) && 
+                   'production' in lastArg;
 
-  const config = hasConfig ? args.pop() : { production: false };
-  const isProduction = config.production;
+  // Extract config without modifying original args
+  const config = hasConfig ? lastArg : { production: false };
+  const messageArgs = hasConfig ? args.slice(0, -1) : args;
+  
+  // Skip info logs in production
+  if (config.production && level === 'info') return;
 
-  if (isProduction && level === 'info') return;
-
-  const message = args.join(' '); // Combine message parts
+  const message = messageArgs.join(' ');
   const { emoji, color } = styles[level] || styles.info;
 
   console.log(
@@ -28,7 +33,6 @@ function logMessage(level, ...args) {
   );
 }
 
-// Place this at the very top of your file, before any class definitions
 /**
  * Clamps a value between a minimum and maximum.
  * @param {number} value - The value to clamp.
@@ -44,15 +48,15 @@ const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
 
 /**
  * Performs linear interpolation between two numbers.
- * @function
  * @param {number} a - The starting value.
  * @param {number} b - The target value.
- * @param {number} n - Normalization factor, typically between 0 and 1.
- * @returns {number} - Result of the linear interpolation.
+ * @param {number} t - Interpolation factor, typically between 0 and 1.
+ * @returns {number} The interpolated value.
+ * @example
+ * lerp(0, 10, 0.5); // 5
+ * lerp(20, 30, 0.2); // 22
  */
-const lerp = (a, b, n) => (1 - n) * a + n * b;
-
-
+const lerp = (a, b, t) => (1 - t) * a + t * b;
 
 /**
  * Debounces a function, delaying its execution until after a specified delay
@@ -60,6 +64,9 @@ const lerp = (a, b, n) => (1 - n) * a + n * b;
  * @param {Function} func - The function to debounce.
  * @param {number} delay - The delay in milliseconds.
  * @returns {Function} A debounced version of the function.
+ * @example
+ * const debouncedSave = debounce(saveData, 300);
+ * debouncedSave(data); // Will only execute after 300ms of inactivity
  */
 function debounce(func, delay) {
     let timeout;
