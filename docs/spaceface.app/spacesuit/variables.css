@@ -8,7 +8,4 @@
     --color-light: rgb(240, 240, 240);
     --gap: 10rem;
     --padding: min(1rem, 3vw);
-    --font-family: "Arrival" , "SCTO", "Noto Sans SC", sans-serif;
-    --fs-body: clamp(1rem, 1.5vw, 1.125rem);
-    --fs-h1: clamp(1rem, 4vw, 5rem);
 }
