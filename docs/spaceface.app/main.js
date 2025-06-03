@@ -25,7 +25,7 @@ app.init();
 const domReady = app.setupSPX();
 
 // Export for external access
-export { app };
+// export { app };
 
 /*
 HTML Usage:
