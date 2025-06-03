@@ -32,11 +32,13 @@ export class Spaceface {
         // Method 2: Check path patterns
         if (path === '/') return 'home';
         if (path === '/app') return 'app';
+
+        /* 
         if (path === '/contact') return 'contact';
         if (path.startsWith('/products/')) return 'product';
         if (path.startsWith('/dashboard')) return 'dashboard';
         if (path.startsWith('/admin')) return 'admin';
-       /* 
+
         // Method 3: Check for specific elements that indicate page type
         if (document.querySelector('[data-dashboard]')) return 'dashboard';
         if (document.querySelector('[data-product-id]')) return 'product';
