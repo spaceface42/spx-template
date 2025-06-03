@@ -1,6 +1,8 @@
 /**
  * Performance monitor for detecting lower-end devices and managing frame rates
  */
+import { logMessage } from '../sbin/Utilities.js';
+
 export class PerformanceMonitor {
     constructor() {
         this.frameCount = 0;
@@ -101,7 +103,8 @@ export class PerformanceMonitor {
         }
         
         const level = this.getPerformanceLevel();
-        console.log(level);
+
+        logMessage('info', 'Performance:', level);
         
         switch (level) {
             case 'high':
