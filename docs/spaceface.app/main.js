@@ -1,135 +1,216 @@
 /**
- * main.js
+ * main.js - Optimized version
  */
-import { LoadingScreen } from './LoadingScreen.js';
 
-// Simple usage
-const loader = new LoadingScreen();
-loader.show('Loading...');
-loader.hide();
-
-// With custom options
-const loader = new LoadingScreen({
-  spinnerType: 'spin', // 'pulse', 'spin', 'dots', 'bars'
-  theme: 'light',     // 'dark', 'light'
-  fadeSpeed: 300,
-  blur: true
-});
-
-// Quick static method
-LoadingScreen.show('Fetching data...');
-
-
-
-
-
-// pjax page loading stuff
+// Critical imports first (hoisted)
 import spx from './system/spx/index.js';
-
-// system init / domready / partialloader / debug
 import { logMessage, generateId } from './system/42/utils.js';
 import { DomReadyPromise } from './system/42/DomReadyPromise.js';
-import { PartialLoader } from './system/42/PartialLoader.js';
 
-// xray debug for css
-import { InspectorXray } from './system/42/InspectorXray.js';
+// Non-critical imports - can be lazy loaded
+let PartialLoader, InspectorXray, ScreensaverController, RandomThemeLoader, ServiceWorkerManager;
 
-// features
-import { ScreensaverController } from './app/features/FloatingImages/ScreensaverController.js';
-import { RandomThemeLoader } from './app/features/RandomTheme/RandomThemeLoader.js';
+// Lazy import function
+const lazyImport = async (modulePath) => {
+    try {
+        return await import(modulePath);
+    } catch (error) {
+        console.warn(`Failed to load module: ${modulePath}`, error);
+        return null;
+    }
+};
 
-/*
-import { DeviceDetect } from './system/42/DeviceDetect.js';
-
-const device = new DeviceDetect({
-  onSwipe: direction => console.log(`Swiped ${direction}`),
-  onResize: () => console.log('Resized or orientation changed'),
-});
-*/
-
-
-// debug // comment for production
-function debug(config) {
+// Optimized debug function with lazy loading
+async function debug(config) {
     if (config.production) return;
-    const xray = new InspectorXray();
+    
+    if (!InspectorXray) {
+        const module = await lazyImport('./system/42/InspectorXray.js');
+        InspectorXray = module?.InspectorXray;
+    }
+    
+    if (InspectorXray) {
+        new InspectorXray();
+    }
 }
 
-(async () => {
+// Optimized screensaver initialization
+const initScreensaver = async (config) => {
     try {
-        console.time('app-initialization');
-        const config = { production: false };
+        if (!ScreensaverController) {
+            const module = await lazyImport('./app/features/FloatingImages/ScreensaverController.js');
+            ScreensaverController = module?.ScreensaverController;
+        }
+        
+        if (!ScreensaverController) return;
 
-        logMessage('info', 'App loaded', config);
+        const uniqueId = generateId('screensaver', 9);
+        
+        // More efficient element creation
+        const screensaverDiv = document.createElement('div');
+        screensaverDiv.id = uniqueId;
+        screensaverDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            display: none;
+        `;
+        
+        document.body.appendChild(screensaverDiv);
 
-        await DomReadyPromise.ready();
-        logMessage('info', 'DOM is ready', config);
+        const controller = new ScreensaverController({
+            partialUrl: '/content/screensaver/screensaver.html',
+            targetSelector: `#${uniqueId}`,
+            inactivityDelay: 3000
+        });
 
-        // Initialize partial loader
-        const loader = new PartialLoader();
-        await loader.init();
+        if (typeof controller.init === 'function') {
+            await controller.init();
+        }
 
-        // Screensaver feature
-        const screensaver = async () => {
-            const uniqueId = generateId('screensaver', 9);
-            const screensaverDiv = Object.assign(document.createElement('div'), { id: uniqueId });
-            Object.assign(screensaverDiv.style, {
-                position: 'fixed',
-                top: '0',
-                left: '0',
-                width: '100vw',
-                height: '100vh',
-                zIndex: '1',
-                display: 'none'
+        // Optimized image preloading with timeout
+        const container = document.getElementById(uniqueId);
+        if (container) {
+            const images = container.querySelectorAll('img');
+            const imagePromises = Array.from(images).map(img => {
+                if (img.complete) return Promise.resolve();
+                
+                return new Promise(resolve => {
+                    const timeout = setTimeout(() => resolve(), 5000); // 5s timeout
+                    
+                    const cleanup = () => {
+                        clearTimeout(timeout);
+                        resolve();
+                    };
+                    
+                    img.onload = cleanup;
+                    img.onerror = cleanup;
+                });
             });
-            document.body.appendChild(screensaverDiv);
+            
+            await Promise.allSettled(imagePromises); // Use allSettled to not fail on single image errors
+        }
 
-            const controller = new ScreensaverController({
-                partialUrl: '/content/screensaver/screensaver.html',
-                targetSelector: `#${uniqueId}`,
-                inactivityDelay: 3000
-            });
-            if (typeof controller.init === 'function') {
-                await controller.init();
-            }
-
-            const container = document.getElementById(uniqueId);
-            if (container) {
-                const images = container.querySelectorAll('img');
-                await Promise.all(Array.from(images).map(img => {
-                    if (img.complete) return Promise.resolve();
-                    return new Promise(resolve => {
-                        img.onload = img.onerror = resolve;
-                    });
-                }));
-            }
-
-            logMessage('info', 'screensaver id: ', uniqueId, config);
-        };
-
-        // Random CSS loader
-        const randomcss = async () => {
-            const loader = new RandomThemeLoader([
-                '/spaceface.app/spacesuit/random/one.css',
-                '/spaceface.app/spacesuit/random/two.css',
-                '/spaceface.app/spacesuit/random/three.css'
-            ]);
-            await loader.loadRandomTheme();
-        };
-
-        await screensaver();
-        await randomcss();
-        debug(config);
-
-        // document.getElementById('splash-screen')?.remove();
-
-
-        console.timeEnd('app-initialization');
+        logMessage('info', 'Screensaver initialized:', uniqueId, config);
     } catch (error) {
-        console.error('App initialization failed:', error);
+        console.warn('Screensaver initialization failed:', error);
+    }
+};
+
+// Optimized random CSS loader
+const initRandomTheme = async (config) => {
+    try {
+        if (!RandomThemeLoader) {
+            const module = await lazyImport('./app/features/RandomTheme/RandomThemeLoader.js');
+            RandomThemeLoader = module?.RandomThemeLoader;
+        }
+        
+        if (!RandomThemeLoader) return;
+
+        const loader = new RandomThemeLoader([
+            '/spaceface.app/spacesuit/random/one.css',
+            '/spaceface.app/spacesuit/random/two.css',
+            '/spaceface.app/spacesuit/random/three.css'
+        ]);
+        
+        await loader.loadRandomTheme();
+        logMessage('info', 'Random theme loaded', config);
+    } catch (error) {
+        console.warn('Random theme loading failed:', error);
+    }
+};
+
+// Service Worker initialization
+const initServiceWorker = async () => {
+    try {
+        if (!ServiceWorkerManager) {
+            const module = await lazyImport('./app/ServiceWorker.js');
+            ServiceWorkerManager = module?.default;
+        }
+        
+        if (!ServiceWorkerManager) return;
+
+        const swManager = new ServiceWorkerManager('/sw.js');
+        await swManager.register();
+        
+        // Optional: Clear cache on development
+        // await swManager.postMessage({ type: 'CLEAR_CACHE' });
+        
+        logMessage('info', 'Service Worker registered');
+    } catch (error) {
+        console.warn('Service Worker registration failed:', error);
+    }
+};
+
+// Main initialization function
+(async () => {
+    const startTime = performance.now();
+    
+    try {
+        const config = { 
+            production: window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')
+        };
+
+        logMessage('info', 'App initialization started', config);
+
+        // Wait for DOM to be ready
+        await DomReadyPromise.ready();
+        logMessage('info', 'DOM ready', config);
+
+        // Initialize PartialLoader early as it might be critical
+        if (!PartialLoader) {
+            const module = await lazyImport('./system/42/PartialLoader.js');
+            PartialLoader = module?.PartialLoader;
+        }
+        
+        if (PartialLoader) {
+            const loader = new PartialLoader();
+            await loader.init();
+            logMessage('info', 'PartialLoader initialized', config);
+        }
+
+        // Parallel initialization of non-critical features
+        const initPromises = [
+            initScreensaver(config),
+            initRandomTheme(config),
+            debug(config),
+            initServiceWorker()
+        ];
+
+        // Wait for all with timeout and error handling
+        const results = await Promise.allSettled(initPromises);
+        
+        // Log any failures
+        results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+                const features = ['screensaver', 'theme', 'debug', 'service-worker'];
+                console.warn(`${features[index]} initialization failed:`, result.reason);
+            }
+        });
+
+        // Remove splash screen after everything is loaded
+        const splashScreen = document.getElementById('splash-screen');
+        if (splashScreen) {
+            splashScreen.style.opacity = '0';
+            splashScreen.style.transition = 'opacity 300ms ease-out';
+            setTimeout(() => splashScreen.remove(), 300);
+        }
+
+        const endTime = performance.now();
+        logMessage('info', `App initialization completed in ${(endTime - startTime).toFixed(2)}ms`, config);
+        
+    } catch (error) {
+        console.error('Critical app initialization error:', error);
+        
+        // Ensure splash screen is removed even on error
+        document.getElementById('splash-screen')?.remove();
     }
 })();
 
-// spx setup
+// SPX setup - can be initialized immediately
 const domReady = spx({
     fragments: ['main', 'footer'],
     logLevel: 0,
@@ -138,18 +219,5 @@ const domReady = spx({
     scripts: ['script[src*="main.js"]'],
 });
 
-
-
-// In your main app
-import ServiceWorkerManager from './app/ServiceWorker.js';
-
-const swManager = new ServiceWorkerManager('/sw.js');
-await swManager.register();
-
-// Clear cache
-await swManager.postMessage({ type: 'CLEAR_CACHE' });
-
-
-
-
-
+// Export for potential external access
+export { initScreensaver, initRandomTheme, initServiceWorker };
