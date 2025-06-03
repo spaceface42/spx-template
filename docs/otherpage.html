@@ -7,6 +7,13 @@
   <link rel="stylesheet" href="./spaceface.app/spacesuit/main.css" />
 
   <script type="module" src="./spaceface.app/main.js"></script>
+  <script type="module">
+  import { ContentRevealer } from './spaceface.app/app/features/ContentRevealer/ImprovedContentRevealer.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const revealer = new ContentRevealer();
+});
+</script>
 </head>
 <body>
 
@@ -23,8 +30,7 @@
   </nav>
   <img src="./spaceface.app/spacesuit/icons/logo-sandorzsolt.svg" width="128px" height="128px" alt="sandor zsolt graphic designer" />
 </header>
-
-    <style>
+<style>
       * {
     margin: 0;
     padding: 0;
@@ -73,7 +79,7 @@ img {
     display:inline-block;
     vertical-align:top;
 }
-    </style>
+</style>
 
 <main id="main">
   <section class="scrapbook">
@@ -91,7 +97,7 @@ img {
 
 
     <span id="next1">
-        <a href="#" class="on" data-id-reference="next2">
+        <a spx-ignore href="#" class="on" data-id-reference="next2">
             <img src="./content/contentrevealer/everything-will-be-fine.jpg" alt="" />
         </a>
         
@@ -99,10 +105,10 @@ img {
 
 
     <span id="next2">
-    So at night, he climbed the rooftops and chased moonlight until he reached the forest. There, an owl greeted him and whispered, <a href="#" data-id-reference="next3">"The key lies beneath the stone."</a>
+    So at night, he climbed the rooftops and chased moonlight until he reached the forest. There, an owl greeted him and whispered, <a spx-ignore href="#" data-id-reference="next3">"The key lies beneath the stone."</a>
     </span>
     <span id="next3">
-    Whiskers scratched at the ground, uncovered an old key, and ran home. That night, his attic door creaked open for the <img src="./content/contentrevealer/rickandmorty2.jpeg" alt="" /> first time in years... <a href="#" data-id-reference="next4">"Finally"</a>
+    Whiskers scratched at the ground, uncovered an old key, and ran home. That night, his attic door creaked open for the <img src="./content/contentrevealer/rickandmorty2.jpeg" alt="" /> first time in years... <a spx-ignore href="#" data-id-reference="next4">"Finally"</a>
     </span>
 
     <span id="next4">
@@ -123,13 +129,6 @@ img {
 </footer>
 <!-- / footer -->
 
-<script type="module">
-  import { ContentRevealer } from './spaceface.app/app/features/ContentRevealer/ImprovedContentRevealer.js';
-
-document.addEventListener('DOMContentLoaded', () => {
-  const revealer = new ContentRevealer();
-});
-</script>
 
 
 </body>
