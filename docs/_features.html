@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      body {
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+      }
+      section {
+        padding: 3rem;
+        background-color: gainsboro;
+        border-radius: .5rem;
+        position: relative; /* needed for positioning the ::before label */
+      }
+
+      section::before {
+        content: attr(id);       /* display the section's id attribute */
+        position: absolute;      /* position it relative to section */
+        top: -1.75rem;            /* place it above the section */
+        left: 0;
+        background: white;       /* label background different from section */
+        padding: 0.2rem 0.5rem;
+        font-size: 0.9rem;
+        white-space: nowrap;
+      }
+
+      #FloatingImagesDemo {
+        position: relative;
+        height: 55vh;
+      }
+      #floating-images-container {
+        position: relative;
+        overflow: hidden; /* Prevent images from escaping the container */
+        max-width: 100%;
+        height: 100%;
+        background-color: aliceblue;
+      }
+      #floating-images-container img {
+        position: absolute; /* Allow JS to move them freely */
+        opacity: 0;
+        max-width: 100%;
+        max-height: 100%;
+        pointer-events: none; /* Optional: images don't block mouse events */
+        user-select: none;    /* Optional: images can't be selected */
+      }
+    </style>
+
+    <script type="module" src="./_features.js"></script>
+</head>
+<body>
+
+
+<section id="BackgroundAudioPlayer">
+  <button id="bg-audio-toggle">Start Music</button>
+</section>
+
+<section id="FloatingImagesDemo">
+  <div id="floating-images-container">
+    <img class="floating-image" src="https://placecats.com/millie_neo/300/200" width="300" height="200" alt="Kitten 1" />
+    <img class="floating-image" src="https://placecats.com/millie/300/150" width="300" height="150" alt="Kitten 2" />
+    <img class="floating-image" src=" https://placecats.com/neo_2/300/200" width="300" height="200" alt="Kitten 3" />
+  </div>
+</section>
+
+
+</body>
+</html>

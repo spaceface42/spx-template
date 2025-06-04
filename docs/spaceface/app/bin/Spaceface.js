@@ -69,7 +69,7 @@ export class Spaceface {
         if (!this.config.features.screensaver) return;
         
         try {
-            const module = await this.lazyImport('../FloatingImages/ScreensaverController.js');
+            const module = await this.lazyImport('../../system/features/Screensaver/ScreensaverController.js');
             const ScreensaverController = module?.ScreensaverController;
             
             if (!ScreensaverController) return;
