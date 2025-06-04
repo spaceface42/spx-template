@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+<body>
+<style>
+section {
+  margin: 3rem;
+  padding: 3rem;
+  background-color: gainsboro;
+  border-radius: .5rem;
+  position: relative; /* needed for positioning the ::before label */
+}
+
+section::before {
+  content: attr(id);       /* display the section's id attribute */
+  position: absolute;      /* position it relative to section */
+  top: -1.75rem;            /* place it above the section */
+  left: 0;
+  background: white;       /* label background different from section */
+  padding: 0.2rem 0.5rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+</style>
+
+<section id="BackgroundAudioPlayer">
+  <button id="bg-audio-toggle">Start Music</button>
+</section>
+
+<script type="module">
+  import { BackgroundAudioPlayer } from './BackgroundAudioPlayer.js'; // adjust path as needed
+
+  const button = document.getElementById('bg-audio-toggle');
+
+  const player = new BackgroundAudioPlayer('./sound.mp3', button, {
+    volume: 0.4,
+    loop: true,
+    playText: 'Start Music',
+    pauseText: 'Stop Music'
+  });
+
+  // Optional: manually control or destroy it later
+  // player.stop();
+  // player.setVolume(0.2);
+  // player.destroy();
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
