@@ -65,12 +65,12 @@ export class AsyncImageLoader {
             if (this._imageCache.has(img)) {
                 return Promise.resolve();
             }
-            
+
             if (img.complete && img.naturalWidth !== 0) {
                 this._imageCache.set(img, true);
                 return Promise.resolve();
             }
-            
+
             return new Promise(resolve => {
                 const cleanup = () => {
                     img.onload = null;
@@ -82,7 +82,7 @@ export class AsyncImageLoader {
                 img.onerror = cleanup;
             });
         });
-        
+
         await Promise.all(loadPromises);
         return images;
     }

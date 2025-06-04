@@ -38,9 +38,9 @@ export class InactivityWatcher {
 
   #addEventListeners() {
     this.#activityEvents.forEach(event =>
-      document.addEventListener(event, this.#handleUserActivity, { 
+      document.addEventListener(event, this.#handleUserActivity, {
         passive: true,
-        capture: false 
+        capture: false
       })
     );
   }

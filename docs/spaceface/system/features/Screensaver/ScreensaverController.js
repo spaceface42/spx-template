@@ -18,7 +18,7 @@ export class ScreensaverController {
 
     async init() {
         if (this._destroyed) return;
-        
+
         try {
             this.watcher = new InactivityWatcher({
                 inactivityDelay: this.inactivityDelay,
@@ -32,7 +32,7 @@ export class ScreensaverController {
 
     async showScreensaver() {
         if (this._destroyed) return;
-        
+
         try {
             await PartialFetcher.load(this.partialUrl, this.targetSelector);
 
@@ -53,7 +53,7 @@ export class ScreensaverController {
 
     hideScreensaver() {
         if (this._destroyed) return;
-        
+
         try {
             const container = document.querySelector(this.targetSelector);
             if (container) container.style.display = 'none';
@@ -68,7 +68,7 @@ export class ScreensaverController {
 
     destroy() {
         this._destroyed = true;
-        
+
         try {
             this.hideScreensaver();
             if (this.watcher) {
@@ -78,14 +78,14 @@ export class ScreensaverController {
         } catch (error) {
             this.handleError('Failed to destroy screensaver controller', error);
         }
-        
+
         // Clear references
         this.onError = null;
     }
 
     handleError(message, error) {
         if (this._destroyed) return;
-        
+
         console.error(`${message}:`, error);
         if (typeof this.onError === 'function') {
             try {

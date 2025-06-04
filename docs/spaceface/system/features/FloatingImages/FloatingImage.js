@@ -14,7 +14,7 @@ export class FloatingImage {
 
         // Cache element reference weakly
         this._elementRef = new WeakRef(element);
-        
+
         // Always use offsetWidth/offsetHeight for rendered size
         this.size = {
             width: this.element.offsetWidth,
@@ -37,7 +37,7 @@ export class FloatingImage {
         this.element.style.willChange = 'transform';
         this.element.style.backfaceVisibility = 'hidden';
         this.element.style.perspective = '1000px';
-        
+
         // Apply initial position
         this.updatePosition();
 
@@ -51,11 +51,11 @@ export class FloatingImage {
     updatePosition() {
         const element = this._elementRef?.deref();
         if (!element) return false; // Element was garbage collected
-        
+
         // Round positions for crisp rendering unless subpixel is enabled
         const x = this.options.useSubpixel ? this.x : Math.round(this.x);
         const y = this.options.useSubpixel ? this.y : Math.round(this.y);
-        
+
         // Use translate3d for hardware acceleration
         element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         return true;
@@ -83,32 +83,32 @@ export class FloatingImage {
 
         if (this.x <= 0 || this.x + this.size.width >= containerWidth) {
             this.vx = -this.vx * damping;
-            
+
             // Ensure minimum velocity to prevent sticking
             if (Math.abs(this.vx) < minVelocity) {
                 this.vx = this.vx > 0 ? minVelocity : -minVelocity;
             }
-            
+
             // Clamp position within bounds
             this.x = clamp(this.x, 0, containerWidth - this.size.width);
         }
-        
+
         if (this.y <= 0 || this.y + this.size.height >= containerHeight) {
             this.vy = -this.vy * damping;
-            
+
             // Ensure minimum velocity to prevent sticking
             if (Math.abs(this.vy) < minVelocity) {
                 this.vy = this.vy > 0 ? minVelocity : -minVelocity;
             }
-            
+
             // Clamp position within bounds
             this.y = clamp(this.y, 0, containerHeight - this.size.height);
         }
-        
+
         // Add organic movement with reduced randomness for performance
         this.vx += (Math.random() - 0.5) * 0.02;
         this.vy += (Math.random() - 0.5) * 0.02;
-        
+
         // Limit max speed with better calculation
         const maxSpeed = 2.5;
         const speedSquared = this.vx * this.vx + this.vy * this.vy;
@@ -118,12 +118,12 @@ export class FloatingImage {
             this.vx *= scale;
             this.vy *= scale;
         }
-        
+
         // Apply position update if requested
         if (applyPosition) {
             return this.updatePosition();
         }
-        
+
         return true;
     }
 

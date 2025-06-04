@@ -66,7 +66,7 @@ export class PartialLoader {
       this.loadingPromises.set(cacheKey, loadingPromise);
 
       const html = await loadingPromise;
-      
+
       // Cache the result
       if (this.options.cacheEnabled) {
         this.cache.set(cacheKey, html);
@@ -111,7 +111,7 @@ export class PartialLoader {
       }
 
       const html = await response.text();
-      
+
       if (!html.trim()) {
         throw new Error('Empty response received');
       }
@@ -120,14 +120,14 @@ export class PartialLoader {
 
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       // Retry on network errors
-      if (attempt < this.options.retryAttempts && 
+      if (attempt < this.options.retryAttempts &&
           (error.name === 'AbortError' || error.name === 'TypeError')) {
         await this.delay(Math.pow(2, attempt) * 100); // Exponential backoff
         return this.fetchPartial(url, attempt + 1);
       }
-      
+
       throw error;
     }
   }
@@ -176,10 +176,10 @@ export class PartialLoader {
     if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('//')) {
       return src;
     }
-    
+
     const base = this.options.baseUrl.replace(/\/$/, '');
     const path = src.startsWith('/') ? src : `/${src}`;
-    
+
     return base + path;
   }
 

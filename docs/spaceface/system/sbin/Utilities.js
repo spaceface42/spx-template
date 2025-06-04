@@ -11,15 +11,15 @@ function logMessage(level, ...args) {
 
   // Check if last arg is a config object
   const lastArg = args[args.length - 1];
-  const hasConfig = typeof lastArg === 'object' && 
-                   lastArg !== null && 
-                   !Array.isArray(lastArg) && 
+  const hasConfig = typeof lastArg === 'object' &&
+                   lastArg !== null &&
+                   !Array.isArray(lastArg) &&
                    'production' in lastArg;
 
   // Extract config without modifying original args
   const config = hasConfig ? lastArg : { production: false };
   const messageArgs = hasConfig ? args.slice(0, -1) : args;
-  
+
   // Skip info logs in production
   if (config.production && level === 'info') return;
 

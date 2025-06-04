@@ -22,7 +22,7 @@ self.addEventListener('install', (event) => {
       try {
         const cache = await caches.open(CACHE_NAME);
         await cache.addAll(PRECACHE_ASSETS);
-        
+
         // Skip waiting to activate immediately
         await self.skipWaiting();
       } catch (error) {
@@ -43,9 +43,9 @@ self.addEventListener('activate', (event) => {
         const deletions = cacheNames
           .filter(name => name !== CACHE_NAME && name !== RUNTIME_CACHE)
           .map(name => caches.delete(name));
-        
+
         await Promise.all(deletions);
-        
+
         // Claim all clients immediately
         await self.clients.claim();
       } catch (error) {
@@ -61,18 +61,18 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
+
   // Skip non-GET requests and chrome-extension URLs
   if (request.method !== 'GET' || url.protocol.includes('chrome-extension')) {
     return;
   }
-  
+
   event.respondWith(
     (async () => {
       try {
         // Try network first
         const networkResponse = await fetch(request);
-        
+
         // Cache successful responses
         if (networkResponse.ok && shouldCache(request)) {
           const cache = await caches.open(RUNTIME_CACHE);
@@ -80,22 +80,22 @@ self.addEventListener('fetch', (event) => {
             // Silently fail cache writes
           });
         }
-        
+
         return networkResponse;
       } catch (error) {
         // Network failed, try cache
         const cachedResponse = await caches.match(request);
-        
+
         if (cachedResponse) {
           return cachedResponse;
         }
-        
+
         // Return offline fallback for navigation requests
         if (request.mode === 'navigate') {
           const fallback = await caches.match('/');
           if (fallback) return fallback;
         }
-        
+
         // Re-throw error if no cache match
         throw error;
       }
@@ -108,16 +108,16 @@ self.addEventListener('fetch', (event) => {
  */
 self.addEventListener('message', (event) => {
   const { type, payload } = event.data;
-  
+
   switch (type) {
     case 'SKIP_WAITING':
       self.skipWaiting();
       break;
-      
+
     case 'GET_VERSION':
       event.ports[0]?.postMessage({ version: CACHE_NAME });
       break;
-      
+
     case 'CLEAR_CACHE':
       clearAllCaches().then(() => {
         event.ports[0]?.postMessage({ success: true });
@@ -125,7 +125,7 @@ self.addEventListener('message', (event) => {
         event.ports[0]?.postMessage({ success: false, error: error.message });
       });
       break;
-      
+
     default:
       console.warn('Unknown message type:', type);
   }
@@ -136,22 +136,22 @@ self.addEventListener('message', (event) => {
  */
 function shouldCache(request) {
   const url = new URL(request.url);
-  
+
   // Don't cache if same origin and has search params (likely API calls)
   if (url.origin === self.location.origin && url.search) {
     return false;
   }
-  
+
   // Cache static assets
   if (/\.(js|css|png|jpg|jpeg|gif|svg|woff2?|ttf)$/i.test(url.pathname)) {
     return true;
   }
-  
+
   // Cache HTML pages
   if (request.mode === 'navigate' || request.headers.get('Accept')?.includes('text/html')) {
     return true;
   }
-  
+
   return false;
 }
 

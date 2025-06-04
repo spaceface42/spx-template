@@ -6,7 +6,7 @@ import { PerformanceMonitor } from '../../bin/PerformanceMonitor.js';
 
 /**
  * Manages floating images using centralized resize management
- * Enhanced FloatingImageManager with performance monitoring and 
+ * Enhanced FloatingImageManager with performance monitoring and
  * better memory management
  */
 export class FloatingImageManager {
@@ -22,14 +22,14 @@ export class FloatingImageManager {
 
         // Initialize performance monitor
         this.performanceMonitor = new PerformanceMonitor();
-        
+
         // Initialize properties with performance-aware defaults
         this.images = [];
         this.speedMultiplier = 1;
         this.isInViewport = true;
         this._destroyed = false;
         this._animationId = null;
-        
+
         // Performance settings
         this.performanceSettings = this.performanceMonitor.getRecommendedSettings();
         this.maxImages = options.maxImages || this.performanceSettings.maxImages;
@@ -64,10 +64,10 @@ export class FloatingImageManager {
     async initializeImages() {
         try {
             const imageElements = await this.imageLoader.waitForImagesToLoad('.floating-image');
-            
+
             // Limit number of images based on performance
             const limitedImages = imageElements.slice(0, this.maxImages);
-            
+
             limitedImages.forEach(imgElement => {
                 this.addExistingImage(imgElement);
             });
@@ -81,7 +81,7 @@ export class FloatingImageManager {
             console.warn('Maximum number of images reached, skipping additional images');
             return;
         }
-        
+
         this.container.manager = this;
         const performanceSettings = this.performanceMonitor.getRecommendedSettings();
         const floatingImage = new FloatingImage(imgElement, this.container, {
@@ -128,7 +128,7 @@ export class FloatingImageManager {
 
         // Update performance monitoring
         const shouldSkipFrame = this.performanceMonitor.update();
-        
+
         // Skip frame if performance is poor
         if (shouldSkipFrame || !this.isInViewport || this.speedMultiplier === 0) {
             this._animationId = requestAnimationFrame(() => this.animate());
@@ -142,11 +142,11 @@ export class FloatingImageManager {
 
         // Batch DOM updates for better performance
         const validImages = [];
-        
+
         // Update positions (calculations only)
         this.images.forEach(image => {
             const isValid = image.update(
-                this.speedMultiplier * this.performanceSettings.speedMultiplier, 
+                this.speedMultiplier * this.performanceSettings.speedMultiplier,
                 false
             );
             if (isValid) {

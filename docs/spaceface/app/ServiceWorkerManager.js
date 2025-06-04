@@ -24,10 +24,10 @@ class ServiceWorkerManager {
 
     try {
       this.registration = await navigator.serviceWorker.register(
-        this.swPath, 
+        this.swPath,
         this.options
       );
-      
+
       this.setupEventListeners();
       return this.registration;
     } catch (error) {
@@ -41,7 +41,7 @@ class ServiceWorkerManager {
    */
   async unregister() {
     if (!this.registration) return false;
-    
+
     try {
       return await this.registration.unregister();
     } catch (error) {
@@ -55,7 +55,7 @@ class ServiceWorkerManager {
    */
   async update() {
     if (!this.registration) return null;
-    
+
     try {
       return await this.registration.update();
     } catch (error) {
@@ -69,11 +69,11 @@ class ServiceWorkerManager {
    */
   getStatus() {
     if (!this.registration) return 'unregistered';
-    
+
     if (this.registration.installing) return 'installing';
     if (this.registration.waiting) return 'waiting';
     if (this.registration.active) return 'active';
-    
+
     return 'unknown';
   }
 
@@ -108,7 +108,7 @@ class ServiceWorkerManager {
   async postMessage(message, transfer) {
     const sw = navigator.serviceWorker.controller;
     if (!sw) throw new Error('No active service worker');
-    
+
     sw.postMessage(message, transfer);
   }
 
@@ -118,13 +118,13 @@ class ServiceWorkerManager {
   waitForMessage(timeout = 5000) {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error('Message timeout')), timeout);
-      
+
       const handler = (event) => {
         clearTimeout(timer);
         navigator.serviceWorker.removeEventListener('message', handler);
         resolve(event.data);
       };
-      
+
       navigator.serviceWorker.addEventListener('message', handler);
     });
   }
@@ -134,7 +134,7 @@ class ServiceWorkerManager {
    */
   async activateWaiting() {
     if (!this.registration?.waiting) return false;
-    
+
     try {
       await this.postMessage({ type: 'SKIP_WAITING' });
       return true;

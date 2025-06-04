@@ -13,7 +13,7 @@ export class Spaceface {
             features: options.features ?? {},
             ...options
         };
-        
+
         this.modules = new Map();
         this.pageType = this.detectPageType();
         this.startTime = performance.now();
@@ -23,17 +23,17 @@ export class Spaceface {
     detectPageType() {
         const path = window.location.pathname;
         const body = document.body;
-        
+
         // Method 1: Check data attribute (recommended)
         if (body.dataset.page) {
             return body.dataset.page;
         }
-        
+
         // Method 2: Check path patterns
         if (path === '/') return 'home';
         if (path === '/app') return 'app';
 
-        /* 
+        /*
         if (path === '/contact') return 'contact';
         if (path.startsWith('/products/')) return 'product';
         if (path.startsWith('/dashboard')) return 'dashboard';
@@ -52,7 +52,7 @@ export class Spaceface {
         if (this.modules.has(modulePath)) {
             return this.modules.get(modulePath);
         }
-        
+
         try {
             const module = await import(modulePath);
             this.modules.set(modulePath, module);
@@ -67,11 +67,11 @@ export class Spaceface {
     // Core feature initializers (same as before)
     async initScreensaver() {
         if (!this.config.features.screensaver) return;
-        
+
         try {
             const module = await this.lazyImport('../../system/features/Screensaver/ScreensaverController.js');
             const ScreensaverController = module?.ScreensaverController;
-            
+
             if (!ScreensaverController) return;
 
             const uniqueId = generateId('screensaver', 9);
@@ -81,7 +81,7 @@ export class Spaceface {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
                 z-index: 1; display: none;
             `;
-            
+
             document.body.appendChild(screensaverDiv);
 
             const controller = new ScreensaverController({
@@ -102,11 +102,11 @@ export class Spaceface {
 
     async initRandomTheme() {
         if (!this.config.features.randomTheme) return;
-        
+
         try {
             const module = await this.lazyImport('../RandomTheme/RandomThemeLoader.js');
             const RandomThemeLoader = module?.RandomThemeLoader;
-            
+
             if (!RandomThemeLoader) return;
 
             const loader = new RandomThemeLoader(
@@ -116,7 +116,7 @@ export class Spaceface {
                     '/spaceface/spacesuit/random/three.css'
                 ]
             );
-            
+
             await loader.loadRandomTheme();
             logMessage('info', 'Random theme loaded');
         } catch (error) {
@@ -126,11 +126,11 @@ export class Spaceface {
 
     async initDebug() {
         if (this.config.production) return;
-        
+
         try {
             const module = await this.lazyImport('../../system/sbin/InspectorXray.js');
             const InspectorXray = module?.InspectorXray;
-            
+
             if (InspectorXray) {
                 new InspectorXray();
                 logMessage('info', 'Debug mode enabled');
@@ -142,11 +142,11 @@ export class Spaceface {
 
     async initServiceWorker() {
         if (!this.config.features.serviceWorker) return;
-        
+
         try {
             const module = await this.lazyImport('../ServiceWorkerManager.js');
             const ServiceWorkerManager = module?.default;
-            
+
             if (!ServiceWorkerManager) return;
 
             const swManager = new ServiceWorkerManager('/sw.js');
@@ -161,7 +161,7 @@ export class Spaceface {
         try {
             const module = await this.lazyImport('../../system/sbin/PartialLoader.js');
             const PartialLoader = module?.PartialLoader;
-            
+
             if (!PartialLoader) return;
 
             const loader = new PartialLoader();
@@ -177,7 +177,7 @@ export class Spaceface {
     // Page-specific initializers
     async initPageFeatures() {
         logMessage('info', `Initializing features for page type: ${this.pageType}`);
-        
+
         try {
             switch (this.pageType) {
                 case 'home':
@@ -200,7 +200,7 @@ export class Spaceface {
                         this.lazyImport('.data-tables.js'),
                         this.lazyImport('.realtime.js')
                     ]);
-                    
+
                     if (charts.status === 'fulfilled' && charts.value?.initCharts) {
                         await charts.value.initCharts();
                     }
@@ -211,18 +211,18 @@ export class Spaceface {
                         await realtime.value.initRealtime();
                     }
                     break;
-                  
+
                 case 'product':
                     const productId = this.getProductId();
                     const { initProduct } = await this.lazyImport('./pages/product.js') || {};
                     if (initProduct) await initProduct(productId);
                     break;
-                    
+
                 case 'admin':
                     const { initAdmin } = await this.lazyImport('./pages/admin.js') || {};
                     if (initAdmin) await initAdmin();
                     break;
-                    
+
                 case 'contact':
                     const { initContactForm } = await this.lazyImport('.contact-form.js') || {};
                     if (initContactForm) await initContactForm();
@@ -233,7 +233,7 @@ export class Spaceface {
                     const { initCommon } = await this.lazyImport('.common.js') || {};
                     if (initCommon) await initCommon();
             }
-            
+
             logMessage('info', `Page features initialized for: ${this.pageType}`);
         } catch (error) {
             console.warn(`Page feature initialization failed for ${this.pageType}:`, error);
@@ -245,11 +245,11 @@ export class Spaceface {
         // Try data attribute first
         const productEl = document.querySelector('[data-product-id]');
         if (productEl) return productEl.dataset.productId;
-        
+
         // Try URL path
         const pathMatch = window.location.pathname.match(/\/products\/([^\/]+)/);
         if (pathMatch) return pathMatch[1];
-        
+
         return null;
     }
 
@@ -292,10 +292,10 @@ export class Spaceface {
 
             // Remove splash screen
             this.removeSplashScreen();
-            
+
             const endTime = performance.now();
             logMessage('info', `App initialization completed in ${(endTime - this.startTime).toFixed(2)}ms`);
-            
+
         } catch (error) {
             console.error('Critical app initialization error:', error);
             this.removeSplashScreen();

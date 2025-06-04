@@ -1,9 +1,9 @@
 /**
  * DeviceDetect
- * 
- * Utility class for detecting device type (mobile/desktop), 
+ *
+ * Utility class for detecting device type (mobile/desktop),
  * updating body classes, and handling swipe and resize/orientation events.
- * 
+ *
  * - Adds "is-mobile" or "is-desktop" class to <body> based on device.
  * - Calls optional callbacks on swipe (mobile) and resize/orientation change.
  * - Detects left/right swipe gestures on mobile devices.

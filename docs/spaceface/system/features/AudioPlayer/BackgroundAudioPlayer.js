@@ -1,6 +1,6 @@
 /**
  * BackgroundAudioPlayer
- * 
+ *
  * A simple class to control background audio playback with a UI button.
  * - Disables the button until the audio is ready.
  * - Handles play, pause, stop, and volume control.
@@ -14,7 +14,7 @@
  *   loop: true,
  *   volume: 0.7
  * });
- * 
+ *
  * // To destroy and clean up:
  * player.destroy();
  */

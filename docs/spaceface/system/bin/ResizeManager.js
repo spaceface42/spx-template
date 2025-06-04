@@ -3,26 +3,26 @@
  */
 class ResizeManager {
     static #instance = null;
-    
+
     constructor() {
         if (ResizeManager.#instance) {
             return ResizeManager.#instance;
         }
-        
+
         this.windowCallbacks = new Set();
         this.elementObservers = new WeakMap();
         this.elementCallbacks = new WeakMap();
         this.isThrottled = false;
-        
+
         this.boundHandler = () => this.#handleWindowResize();
         window.addEventListener('resize', this.boundHandler, { passive: true });
-        
+
         ResizeManager.#instance = this;
     }
-    
+
     #handleWindowResize() {
         if (this.isThrottled) return;
-        
+
         this.isThrottled = true;
         requestAnimationFrame(() => {
             this.windowCallbacks.forEach(callback => {
@@ -31,12 +31,12 @@ class ResizeManager {
             this.isThrottled = false;
         });
     }
-    
+
     #createElementHandler(element) {
         return (entries) => {
             const callbacks = this.elementCallbacks.get(element);
             if (!callbacks) return;
-            
+
             requestAnimationFrame(() => {
                 callbacks.forEach(callback => {
                     try { callback(entries[0]); } catch (e) { console.error('Element resize error:', e); }
@@ -44,20 +44,20 @@ class ResizeManager {
             });
         };
     }
-    
+
     /**
      * Subscribe to window resize
-     * @param {Function} callback 
+     * @param {Function} callback
      * @returns {Function} unsubscribe
      */
     onWindow(callback) {
         this.windowCallbacks.add(callback);
         return () => this.windowCallbacks.delete(callback);
     }
-    
+
     /**
      * Subscribe to element resize
-     * @param {Element} element 
+     * @param {Element} element
      * @param {Function} callback - receives ResizeObserverEntry
      * @returns {Function} unsubscribe
      */
@@ -65,16 +65,16 @@ class ResizeManager {
         if (!this.elementCallbacks.has(element)) {
             this.elementCallbacks.set(element, new Set());
         }
-        
+
         const callbacks = this.elementCallbacks.get(element);
         callbacks.add(callback);
-        
+
         if (!this.elementObservers.has(element)) {
             const observer = new ResizeObserver(this.#createElementHandler(element));
             observer.observe(element);
             this.elementObservers.set(element, observer);
         }
-        
+
         return () => {
             callbacks.delete(callback);
             if (callbacks.size === 0) {
@@ -84,14 +84,14 @@ class ResizeManager {
             }
         };
     }
-    
+
     /**
      * Get window dimensions
      */
     getWindow() {
         return { width: window.innerWidth, height: window.innerHeight };
     }
-    
+
     /**
      * Get element dimensions
      */
@@ -103,7 +103,7 @@ class ResizeManager {
             offsetHeight: element.offsetHeight
         };
     }
-    
+
     /**
      * Cleanup everything
      */
