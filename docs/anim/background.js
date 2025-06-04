@@ -19,7 +19,8 @@ export class Background {
     this.ww = window.innerWidth;
     this.wh = window.innerHeight;
     this.range = 1500;
-    this.pcount = 2000; // Fewer particles for demo performance
+    // Optimize: Reduce particle count for small screens
+    this.pcount = window.innerWidth < 800 ? 800 : 2000;
     this.dDistance = 600;
     this.dRotX = 0;
     this.dRotY = 0;
@@ -50,7 +51,7 @@ export class Background {
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(this.ww, this.wh);
-    this.renderer.setClearColor(0xffffff, 1.0); // Dark background
+    this.renderer.setClearColor(0xffffff, 1.0); // White background
     this.container.appendChild(this.renderer.domElement);
 
     this._setupParticles();
@@ -78,10 +79,10 @@ export class Background {
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
     geometry.before = before;
 
-    // Use a bright color and larger size for visibility
+    // Use black color and larger size for visibility on white background
     const material = new THREE.PointsMaterial({
-      color: 0x000000,
-      size: 2.0,
+      color: 0x000000, // Black particles
+      size: 2.5,
       depthTest: false,
       transparent: true
     });
@@ -127,7 +128,7 @@ export class Background {
     const vLength = positions.count;
 
     for (let i = 0; i < vLength; i++) {
-      let b = before[i];
+      const b = before[i];
 
       let pos1 = b.t1 + Math.random() * 0.001 - 0.0005;
       let pos2 = b.t2 + Math.random() * 0.001 - 0.0005;
@@ -173,6 +174,8 @@ export class Background {
   destroy() {
     window.removeEventListener('resize', this._resize);
     window.removeEventListener('mousemove', this._mousemove);
+    this._resize = null;
+    this._mousemove = null;
     if (this._rafId) cancelAnimationFrame(this._rafId);
     if (this.renderer) {
       this.renderer.dispose?.();
