@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SVG Logo Top-Left</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    /* Rotating wrapper */
+    #logo-container {
+      position: fixed;
+      top: 3vw;
+      left: 3vw;
+      width: 120px;
+      height: 120px;
+      transform-style: preserve-3d;
+      transition: transform 0.2s ease-out;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Wrapper div gets rotated, not SVG directly -->
+  <div id="logo-container">
+    <svg id="logo" preserveAspectRatio="xMidYMid meet"
+         viewBox="0 0 620 620" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        #logo path {
+          fill: none;
+          stroke: rgba(244, 244, 244, 1);
+          stroke-width: 30px;
+          stroke-linecap: round;
+          transform: scale(0.8);
+          transform-origin: center;
+          shape-rendering: geometricPrecision;
+        }
+
+        #squaricle {
+          fill: rgba(241, 68, 41, 0.9);
+        }
+      </style>
+      <g id="squaricle">
+        <path d="
+          M 310,  615
+          C 376,  615,  481,  615,  548,  548
+          C 615,  481,  615,  376,  615,  310
+          C 615,  244,  615,  139,  548,   72
+          C 481,    5,  376,    5,  310,    5
+          C 244,    5,  139,    5,   72,   72
+          C   5,  139,    5,  244,    5,  310
+          C   5,  376,    5,  481,   72,  548
+          C 139,  615,  244,  615,  310,  615 Z" />
+      </g>
+      <g id="logo">
+        <path d="
+          M 110 510
+          H 460
+          a 50 50 0 0 0 0 -100
+          H 160
+          a 50 50 0 0 1 0 -100
+          H 460
+          a 50 50 0 0 0 0 -100
+          H 160
+          a 50 50 0 0 1 0 -100
+          H 510" />
+      </g>
+    </svg>
+  </div>
+
+  <script type="module">
+    class MouseRotate {
+      #el;
+      #bound;
+
+      constructor(el) {
+        this.#el = el;
+        this.#bound = this.#onMove.bind(this);
+        window.addEventListener("mousemove", this.#bound);
+      }
+
+      #onMove(e) {
+        const { innerWidth, innerHeight } = window;
+        const offsetX = e.clientX - innerWidth / 2;
+        const offsetY = e.clientY - innerHeight / 2;
+
+        const rotateX = (offsetY / innerHeight) * 10;
+        const rotateY = (offsetX / innerWidth) * -10;
+
+        this.#el.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      }
+
+      destroy() {
+        window.removeEventListener("mousemove", this.#bound);
+      }
+    }
+
+    // Apply rotation to the container, not the SVG
+    new MouseRotate(document.getElementById("logo-container"));
+  </script>
+
+</body>
+</html>
