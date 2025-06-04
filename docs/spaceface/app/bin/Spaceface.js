@@ -144,7 +144,7 @@ export class Spaceface {
         if (!this.config.features.serviceWorker) return;
         
         try {
-            const module = await this.lazyImport('../ServiceWorker.js');
+            const module = await this.lazyImport('../ServiceWorkerManager.js');
             const ServiceWorkerManager = module?.default;
             
             if (!ServiceWorkerManager) return;
