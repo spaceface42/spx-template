@@ -136,9 +136,7 @@ async initServiceWorker() {
     logMessage('error', `Service Worker registration failed: ${error.message}`);
   }
 }
-
-
-
+  
   async initPartialLoader() {
     const module = await this.loadFeatureModule('partialLoader');
     if (!module?.PartialLoader) return null;
@@ -158,12 +156,16 @@ async initServiceWorker() {
           // Example: dynamically load and init home page features
           // const { initHome } = await import('./pages/home.js');
           // if (initHome) await initHome();
+
+                    const { initHome } = await import('./_home.js');
+                    if (initHome) await initHome();
           break;
 
         case 'app':
           // Example: dynamically load and init app page features
-          // const { initApp } = await import('./pages/app.js');
-          // if (initApp) await initApp();
+          const { initApp } = await import('./_app.js');
+          if (initApp) await initApp();
+          // logMessage('info', `app??: ${this.pageType}`);
           break;
 
         // Add other page types here...
