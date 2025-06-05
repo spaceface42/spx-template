@@ -6,10 +6,10 @@ import { PerformanceMonitor } from '../../bin/PerformanceMonitor.js';
 
 /**
  * Manages floating images using centralized resize management
- * Enhanced FloatingImageManager with performance monitoring and
+ * Enhanced FloatingImagesManager with performance monitoring and
  * better memory management
  */
-export class FloatingImageManager {
+export class FloatingImagesManager {
     constructor(containerOrId, options = {}) {
         // Get container element
         this.container = typeof containerOrId === 'string'

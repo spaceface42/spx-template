@@ -1,5 +1,5 @@
 import { BackgroundAudioPlayer } from '/spaceface/system/features/AudioPlayer/BackgroundAudioPlayer.js';
-import { FloatingImageManager } from '/spaceface/system/features/FloatingImages/FloatingImageManager.js';
+import { FloatingImagesManager } from '/spaceface/system/features/FloatingImages/FloatingImagesManager.js';
 
 const button = document.getElementById('bg-audio-toggle');
 
@@ -18,9 +18,9 @@ const player = new BackgroundAudioPlayer('/content/sound.mp3', button, {
 const container = document.getElementById('floating-images-container');
 if (container) {
   // Optionally, you can pass options like { maxImages: 2 }
-  const manager = new FloatingImageManager(container);
+  const manager = new FloatingImagesManager(container);
   // Optionally, randomize positions on load:
   manager.resetAllImagePositions();
   // Expose for debugging
-  window.floatingImageManager = manager;
+  window.FloatingImagesManager = manager;
 }

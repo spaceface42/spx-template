@@ -1,18 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spaceface</title>
+  <link rel="stylesheet" href="./spaceface/spacesuit/main.css" />
+
+  <script type="module" src="./spaceface/app/bin/main.js"></script>
 </head>
 <body>
 
+<!-- progressbar -->
+<link rel="partial" src="./content/partials/progressbar.html" />
+<!-- / progressbar -->
+
+<header>
+  <nav>
+    <ul class="nav">
+      <li><a spx-target href="/" >home</a></li>
+      <li><a spx-target href="/app.html">app</a></li>
+      <li><a spx-target href="/otherpage.html">otherpage</a></li>
+    </ul>
+  </nav>
+  <img src="./spaceface/spacesuit/icons/logo-sandorzsolt.svg" width="128px" height="128px" alt="sandor zsolt graphic designer" />
+</header>
 
 
+
+<main id="main">
+  <h1>spaceface</h1>
+  <h3>app</h3>
+  <p>dolor sit amet</p>
+  <img width="400px" src="./content/mov-loop-slow.webp" alt="" />
+</main>
+
+<!-- footer -->
+<footer>
+<link rel="partial" src="./content/partials/footer.html" />
+</footer>
+<!-- / footer -->
 
 <div id="ex1" class="container">
     <style>
     .container {
+        position: fixed;
+                top: 0;
+        left: 0;
         height: 100vh;
         width: 100vw;
         display: flex;
@@ -20,8 +53,9 @@
         justify-content: center;
     }
     .box {
-        height: 200px;
-        width: 200px;
+        height: 100px;
+        width: 100px;
+
         position: absolute;
         will-change: transform;
     }
@@ -71,8 +105,6 @@ currentY = targetY;
 
 updateTransform();
 </script>
-
-
 
 </body>
 </html>

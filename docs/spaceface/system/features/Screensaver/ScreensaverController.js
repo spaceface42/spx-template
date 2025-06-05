@@ -1,6 +1,6 @@
 import { InactivityWatcher } from '../../bin/InactivityWatcher.js';
 import { PartialFetcher } from '../../sbin/PartialFetcher.js';
-import { FloatingImageManager } from '../FloatingImages/FloatingImageManager.js';
+import { FloatingImagesManager } from '../FloatingImages/FloatingImagesManager.js';
 
 /**
  * Enhanced ScreensaverController with better error handling and cleanup
@@ -44,7 +44,7 @@ export class ScreensaverController {
                 this.screensaverManager = null;
             }
 
-            this.screensaverManager = new FloatingImageManager(container);
+            this.screensaverManager = new FloatingImagesManager(container);
             this.screensaverManager.resetAllImagePositions();
         } catch (error) {
             this.handleError('Failed to load or show screensaver', error);

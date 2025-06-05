@@ -20,7 +20,7 @@ export class Spaceface {
     this.featureModules = {
       screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
       randomTheme: () => import('../RandomTheme/RandomThemeLoader.js'),
-      debug: () => import('../../system/sbin/InspectorXray.js'),
+      // debug: () => import('../../system/sbin/InspectorXray.js'),
       serviceWorker: () => import('../ServiceWorkerManager.js'),
       partialLoader: () => import('../../system/sbin/PartialLoader.js'),
     };
@@ -41,6 +41,8 @@ export class Spaceface {
 
     return 'default';
   }
+
+
 
   async loadFeatureModule(featureName) {
     if (!this.featureModules[featureName]) {
