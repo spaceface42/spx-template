@@ -6,6 +6,11 @@
 const CACHE_NAME = 'app-cache-v1';
 const RUNTIME_CACHE = 'runtime-cache-v1';
 
+let strategyConfig = {
+  images: 'cache-first', // or 'network-first'
+  others: 'network-first'
+};
+
 // Essential assets to cache on install
 const PRECACHE_ASSETS = [
   '/',
@@ -62,46 +67,61 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests and chrome-extension URLs
-  if (request.method !== 'GET' || url.protocol.includes('chrome-extension')) {
-    return;
+  if (request.method !== 'GET' || url.protocol.includes('chrome-extension')) return;
+
+  const isImage = /\.(png|jpg|jpeg|webp|gif|svg)$/i.test(url.pathname);
+  const cacheStrategy = isImage ? strategyConfig.images : strategyConfig.others;
+
+  event.respondWith(handleRequest(request, cacheStrategy));
+});
+
+self.addEventListener('message', (event) => {
+  const { type, payload } = event.data;
+
+  switch (type) {
+    case 'SET_STRATEGY':
+      Object.assign(strategyConfig, payload);
+      break;
+
+    // ... existing handlers
+  }
+});
+
+
+async function handleRequest(request, strategy) {
+  const cache = await caches.open(RUNTIME_CACHE);
+
+  if (strategy === 'cache-first') {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+
+    try {
+      const network = await fetch(request);
+      if (network.ok) cache.put(request, network.clone()).catch(() => {});
+      return network;
+    } catch (err) {
+      return new Response('Offline', { status: 503 });
+    }
   }
 
-  event.respondWith(
-    (async () => {
-      try {
-        // Try network first
-        const networkResponse = await fetch(request);
+  // default: network-first
+  try {
+    const network = await fetch(request);
+    if (network.ok && shouldCache(request)) {
+      cache.put(request, network.clone()).catch(() => {});
+    }
+    return network;
+  } catch (err) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    if (request.mode === 'navigate') {
+      const fallback = await cache.match('/');
+      if (fallback) return fallback;
+    }
+    throw err;
+  }
+}
 
-        // Cache successful responses
-        if (networkResponse.ok && shouldCache(request)) {
-          const cache = await caches.open(RUNTIME_CACHE);
-          cache.put(request, networkResponse.clone()).catch(() => {
-            // Silently fail cache writes
-          });
-        }
-
-        return networkResponse;
-      } catch (error) {
-        // Network failed, try cache
-        const cachedResponse = await caches.match(request);
-
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        // Return offline fallback for navigation requests
-        if (request.mode === 'navigate') {
-          const fallback = await caches.match('/');
-          if (fallback) return fallback;
-        }
-
-        // Re-throw error if no cache match
-        throw error;
-      }
-    })()
-  );
-});
 
 /**
  * Message Event - Handle commands from main thread

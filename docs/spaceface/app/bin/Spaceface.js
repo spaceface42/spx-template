@@ -114,16 +114,31 @@ export class Spaceface {
     }
   }
 
-  async initServiceWorker() {
-    if (!this.config.features.serviceWorker) return;
+async initServiceWorker() {
+  if (!this.config.features.serviceWorker) return;
 
-    const module = await this.loadFeatureModule('serviceWorker');
-    if (!module?.default) return;
+  const module = await this.loadFeatureModule('serviceWorker');
+  if (!module?.default) return;
 
-    const swManager = new module.default('/sw.js');
+  const swManager = new module.default('/sw.js');
+
+  try {
     await swManager.register();
     logMessage('info', 'Service Worker registered');
+
+    // Set cache strategy after registration
+    swManager.setStrategy({
+      images: 'cache-first',
+      others: 'network-first'
+    });
+
+    // Optional: Store instance for later use
+    this.swManager = swManager;
+  } catch (error) {
+    logMessage('error', `Service Worker registration failed: ${error.message}`);
   }
+}
+
 
   async initPartialLoader() {
     const module = await this.loadFeatureModule('partialLoader');

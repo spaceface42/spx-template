@@ -14,6 +14,18 @@ class ServiceWorkerManager {
     this.isSupported = 'serviceWorker' in navigator;
   }
 
+  setStrategy(config = {}) {
+    if (!navigator.serviceWorker.controller) {
+        console.warn('No active SW to set strategy');
+        return;
+    }
+
+    this.postMessage({
+        type: 'SET_STRATEGY',
+        payload: config
+    });
+    }
+
   /**
    * Register the service worker
    */
