@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaussian Image Distribution Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        #GaussianImagesDemo {
+            width: 90%;
+            max-width: 1200px;
+            text-align: center;
+        }
+
+        #floating-images-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .Gaussian-image {
+            transition: transform 0.3s ease;
+            max-width: 250px;
+            height: auto;
+        }
+
+
+
+        #GaussianImagesDemo p {
+            font-size: 18px;
+            opacity: 0.8;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        input[type="range"] {
+            width: 120px;
+            margin: 0 10px;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            #floating-images-container {
+                height: 400px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .Gaussian-image {
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section id="GaussianImagesDemo">
+        <div id="floating-images-container">
+            <img class="Gaussian-image" src="https://placecats.com/millie_neo/300/200" width="300" height="200" alt="Kitten 1" />
+            <img class="Gaussian-image" src="https://placecats.com/millie/300/150" width="300" height="150" alt="Kitten 2" />
+            <img class="Gaussian-image" src="https://placecats.com/neo_2/300/200" width="300" height="200" alt="Kitten 3" />
+        </div>
+        <p>This feature is also used as a screensaver</p>
+        
+        <div class="controls">
+            <button id="startBtn">Start Demo</button>
+            <button id="stopBtn">Stop Demo</button>
+            
+            <div class="control-group">
+                <label for="spreadControl">Spread</label>
+                <input type="range" id="spreadControl" min="0.1" max="0.4" step="0.05" value="0.2">
+            </div>
+            
+            <div class="control-group">
+                <label for="speedControl">Speed</label>
+                <input type="range" id="speedControl" min="500" max="4000" step="100" value="2000">
+            </div>
+        </div>
+        
+        <div class="status" id="status">
+            Ready to start...
+        </div>
+    </section>
+
+    <script type="module">
+        // AsyncImageLoader class
+        class AsyncImageLoader {
+            constructor(container, options = {}) {
+                if (!container || !(container instanceof Element)) {
+                    throw new Error('ImageLoader: container must be a valid DOM Element.');
+                }
+                this.container = container;
+                this._imageCache = new WeakMap();
+                this.includePicture = options.includePicture || false;
+            }
+
+            getImages(selector = 'img') {
+                let images = Array.from(this.container.querySelectorAll(selector));
+                if (this.includePicture) {
+                    const pictureImgs = Array.from(this.container.querySelectorAll('picture img'));
+                    images = images.concat(pictureImgs);
+                }
+                images = Array.from(new Set(images));
+                return images;
+            }
+
+            async waitForImagesToLoad(selector = 'img') {
+                const images = this.getImages(selector);
+                const loadPromises = images.map(img => {
+                    if (this._imageCache.has(img)) {
+                        return Promise.resolve();
+                    }
+
+                    if (img.complete && img.naturalWidth !== 0) {
+                        this._imageCache.set(img, true);
+                        return Promise.resolve();
+                    }
+
+                    return new Promise(resolve => {
+                        const cleanup = () => {
+                            img.onload = null;
+                            img.onerror = null;
+                            this._imageCache.set(img, true);
+                            resolve();
+                        };
+                        img.onload = cleanup;
+                        img.onerror = cleanup;
+                    });
+                });
+
+                await Promise.all(loadPromises);
+                return images;
+            }
+
+            getImageData(selector = 'img') {
+                const images = this.getImages(selector);
+                if (images.length === 0) {
+                    return [];
+                }
+                return images.map(img => {
+                    let sources = [];
+                    if (this.includePicture) {
+                        const picture = img.closest('picture');
+                        if (picture) {
+                            sources = Array.from(picture.querySelectorAll('source')).map(source => ({
+                                srcset: source.srcset || '',
+                                type: source.type || '',
+                                media: source.media || ''
+                            }));
+                        }
+                    }
+                    return {
+                        element: img,
+                        src: img.src || '',
+                        alt: img.alt || '',
+                        href: img.closest('a') ? img.closest('a').href : null,
+                        sources
+                    };
+                });
+            }
+
+            destroy() {
+                this.container = null;
+            }
+        }
+
+        // GaussianImageDistributor class
+        class GaussianImageDistributor {
+            constructor(container, imageLoader, options = {}) {
+                if (!container || !(container instanceof Element)) {
+                    throw new Error('GaussianImageDistributor: container must be a valid DOM Element.');
+                }
+                if (!imageLoader) {
+                    throw new Error('GaussianImageDistributor: imageLoader is required.');
+                }
+
+                this.container = container;
+                this.imageLoader = imageLoader;
+                
+                this.fadeInDuration = options.fadeInDuration || 600;
+                this.displayDuration = options.displayDuration || 2000;
+                this.fadeOutDuration = options.fadeOutDuration || 400;
+                this.standardDeviation = options.standardDeviation || 0.2;
+                this.selector = options.selector || 'img';
+                this.loop = options.loop !== false;
+                
+                this.isRunning = false;
+                this.currentIndex = 0;
+                this.images = [];
+                this.animationId = null;
+                
+                this.start = this.start.bind(this);
+                this.stop = this.stop.bind(this);
+                this.showNextImage = this.showNextImage.bind(this);
+            }
+
+            generateGaussianRandom(mean = 0, stdDev = 1) {
+                let u = 0, v = 0;
+                while(u === 0) u = Math.random();
+                while(v === 0) v = Math.random();
+                
+                const z0 = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+                return z0 * stdDev + mean;
+            }
+
+            getContainerInfo() {
+                const rect = this.container.getBoundingClientRect();
+                const computedStyle = getComputedStyle(this.container);
+                
+                return {
+                    width: rect.width,
+                    height: rect.height,
+                    centerX: rect.width / 2,
+                    centerY: rect.height / 2,
+                    paddingLeft: parseFloat(computedStyle.paddingLeft) || 0,
+                    paddingTop: parseFloat(computedStyle.paddingTop) || 0
+                };
+            }
+
+            getGaussianPosition() {
+                const containerInfo = this.getContainerInfo();
+                
+                const stdDevX = containerInfo.width * this.standardDeviation;
+                const stdDevY = containerInfo.height * this.standardDeviation;
+                
+                const offsetX = this.generateGaussianRandom(0, stdDevX);
+                const offsetY = this.generateGaussianRandom(0, stdDevY);
+                
+                let x = containerInfo.centerX + offsetX;
+                let y = containerInfo.centerY + offsetY;
+                
+                const margin = 50;
+                x = Math.max(margin, Math.min(containerInfo.width - margin, x));
+                y = Math.max(margin, Math.min(containerInfo.height - margin, y));
+                
+                return { x, y };
+            }
+
+            positionImage(imgElement, x, y) {
+                // Reset any existing styles first
+                imgElement.style.position = 'absolute';
+                imgElement.style.left = `${x}px`;
+                imgElement.style.top = `${y}px`;
+                imgElement.style.transform = 'translate(-50%, -50%)';
+                imgElement.style.zIndex = '1000';
+                imgElement.style.opacity = '0';
+                imgElement.style.display = 'block';
+                imgElement.style.pointerEvents = 'auto';
+                // Force reflow to ensure styles are applied
+                imgElement.offsetHeight;
+            }
+
+            async animateImageIn(imgElement) {
+                return new Promise(resolve => {
+                    imgElement.style.transition = `opacity ${this.fadeInDuration}ms ease-in-out`;
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            imgElement.style.opacity = '1';
+                            setTimeout(resolve, this.fadeInDuration);
+                        });
+                    });
+                });
+            }
+
+            async animateImageOut(imgElement) {
+                return new Promise(resolve => {
+                    imgElement.style.transition = `opacity ${this.fadeOutDuration}ms ease-in-out`;
+                    imgElement.style.opacity = '0';
+                    setTimeout(() => {
+                        imgElement.style.display = 'none';
+                        resolve();
+                    }, this.fadeOutDuration);
+                });
+            }
+
+            async showNextImage() {
+                if (!this.isRunning || this.images.length === 0) return;
+
+                const currentImage = this.images[this.currentIndex];
+                const imgElement = currentImage.element;
+                
+                // Get a new random position for each image
+                const position = this.getGaussianPosition();
+                console.log(`Showing image ${this.currentIndex + 1} at position:`, position);
+                
+                // Position the image
+                this.positionImage(imgElement, position.x, position.y);
+                
+                // Animate in
+                await this.animateImageIn(imgElement);
+                
+                if (!this.isRunning) return;
+                
+                // Wait for display duration
+                await new Promise(resolve => {
+                    this.animationId = setTimeout(resolve, this.displayDuration);
+                });
+                
+                if (!this.isRunning) return;
+                
+                // Animate out
+                await this.animateImageOut(imgElement);
+                
+                // Move to next image
+                this.currentIndex++;
+                
+                if (this.currentIndex >= this.images.length) {
+                    if (this.loop) {
+                        this.currentIndex = 0;
+                        if (this.isRunning) {
+                            // Small delay before starting next cycle
+                            setTimeout(() => this.showNextImage(), 500);
+                        }
+                    } else {
+                        this.stop();
+                        return;
+                    }
+                } else {
+                    if (this.isRunning) {
+                        // Small delay between images
+                        setTimeout(() => this.showNextImage(), 200);
+                    }
+                }
+            }
+
+            async start() {
+                if (this.isRunning) return;
+                
+                try {
+                    await this.imageLoader.waitForImagesToLoad(this.selector);
+                    this.images = this.imageLoader.getImageData(this.selector);
+                    
+                    if (this.images.length === 0) {
+                        console.warn('GaussianImageDistributor: No images found');
+                        return;
+                    }
+                    
+                    console.log(`Found ${this.images.length} images to display`);
+                    
+                    if (getComputedStyle(this.container).position === 'static') {
+                        this.container.style.position = 'relative';
+                    }
+                    
+                    // Hide all images initially and reset their styles
+                    this.images.forEach(img => {
+                        img.element.style.display = 'none';
+                        img.element.style.opacity = '0';
+                        img.element.style.position = 'absolute';
+                    });
+                    
+                    this.isRunning = true;
+                    this.currentIndex = 0;
+                    
+                    // Start the sequence with a small delay
+                    setTimeout(() => this.showNextImage(), 100);
+                    
+                } catch (error) {
+                    console.error('GaussianImageDistributor: Error starting sequence:', error);
+                }
+            }
+
+            stop() {
+                this.isRunning = false;
+                
+                if (this.animationId) {
+                    clearTimeout(this.animationId);
+                    this.animationId = null;
+                }
+                
+                this.images.forEach(img => {
+                    img.element.style.display = 'none';
+                    img.element.style.opacity = '0';
+                });
+            }
+
+            updateOptions(options) {
+                if (options.fadeInDuration !== undefined) this.fadeInDuration = options.fadeInDuration;
+                if (options.displayDuration !== undefined) this.displayDuration = options.displayDuration;
+                if (options.fadeOutDuration !== undefined) this.fadeOutDuration = options.fadeOutDuration;
+                if (options.standardDeviation !== undefined) this.standardDeviation = options.standardDeviation;
+                if (options.loop !== undefined) this.loop = options.loop;
+            }
+
+            getStatus() {
+                return {
+                    isRunning: this.isRunning,
+                    currentIndex: this.currentIndex,
+                    totalImages: this.images.length,
+                    currentImage: this.images[this.currentIndex] || null
+                };
+            }
+
+            destroy() {
+                this.stop();
+                this.container = null;
+                this.imageLoader = null;
+                this.images = [];
+            }
+        }
+
+        // Setup and initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('floating-images-container');
+            const imageLoader = new AsyncImageLoader(container);
+            
+            const distributor = new GaussianImageDistributor(container, imageLoader, {
+                fadeInDuration: 600,
+                displayDuration: 2000,
+                fadeOutDuration: 400,
+                standardDeviation: 0.2,
+                selector: '.Gaussian-image',
+                loop: true
+            });
+
+            // Control elements
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const spreadControl = document.getElementById('spreadControl');
+            const speedControl = document.getElementById('speedControl');
+            const status = document.getElementById('status');
+
+            // Update status function
+            function updateStatus() {
+                const statusInfo = distributor.getStatus();
+                if (statusInfo.isRunning) {
+                    status.textContent = `Running - Image ${statusInfo.currentIndex + 1} of ${statusInfo.totalImages}`;
+                } else {
+                    status.textContent = 'Stopped';
+                }
+            }
+
+            // Event listeners
+            startBtn.addEventListener('click', () => {
+                distributor.start();
+                status.textContent = 'Starting...';
+                setTimeout(updateStatus, 500);
+                // Update status periodically while running
+                const statusInterval = setInterval(() => {
+                    if (distributor.getStatus().isRunning) {
+                        updateStatus();
+                    } else {
+                        clearInterval(statusInterval);
+                    }
+                }, 1000);
+            });
+
+            stopBtn.addEventListener('click', () => {
+                distributor.stop();
+                updateStatus();
+            });
+
+            spreadControl.addEventListener('input', (e) => {
+                distributor.updateOptions({ standardDeviation: parseFloat(e.target.value) });
+            });
+
+            speedControl.addEventListener('input', (e) => {
+                distributor.updateOptions({ displayDuration: parseInt(e.target.value) });
+            });
+
+            // Auto-start demo after a short delay
+            setTimeout(() => {
+                console.log('Auto-starting demo...');
+                distributor.start();
+                setTimeout(updateStatus, 200);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
