@@ -77,11 +77,25 @@ function debounce(func, delay) {
     };
 }
 
+// throttle.js
+function throttle(fn, wait = 16) {
+    let lastTime = 0;
+    return function throttled(...args) {
+        const now = performance.now();
+        if (now - lastTime >= wait) {
+            lastTime = now;
+            fn.apply(this, args);
+        }
+    };
+}
+
+
 // Exporting utility functions for use in other modules.
 export {
     generateId,
     clamp,
     lerp,
     logMessage,
-    debounce
+    debounce,
+    throttle
 };

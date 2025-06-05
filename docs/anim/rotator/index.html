@@ -13,22 +13,27 @@
             justify-content: center;
         }
         .box {
-            border: 2px solid red;
-            height: 100px;
-            width: 100px;
+            height: 200px;
+            width: 200px;
             position: absolute;
+            will-change: transform;
+        }
+        .box object {
+            max-width: 100%;
         }
     </style>
 </head>
 <body>
 
 <div id="ex1" class="container">
-  <div id="ex1-layer" class="box"></div>
+  <div id="ex1-layer" class="box">
+    <object data="../../content/random/logo-sandorzsolt-620.svg" type="image/svg+xml"></object>
+  </div>
 </div>
 
 <script type="module">
 import { MouseTracker } from '/spaceface/system/sbin/MouseTracker.js';
-import { lerp } from '/spaceface/system/sbin/utilities.js';
+import { lerp, clamp } from '/spaceface/system/sbin/utilities.js';
 
 const tracker = MouseTracker.getInstance();
 tracker.subscribe(() => {}); // Ensure tracking starts
@@ -37,13 +42,13 @@ const ex1Layer = document.getElementById("ex1-layer");
 const constrain = 20;
 let targetX = 0, targetY = 0;
 let currentX = 0, currentY = 0;
-const lerpFactor = 0.15;
+const lerpFactor = 0.1;
 
 function transforms(x, y, el) {
-  let box = el.getBoundingClientRect();
-  let calcX = -(y - box.y - (box.height / 2)) / constrain;
-  let calcY = (x - box.x - (box.width / 2)) / constrain;
-  return "perspective(100px) rotateX(" + calcX + "deg) rotateY(" + calcY + "deg)";
+  const box = el.getBoundingClientRect();
+  const calcX = clamp(-(y - box.y - (box.height / 2)) / constrain, -15, 15);
+  const calcY = clamp((x - box.x - (box.width / 2)) / constrain, -15, 15);
+  return `perspective(600px) rotateX(${calcX}deg) rotateY(${calcY}deg)`;
 }
 
 function updateTransform() {
