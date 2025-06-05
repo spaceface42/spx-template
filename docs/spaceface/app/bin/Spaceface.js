@@ -21,7 +21,7 @@ export class Spaceface {
       screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
       randomTheme: () => import('../RandomTheme/RandomThemeLoader.js'),
       // debug: () => import('../../system/sbin/InspectorXray.js'),
-      serviceWorker: () => import('../ServiceWorkerManager.js'),
+      serviceWorker: () => import('../../system/bin/ServiceWorkerManager.js'),
       partialLoader: () => import('../../system/sbin/PartialLoader.js'),
     };
 
@@ -120,24 +120,23 @@ async initServiceWorker() {
   const module = await this.loadFeatureModule('serviceWorker');
   if (!module?.default) return;
 
-  const swManager = new module.default('/sw.js');
+  const swManager = new module.default('/sw.js', {}, {
+    strategy: {
+      images: 'cache-first',
+      others: 'network-first'
+    }
+  });
 
   try {
     await swManager.register();
-    logMessage('info', 'Service Worker registered');
-
-    // Set cache strategy after registration
-    swManager.setStrategy({
-      images: 'cache-first',
-      others: 'network-first'
-    });
-
-    // Optional: Store instance for later use
+    swManager.configure();
+    logMessage('info', 'Service Worker registered and configured');
     this.swManager = swManager;
   } catch (error) {
     logMessage('error', `Service Worker registration failed: ${error.message}`);
   }
 }
+
 
 
   async initPartialLoader() {

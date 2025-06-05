@@ -1,30 +1,19 @@
 /**
  * Modern ServiceWorker ESM Class
- * Minimal, fast, and failsafe implementation
+ * Generic, minimal, and project-agnostic
  */
 class ServiceWorkerManager {
-  constructor(swPath = '/sw.js', options = {}) {
+  constructor(swPath = '/sw.js', options = {}, customConfig = {}) {
     this.swPath = swPath;
     this.options = {
       scope: '/',
       updateViaCache: 'none',
       ...options
     };
+    this.customConfig = customConfig;
     this.registration = null;
     this.isSupported = 'serviceWorker' in navigator;
   }
-
-  setStrategy(config = {}) {
-    if (!navigator.serviceWorker.controller) {
-        console.warn('No active SW to set strategy');
-        return;
-    }
-
-    this.postMessage({
-        type: 'SET_STRATEGY',
-        payload: config
-    });
-    }
 
   /**
    * Register the service worker
@@ -45,6 +34,15 @@ class ServiceWorkerManager {
     } catch (error) {
       console.error('SW registration failed:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Apply custom configuration after registration
+   */
+  configure() {
+    if (this.customConfig.strategy) {
+      this.setStrategy(this.customConfig.strategy);
     }
   }
 
@@ -90,32 +88,29 @@ class ServiceWorkerManager {
   }
 
   /**
-   * Setup event listeners for SW lifecycle
+   * Setup lifecycle event listeners
    */
   setupEventListeners() {
     if (!this.registration) return;
 
-    // Handle updates
     this.registration.addEventListener('updatefound', () => {
       const newWorker = this.registration.installing;
       if (!newWorker) return;
 
       newWorker.addEventListener('statechange', () => {
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          // New version available
           this.onUpdateAvailable?.(newWorker);
         }
       });
     });
 
-    // Handle controller changes
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       this.onControllerChange?.();
     });
   }
 
   /**
-   * Post message to service worker
+   * Send a message to the service worker
    */
   async postMessage(message, transfer) {
     const sw = navigator.serviceWorker.controller;
@@ -142,7 +137,7 @@ class ServiceWorkerManager {
   }
 
   /**
-   * Skip waiting and claim clients
+   * Activate the waiting service worker
    */
   async activateWaiting() {
     if (!this.registration?.waiting) return false;
@@ -156,7 +151,22 @@ class ServiceWorkerManager {
     }
   }
 
-  // Event handler stubs (override these)
+  /**
+   * Set runtime cache strategy (e.g., cache-first or network-first)
+   */
+  setStrategy(config = {}) {
+    if (!navigator.serviceWorker.controller) {
+      console.warn('No active SW to set strategy');
+      return;
+    }
+
+    this.postMessage({
+      type: 'SET_STRATEGY',
+      payload: config
+    });
+  }
+
+  // Optional hooks for integration
   onUpdateAvailable(newWorker) {
     console.log('New service worker available');
   }
