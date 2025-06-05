@@ -1,6 +1,25 @@
 import { eventBus } from '../../system/bin/EventBus.js'; // adjust path if needed
 import { logMessage } from '../../system/usr/bin/logging.js'; // your existing logger
 
+const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
+
+if (isDev) {
+  eventBus.on('log', ({ level = 'info', args = [] }) => {
+    switch (level) {
+      case 'error':
+        console.error('[app] ', ...args);
+        break;
+      case 'warn':
+        console.warn('[app] ', ...args);
+        break;
+      case 'info':
+      default:
+        console.log('[app] ', ...args);
+        break;
+    }
+  });
+}
+
 // Set up event logging right away
 const eventsToLog = [
   'screensaver:initialized',
@@ -39,3 +58,7 @@ const app = new Spaceface({
 });
 
 app.init();
+
+
+
+

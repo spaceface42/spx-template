@@ -22,3 +22,8 @@ export function logMessage(level, ...args) {
 eventBus.on('log', ({ level, args }) => {
   logMessage(level, ...args);
 });
+
+// for future event logs
+export function log(level = 'info', ...args) {
+  eventBus.emit('log', { level, args });
+}
