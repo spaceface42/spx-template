@@ -3,6 +3,8 @@ import spx from '../../lib/spx/index.js';
 import { logMessage } from '../../system/usr/bin/logging.js';
 import { generateId } from '../../system/usr/bin/id.js';
 
+import { eventBus } from '../../system/bin/EventBus.js';
+
 import { DomReadyPromise } from '../../system/sbin/DomReadyPromise.js';
 
 export class Spaceface {
@@ -215,24 +217,11 @@ async initServiceWorker() {
           }
         });
       }
-
-      this.removeSplashScreen();
-
       const endTime = performance.now();
       logMessage('info', `App initialization completed in ${(endTime - this.startTime).toFixed(2)}ms`);
 
     } catch (error) {
       console.error('Critical app initialization error:', error);
-      this.removeSplashScreen();
-    }
-  }
-
-  removeSplashScreen() {
-    const splashScreen = document.getElementById('splash-screen');
-    if (splashScreen) {
-      splashScreen.style.opacity = '0';
-      splashScreen.style.transition = 'opacity 300ms ease-out';
-      setTimeout(() => splashScreen.remove(), 300);
     }
   }
 
