@@ -1,4 +1,4 @@
-import spx from '../../library/spx/index.js';
+import spx from '../../lib/spx/index.js';
 
 import { logMessage } from '../../system/usr/bin/logging.js';
 import { generateId } from '../../system/usr/bin/id.js';
