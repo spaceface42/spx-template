@@ -1,5 +1,5 @@
 // /spaceface/system/sbin/utilities/index.js
-export { clemp, lerp } from './math.js';
+export { clamp, lerp } from './math.js';
 export * from './timing.js';
 export * from './logging.js';
 export * from './id.js';

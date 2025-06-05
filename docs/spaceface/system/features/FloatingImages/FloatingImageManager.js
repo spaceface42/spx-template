@@ -1,4 +1,4 @@
-import { clamp } from '../../sbin/Utilities.js';
+import { clamp } from '../../usr/bin/math.js';
 import { FloatingImage } from './FloatingImage.js';
 import { resizeManager } from '../../bin/ResizeManager.js';
 import { AsyncImageLoader } from '../../bin/AsyncImageLoader.js';

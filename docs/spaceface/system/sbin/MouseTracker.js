@@ -1,4 +1,4 @@
-import { throttle } from './Utilities.js';
+import { throttle } from '../usr/bin/timing.js';
 
 export class MouseTracker {
   static #instance = null;

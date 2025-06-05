@@ -3,7 +3,7 @@
  * Loads HTML partials marked with link[rel="partial"] tags
  * Uses fetch API, caching, and modern JavaScript features
  */
-import { debounce } from './Utilities.js';
+import { debounce } from '../usr/bin/timing.js';
 
 export class PartialLoader {
   constructor(options = {}) {

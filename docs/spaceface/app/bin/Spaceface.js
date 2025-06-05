@@ -3,7 +3,11 @@
  * Simple approach: detect page type and load accordingly
  */
 import spx from '../../library/spx/index.js';
-import { logMessage, generateId } from '../../system/sbin/Utilities.js';
+
+import { logMessage } from '../../system/usr/bin/logging.js';
+import { generateId } from '../../system/usr/bin/id.js';
+
+
 import { DomReadyPromise } from '../../system/sbin/DomReadyPromise.js';
 
 export class Spaceface {

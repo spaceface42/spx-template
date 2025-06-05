@@ -27,14 +27,13 @@
 
 <div id="ex1" class="container">
   <div id="ex1-layer" class="box">
-    <object data="../../content/random/logo-sandorzsolt-620.svg" type="image/svg+xml"></object>
+    <object data="/content/random/logo-sandorzsolt-620.svg" type="image/svg+xml"></object>
   </div>
 </div>
 
 <script type="module">
 import { MouseTracker } from '/spaceface/system/sbin/MouseTracker.js';
-import * as utils from '/spaceface/system/sbin/utilities/index.js';
-// import { lerp, clamp } from '/spaceface/system/sbin/utilities.js';
+import * as utils from '/spaceface/system/usr/bin/index.js';
 
 const tracker = MouseTracker.getInstance();
 tracker.subscribe(() => {}); // Ensure tracking starts

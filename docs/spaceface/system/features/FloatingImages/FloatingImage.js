@@ -2,7 +2,8 @@
  * Represents a floating image inside a container
  * Enhanced FloatingImage with better transform handling and memory management
  */
-import { clamp } from '../../sbin/Utilities.js';
+import { clamp } from '../../usr/bin/math.js';
+
 export class FloatingImage {
     constructor(element, container, options = {}) {
         this.element = element;

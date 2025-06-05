@@ -1,7 +1,7 @@
 /**
  * Performance monitor for detecting lower-end devices and managing frame rates
  */
-import { logMessage } from '../sbin/Utilities.js';
+import { logMessage } from '../usr/bin/logging.js';
 
 export class PerformanceMonitor {
     constructor() {
