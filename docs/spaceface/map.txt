@@ -1,0 +1,41 @@
+/web-root
+│
+├── spaceface/
+│   ├── app/
+│   │   ├── main.js
+│   │   └── Spaceface.js
+│   │
+│   ├── system/
+│   │   ├── bin/
+│   │   │   ├── AsyncImageLoader.js
+│   │   │   ├── EventBus.js
+│   │   │   ├── InactivityWatcher.js
+│   │   │   ├── PerformanceMonitor.js
+│   │   │   ├── ResizeManager.js
+│   │   │   └── ServiceWorkerManager.js
+│   │   │
+│   │   ├── features/
+│   │   │   ├── AudioPlayer/
+│   │   │   │   └── BackgroundAudioPlayer.js
+│   │   │   ├── FloatingImages/
+│   │   │   │   ├── FloatingImage.js
+│   │   │   │   └── FloatingImagesManager.js
+│   │   │   └── Screensaver/
+│   │   │       └── ScreensaverController.js
+│   │   │
+│   │   ├── sbin/
+│   │   │   ├── DeviceDetect.js
+│   │   │   ├── DomReadyPromise.js
+│   │   │   ├── InactivityWatcher.js
+│   │   │   ├── MouseTracker.js
+│   │   │   ├── PartialFetcher.js
+│   │   │   └── PartialLoader.js
+│   │   │
+│   │   └── usr/
+│   │       └── bin/
+│   │           ├── id.js
+│   │           ├── index.js
+│   │           ├── InspectorXray.js
+│   │           ├── logging.js
+│   │           ├── math.js
+│   │           └── timing.js

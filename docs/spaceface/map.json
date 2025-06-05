@@ -1,0 +1,48 @@
+{
+  "spaceface": {
+    "app": {
+      "main.js": null,
+      "Spaceface.js": null
+    },
+    "system": {
+      "bin": {
+        "AsyncImageLoader.js": null,
+        "EventBus.js": null,
+        "InactivityWatcher.js": null,
+        "PerformanceMonitor.js": null,
+        "ResizeManager.js": null,
+        "ServiceWorkerManager.js": null
+      },
+      "features": {
+        "AudioPlayer": {
+          "BackgroundAudioPlayer.js": null
+        },
+        "FloatingImages": {
+          "FloatingImage.js": null,
+          "FloatingImagesManager.js": null
+        },
+        "Screensaver": {
+          "ScreensaverController.js": null
+        }
+      },
+      "sbin": {
+        "DeviceDetect.js": null,
+        "DomReadyPromise.js": null,
+        "InactivityWatcher.js": null,
+        "MouseTracker.js": null,
+        "PartialFetcher.js": null,
+        "PartialLoader.js": null
+      },
+      "usr": {
+        "bin": {
+          "id.js": null,
+          "index.js": null,
+          "InspectorXray.js": null,
+          "logging.js": null,
+          "math.js": null,
+          "timing.js": null
+        }
+      }
+    }
+  }
+}
