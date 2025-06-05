@@ -75,6 +75,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(handleRequest(request, cacheStrategy));
 });
 
+/**
+ * Message Event - Handle commands from main thread (COMBINED)
+ */
 self.addEventListener('message', (event) => {
   const { type, payload } = event.data;
 
@@ -83,10 +86,26 @@ self.addEventListener('message', (event) => {
       Object.assign(strategyConfig, payload);
       break;
 
-    // ... existing handlers
+    case 'SKIP_WAITING':
+      self.skipWaiting();
+      break;
+
+    case 'GET_VERSION':
+      event.ports[0]?.postMessage({ version: CACHE_NAME });
+      break;
+
+    case 'CLEAR_CACHE':
+      clearAllCaches().then(() => {
+        event.ports[0]?.postMessage({ success: true });
+      }).catch((error) => {
+        event.ports[0]?.postMessage({ success: false, error: error.message });
+      });
+      break;
+
+    default:
+      console.warn('Unknown message type:', type);
   }
 });
-
 
 async function handleRequest(request, strategy) {
   const cache = await caches.open(RUNTIME_CACHE);
@@ -121,35 +140,6 @@ async function handleRequest(request, strategy) {
     throw err;
   }
 }
-
-
-/**
- * Message Event - Handle commands from main thread
- */
-self.addEventListener('message', (event) => {
-  const { type, payload } = event.data;
-
-  switch (type) {
-    case 'SKIP_WAITING':
-      self.skipWaiting();
-      break;
-
-    case 'GET_VERSION':
-      event.ports[0]?.postMessage({ version: CACHE_NAME });
-      break;
-
-    case 'CLEAR_CACHE':
-      clearAllCaches().then(() => {
-        event.ports[0]?.postMessage({ success: true });
-      }).catch((error) => {
-        event.ports[0]?.postMessage({ success: false, error: error.message });
-      });
-      break;
-
-    default:
-      console.warn('Unknown message type:', type);
-  }
-});
 
 /**
  * Helper: Determine if request should be cached
