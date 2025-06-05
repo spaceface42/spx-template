@@ -143,7 +143,7 @@ function shouldCache(request) {
   }
 
   // Cache static assets
-  if (/\.(js|css|png|jpg|jpeg|gif|svg|woff2?|ttf)$/i.test(url.pathname)) {
+  if (/\.(js|css|png|jpg|jpeg|webp|svg|woff2?|ttf)$/i.test(url.pathname)) {
     return true;
   }
 
