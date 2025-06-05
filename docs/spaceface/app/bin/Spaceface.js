@@ -18,11 +18,11 @@ export class Spaceface {
 
     // Static map for feature modules keyed by feature name
     this.featureModules = {
-      screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
-      randomTheme: () => import('../RandomTheme/RandomThemeLoader.js'),
-      // debug: () => import('../../system/sbin/InspectorXray.js'),
-      serviceWorker: () => import('../../system/bin/ServiceWorkerManager.js'),
+      // debug: () => import('../../system/usr/bin/InspectorXray.js'),
       partialLoader: () => import('../../system/sbin/PartialLoader.js'),
+      screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
+      serviceWorker: () => import('../../system/bin/ServiceWorkerManager.js'),
+      // randomTheme: () => import('../RandomTheme/RandomThemeLoader.js'),
     };
 
     // Cache loaded modules to avoid multiple imports
