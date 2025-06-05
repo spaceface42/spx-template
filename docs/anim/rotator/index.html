@@ -1,118 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>SVG Logo Top-Left</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #111;
-      color: white;
-      font-family: sans-serif;
-      overflow: hidden;
-    }
-
-    /* Rotating wrapper */
-    #logo-container {
-      position: fixed;
-      top: 3vw;
-      left: 3vw;
-      width: 120px;
-      height: 120px;
-      transform-style: preserve-3d;
-      transition: transform 0.2s ease-out;
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+        .container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .box {
+            border: 2px solid red;
+            height: 100px;
+            width: 100px;
+            position: absolute;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Wrapper div gets rotated, not SVG directly -->
-  <div id="logo-container">
-    <svg id="logo" preserveAspectRatio="xMidYMid meet"
-         viewBox="0 0 620 620" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        #logo path {
-          fill: none;
-          stroke: rgba(244, 244, 244, 1);
-          stroke-width: 30px;
-          stroke-linecap: round;
-          transform: scale(0.8);
-          transform-origin: center;
-          shape-rendering: geometricPrecision;
-        }
+<div id="ex1" class="container">
+  <div id="ex1-layer" class="box"></div>
+</div>
 
-        #squaricle {
-          fill: rgba(241, 68, 41, 0.9);
-        }
-      </style>
-      <g id="squaricle">
-        <path d="
-          M 310,  615
-          C 376,  615,  481,  615,  548,  548
-          C 615,  481,  615,  376,  615,  310
-          C 615,  244,  615,  139,  548,   72
-          C 481,    5,  376,    5,  310,    5
-          C 244,    5,  139,    5,   72,   72
-          C   5,  139,    5,  244,    5,  310
-          C   5,  376,    5,  481,   72,  548
-          C 139,  615,  244,  615,  310,  615 Z" />
-      </g>
-      <g id="logo">
-        <path d="
-          M 110 510
-          H 460
-          a 50 50 0 0 0 0 -100
-          H 160
-          a 50 50 0 0 1 0 -100
-          H 460
-          a 50 50 0 0 0 0 -100
-          H 160
-          a 50 50 0 0 1 0 -100
-          H 510" />
-      </g>
-    </svg>
-  </div>
+<script type="module">
+import { MouseTracker } from '/spaceface/system/sbin/MouseTracker.js';
+import { lerp } from '/spaceface/system/sbin/utilities.js';
 
-  <script type="module">
-    class MouseRotate {
-      #el;
-      #bound;
+const tracker = MouseTracker.getInstance();
+tracker.subscribe(() => {}); // Ensure tracking starts
 
-      constructor(el) {
-        this.#el = el;
-        this.#bound = this.#onMove.bind(this);
-        window.addEventListener("mousemove", this.#bound);
-      }
+const ex1Layer = document.getElementById("ex1-layer");
+const constrain = 20;
+let targetX = 0, targetY = 0;
+let currentX = 0, currentY = 0;
+const lerpFactor = 0.15;
 
-      #onMove(e) {
-        const { innerWidth, innerHeight } = window;
-        const offsetX = e.clientX - innerWidth / 2;
-        const offsetY = e.clientY - innerHeight / 2;
+function transforms(x, y, el) {
+  let box = el.getBoundingClientRect();
+  let calcX = -(y - box.y - (box.height / 2)) / constrain;
+  let calcY = (x - box.x - (box.width / 2)) / constrain;
+  return "perspective(100px) rotateX(" + calcX + "deg) rotateY(" + calcY + "deg)";
+}
 
-        const rotateX = (offsetY / innerHeight) * 10;
-        const rotateY = (offsetX / innerWidth) * -10;
+function updateTransform() {
+  const { x, y } = tracker.position;
+  targetX = x;
+  targetY = y;
+  currentX = lerp(currentX, targetX, lerpFactor);
+  currentY = lerp(currentY, targetY, lerpFactor);
+  ex1Layer.style.transform = transforms(currentX, currentY, ex1Layer);
+  requestAnimationFrame(updateTransform);
+}
 
-        this.#el.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      }
+const box = ex1Layer.getBoundingClientRect();
+targetX = box.x + box.width / 2;
+targetY = box.y + box.height / 2;
+currentX = targetX;
+currentY = targetY;
 
-      destroy() {
-        window.removeEventListener("mousemove", this.#bound);
-      }
-    }
+updateTransform();
+</script>
 
-    // Apply rotation to the container, not the SVG
-    new MouseRotate(document.getElementById("logo-container"));
-  </script>
+</script>
 
 </body>
 </html>
