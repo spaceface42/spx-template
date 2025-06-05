@@ -1,10 +1,7 @@
 import spx from '../../lib/spx/index.js';
 
-import { logMessage } from '../../system/usr/bin/logging.js';
 import { generateId } from '../../system/usr/bin/id.js';
-
 import { eventBus } from '../../system/bin/EventBus.js';
-
 import { DomReadyPromise } from '../../system/sbin/DomReadyPromise.js';
 
 export class Spaceface {
@@ -18,7 +15,6 @@ export class Spaceface {
     this.pageType = this.detectPageType();
     this.startTime = performance.now();
 
-    // Static map for feature modules keyed by feature name
     this.featureModules = {
       // debug: () => import('../../system/usr/bin/InspectorXray.js'),
       partialLoader: () => import('../../system/sbin/PartialLoader.js'),
@@ -27,7 +23,6 @@ export class Spaceface {
       // randomTheme: () => import('../RandomTheme/RandomThemeLoader.js'),
     };
 
-    // Cache loaded modules to avoid multiple imports
     this.loadedModules = new Map();
   }
 
@@ -44,8 +39,6 @@ export class Spaceface {
     return 'default';
   }
 
-
-
   async loadFeatureModule(featureName) {
     if (!this.featureModules[featureName]) {
       return null;
@@ -55,7 +48,7 @@ export class Spaceface {
         const module = await this.featureModules[featureName]();
         this.loadedModules.set(featureName, module);
       } catch (err) {
-        console.warn(`Failed to load feature module "${featureName}":`, err);
+        eventBus.emit('log', { level: 'warn', args: [`Failed to load feature module "${featureName}":`, err] });
         this.loadedModules.set(featureName, null);
       }
     }
@@ -86,7 +79,8 @@ export class Spaceface {
       await controller.init();
     }
 
-    logMessage('info', 'Screensaver initialized:', uniqueId);
+    eventBus.emit('screensaver:initialized', uniqueId);
+    eventBus.emit('log', { level: 'info', args: ['Screensaver initialized:', uniqueId] });
   }
 
   async initRandomTheme() {
@@ -103,7 +97,7 @@ export class Spaceface {
       ]
     );
     await loader.loadRandomTheme();
-    logMessage('info', 'Random theme loaded');
+    eventBus.emit('log', { level: 'info', args: ['Random theme loaded'] });
   }
 
   async initDebug() {
@@ -112,90 +106,78 @@ export class Spaceface {
     const module = await this.loadFeatureModule('debug');
     if (module?.InspectorXray) {
       new module.InspectorXray();
-      logMessage('info', 'Debug mode enabled');
+      eventBus.emit('log', { level: 'info', args: ['Debug mode enabled'] });
     }
   }
 
-async initServiceWorker() {
-  if (!this.config.features.serviceWorker) return;
+  async initServiceWorker() {
+    if (!this.config.features.serviceWorker) return;
 
-  const module = await this.loadFeatureModule('serviceWorker');
-  if (!module?.default) return;
+    const module = await this.loadFeatureModule('serviceWorker');
+    if (!module?.default) return;
 
-  const swManager = new module.default('/sw.js', {}, {
-    strategy: {
-      images: 'cache-first',
-      others: 'network-first'
+    const swManager = new module.default('/sw.js', {}, {
+      strategy: {
+        images: 'cache-first',
+        others: 'network-first'
+      }
+    });
+
+    try {
+      await swManager.register();
+      swManager.configure();
+      eventBus.emit('log', { level: 'info', args: ['Service Worker registered and configured'] });
+      this.swManager = swManager;
+    } catch (error) {
+      eventBus.emit('log', { level: 'error', args: [`Service Worker registration failed: ${error.message}`] });
     }
-  });
-
-  try {
-    await swManager.register();
-    swManager.configure();
-    logMessage('info', 'Service Worker registered and configured');
-    this.swManager = swManager;
-  } catch (error) {
-    logMessage('error', `Service Worker registration failed: ${error.message}`);
   }
-}
-  
+
   async initPartialLoader() {
     const module = await this.loadFeatureModule('partialLoader');
     if (!module?.PartialLoader) return null;
 
     const loader = new module.PartialLoader();
     await loader.init();
-    logMessage('info', 'PartialLoader initialized');
+    eventBus.emit('log', { level: 'info', args: ['PartialLoader initialized'] });
     return loader;
   }
 
   async initPageFeatures() {
-    logMessage('info', `Initializing features for page type: ${this.pageType}`);
+    eventBus.emit('log', { level: 'info', args: [`Initializing features for page type: ${this.pageType}`] });
 
     try {
       switch (this.pageType) {
         case 'home':
-          // Example: dynamically load and init home page features
-          // const { initHome } = await import('./pages/home.js');
-          // if (initHome) await initHome();
-
-                    const { initHome } = await import('./_home.js');
-                    if (initHome) await initHome();
+          const { initHome } = await import('./_home.js');
+          if (initHome) await initHome();
           break;
 
         case 'app':
-          // Example: dynamically load and init app page features
           const { initApp } = await import('./_app.js');
           if (initApp) await initApp();
-          // logMessage('info', `app??: ${this.pageType}`);
           break;
-
-        // Add other page types here...
 
         default:
-          // Fallback common features
-          // const { initCommon } = await import('./pages/common.js');
-          // if (initCommon) await initCommon();
+          // fallback or no specific page features
           break;
       }
-      logMessage('info', `Page features initialized for: ${this.pageType}`);
+      eventBus.emit('log', { level: 'info', args: [`Page features initialized for: ${this.pageType}`] });
     } catch (error) {
-      console.warn(`Page feature initialization failed for ${this.pageType}:`, error);
+      eventBus.emit('log', { level: 'warn', args: [`Page feature initialization failed for ${this.pageType}:`, error] });
     }
   }
 
   async init() {
     try {
-      logMessage('info', `App initialization started (Page: ${this.pageType})`);
+      eventBus.emit('log', { level: 'info', args: [`App initialization started (Page: ${this.pageType})`] });
 
-      // Mark JS as available
       document.documentElement.classList.add('js-enabled');
       document.documentElement.classList.add(`page-${this.pageType}`);
 
       await DomReadyPromise.ready();
-      logMessage('info', 'DOM ready');
+      eventBus.emit('log', { level: 'info', args: ['DOM ready'] });
 
-      // Initialize core features and page features in parallel
       const coreFeatures = [
         this.initPartialLoader(),
         this.initScreensaver(),
@@ -213,15 +195,16 @@ async initServiceWorker() {
         const featureNames = ['partialLoader', 'screensaver', 'randomTheme', 'debug', 'serviceWorker'];
         coreResults.value.forEach((result, i) => {
           if (result.status === 'rejected') {
-            console.warn(`${featureNames[i]} initialization failed:`, result.reason);
+            eventBus.emit('log', { level: 'warn', args: [`${featureNames[i]} initialization failed:`, result.reason] });
           }
         });
       }
+      
       const endTime = performance.now();
-      logMessage('info', `App initialization completed in ${(endTime - this.startTime).toFixed(2)}ms`);
+      eventBus.emit('log', { level: 'info', args: [`App initialization completed in ${(endTime - this.startTime).toFixed(2)}ms`] });
 
     } catch (error) {
-      console.error('Critical app initialization error:', error);
+      eventBus.emit('log', { level: 'error', args: ['Critical app initialization error:', error] });
     }
   }
 

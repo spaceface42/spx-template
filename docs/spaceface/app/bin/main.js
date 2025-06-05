@@ -1,52 +1,41 @@
-/**
- * main.js - Page-aware initialization (Simple & Clean)
- */
-import { Spaceface } from './Spaceface.js';
+import { eventBus } from '../../system/bin/EventBus.js'; // adjust path if needed
+import { logMessage } from '../../system/usr/bin/logging.js'; // your existing logger
 
-// Simple configuration
-const app = new Spaceface({
-    features: {
-        screensaver: { delay: 3000 },
-        randomTheme: {
-            themes: [
-                '/spaceface/spacesuit/random/one.css',
-                '/spaceface/spacesuit/random/two.css',
-                '/spaceface/spacesuit/random/three.css'
-            ]
-        },
-        serviceWorker: true
-    }
+// Set up event logging right away
+const eventsToLog = [
+  'screensaver:initialized',
+  'theme:randomLoaded',
+  'debug:enabled',
+  'serviceWorker:registered',
+  'partialLoader:initialized',
+  'page:homeInit',
+  'page:appInit',
+  'app:initComplete',
+  'app:initError',
+  'feature:initFailed',
+];
+
+// Register listeners for these events to log them
+eventsToLog.forEach(eventName => {
+  eventBus.on(eventName, (...args) => {
+    logMessage('info', `[eventBus] Event: ${eventName}`, ...args);
+  });
 });
 
-// Initialize everything - it automatically detects page type and loads accordingly
+// Optionally, listen to all events if your event bus supports `onAny`
+// eventBus.onAny((eventName, ...args) => {
+//   logMessage('info', `[eventBus] Event emitted: ${eventName}`, ...args);
+// });
+
+// Now import and init your main app class (Spaceface or similar)
+import { Spaceface } from './Spaceface.js';
+
+const app = new Spaceface({
+  features: {
+    screensaver: { delay: 5000 },
+    serviceWorker: true,
+    partialLoader: true,
+  }
+});
+
 app.init();
-
-// Setup SPX
-const domReady = app.setupSPX();
-
-// Export for external access
-// export { app };
-
-/*
-HTML Usage:
-
-Method 1 (Recommended): Use data-page attribute
-<body data-page="dashboard">
-<body data-page="product">
-<body data-page="admin">
-
-Method 2: Use specific elements for detection
-<div data-dashboard>Dashboard content</div>
-<div data-product-id="123">Product content</div>
-
-Method 3: Let it auto-detect from URL path
-/dashboard -> loads dashboard features
-/products/123 -> loads product features
-/admin -> loads admin features
-
-CSS Classes added automatically:
-.js-enabled (JS is available)
-.page-dashboard (on dashboard pages)
-.page-product (on product pages)
-etc.
-*/
