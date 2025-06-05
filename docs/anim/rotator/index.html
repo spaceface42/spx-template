@@ -33,7 +33,8 @@
 
 <script type="module">
 import { MouseTracker } from '/spaceface/system/sbin/MouseTracker.js';
-import { lerp, clamp } from '/spaceface/system/sbin/utilities.js';
+import * as utils from '/spaceface/system/sbin/utilities/index.js';
+// import { lerp, clamp } from '/spaceface/system/sbin/utilities.js';
 
 const tracker = MouseTracker.getInstance();
 tracker.subscribe(() => {}); // Ensure tracking starts
@@ -42,12 +43,12 @@ const ex1Layer = document.getElementById("ex1-layer");
 const constrain = 20;
 let targetX = 0, targetY = 0;
 let currentX = 0, currentY = 0;
-const lerpFactor = 0.1;
+const lerpFactor = 0.06;
 
 function transforms(x, y, el) {
   const box = el.getBoundingClientRect();
-  const calcX = clamp(-(y - box.y - (box.height / 2)) / constrain, -15, 15);
-  const calcY = clamp((x - box.x - (box.width / 2)) / constrain, -15, 15);
+  const calcX = utils.clamp(-(y - box.y - (box.height / 2)) / constrain, -15, 15);
+  const calcY = utils.clamp((x - box.x - (box.width / 2)) / constrain, -15, 15);
   return `perspective(600px) rotateX(${calcX}deg) rotateY(${calcY}deg)`;
 }
 
@@ -55,8 +56,8 @@ function updateTransform() {
   const { x, y } = tracker.position;
   targetX = x;
   targetY = y;
-  currentX = lerp(currentX, targetX, lerpFactor);
-  currentY = lerp(currentY, targetY, lerpFactor);
+  currentX = utils.lerp(currentX, targetX, lerpFactor);
+  currentY = utils.lerp(currentY, targetY, lerpFactor);
   ex1Layer.style.transform = transforms(currentX, currentY, ex1Layer);
   requestAnimationFrame(updateTransform);
 }
