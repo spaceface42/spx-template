@@ -72,18 +72,14 @@ import { Spaceface } from './Spaceface.js';
 
 const app = new Spaceface({
   features: {
+    partialLoader: true,
     slideplayer: {
       interval: 5000,
       includePicture: false
     },
     screensaver: { delay: 5000 },
     serviceWorker: true,
-    partialLoader: true,
   }
 });
 
 app.init();
-
-
-
-
