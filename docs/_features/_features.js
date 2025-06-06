@@ -3,7 +3,7 @@ import { FloatingImagesManager } from '/spaceface/system/features/FloatingImages
 
 const button = document.getElementById('bg-audio-toggle');
 
-const player = new BackgroundAudioPlayer('/content/sound.mp3', button, {
+const player = new BackgroundAudioPlayer('/content/bbc_rain---rai_nhu0506113.mp3', button, {
   volume: 0.4,
   loop: true,
   playText: 'Start Music',
