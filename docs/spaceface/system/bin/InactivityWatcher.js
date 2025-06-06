@@ -1,17 +1,17 @@
+import { eventBus } from './EventBus.js';
+
 /**
- * Watches for user inactivity and triggers callbacks when inactivity starts or ends.
- * Usage:
- *   import InactivityWatcher from './InactivityWatcher.js';
- *   const watcher = new InactivityWatcher({
- *     inactivityDelay: 30000, // ms
- *     onInactivity: () => { /* start your slideshow class here */ },
- *     onActivity: () => { /* stop your slideshow class here */ }
- *   });
+ * Emits inactivity and activity events based on user input.
+ * Events emitted:
+ *   - 'inactivity:detected'
+ *   - 'inactivity:active'
+ *
+ * Example usage:
+ *   eventBus.on('inactivity:detected', () => startScreensaver());
+ *   eventBus.on('inactivity:active', () => stopScreensaver());
  */
 export class InactivityWatcher {
   #inactivityDelay;
-  #onInactivity;
-  #onActivity;
   #inactivityTimer = null;
   #isInactive = false;
   #activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
@@ -19,19 +19,10 @@ export class InactivityWatcher {
 
   /**
    * @param {Object} options
-   * @param {number} [options.inactivityDelay=30000] - Delay in ms before considering the user inactive.
-   * @param {Function} options.onInactivity - Called when inactivity is detected.
-   * @param {Function} options.onActivity - Called when user becomes active again.
+   * @param {number} [options.inactivityDelay=30000] - Delay in ms before user is considered inactive.
    */
-  constructor({ inactivityDelay = 30000, onInactivity, onActivity }) {
-    if (typeof onInactivity !== 'function' || typeof onActivity !== 'function') {
-      throw new Error('onInactivity and onActivity must be functions');
-    }
-
+  constructor({ inactivityDelay = 30000 } = {}) {
     this.#inactivityDelay = Math.max(1000, inactivityDelay); // Minimum 1 second
-    this.#onInactivity = onInactivity;
-    this.#onActivity = onActivity;
-
     this.#addEventListeners();
     this.#startInactivityTimer();
   }
@@ -55,7 +46,7 @@ export class InactivityWatcher {
     this.#clearInactivityTimer();
     this.#inactivityTimer = setTimeout(() => {
       this.#isInactive = true;
-      this.#onInactivity();
+      eventBus.emit('user:inactive');
     }, this.#inactivityDelay);
   }
 
@@ -69,37 +60,37 @@ export class InactivityWatcher {
   #handleActivity() {
     if (this.#isInactive) {
       this.#isInactive = false;
-      this.#onActivity();
+      eventBus.emit('user:active');
     }
     this.#startInactivityTimer();
   }
 
   /**
-   * Updates the inactivity delay
-   * @param {number} delay - New delay in milliseconds
+   * Update the inactivity delay.
+   * @param {number} delay - New delay in milliseconds.
    */
   setInactivityDelay(delay) {
     this.#inactivityDelay = Math.max(1000, delay);
-    this.#startInactivityTimer(); // Restart timer with new delay
+    this.#startInactivityTimer();
   }
 
   /**
-   * Get current inactivity status
-   * @returns {boolean} - True if currently inactive
+   * Returns true if user is currently considered inactive.
+   * @returns {boolean}
    */
   get isInactive() {
     return this.#isInactive;
   }
 
   /**
-   * Manually trigger activity (useful for custom events)
+   * Manually simulate user activity (useful for custom triggers).
    */
   triggerActivity() {
     this.#handleActivity();
   }
 
   /**
-   * Pause the inactivity watcher
+   * Temporarily stops the inactivity watcher.
    */
   pause() {
     this.#clearInactivityTimer();
@@ -107,7 +98,7 @@ export class InactivityWatcher {
   }
 
   /**
-   * Resume the inactivity watcher
+   * Resumes monitoring user activity.
    */
   resume() {
     this.#addEventListeners();
@@ -115,7 +106,7 @@ export class InactivityWatcher {
   }
 
   /**
-   * Clean up event listeners and timers
+   * Fully stops and cleans up the watcher.
    */
   destroy() {
     this.#clearInactivityTimer();

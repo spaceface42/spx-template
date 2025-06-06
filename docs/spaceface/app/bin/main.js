@@ -1,10 +1,9 @@
-import { eventBus } from '../../system/bin/EventBus.js'; // adjust path if needed
-import { logMessage } from '../../system/usr/bin/logging.js'; // your existing logger
-
+import { eventBus } from '../../system/bin/EventBus.js';
 
 
 
 /*
+// v1
 const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
 
 if (isDev) {
@@ -25,15 +24,8 @@ if (isDev) {
 }
 */
 
-// Listen to all events:
-eventBus.on('*', (eventName, payload) => {
-  console.log(`[Wildcard listener] Event: ${eventName}`, payload);
-});
-
-
-
-
-
+/*
+// v2
 // Set up event logging right away
 const eventsToLog = [
   'screensaver:initialized',
@@ -59,6 +51,21 @@ eventsToLog.forEach(eventName => {
 // eventBus.onAny((eventName, ...args) => {
 //   logMessage('info', `[eventBus] Event emitted: ${eventName}`, ...args);
 // });
+*/
+
+
+
+
+
+
+// Listen to all events:
+eventBus.on('*', (eventName, payload) => {
+  console.log(`████████ [ any ×͜× listener ] Event: ${eventName}`, payload);
+});
+
+
+
+
 
 // Now import and init your main app class (Spaceface or similar)
 import { Spaceface } from './Spaceface.js';

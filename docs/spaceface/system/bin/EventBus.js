@@ -14,6 +14,15 @@ export class EventBus {
     }
   }
 
+  // Register a listener that will only be called once
+  once(event, callback) {
+    const wrapper = (...args) => {
+      callback(...args);
+      this.off(event, wrapper);
+    };
+    this.on(event, wrapper);
+  }
+
   // Remove a listener for a specific event or '*' for all events
   off(event, callback) {
     if (event === '*') {
@@ -22,6 +31,36 @@ export class EventBus {
       if (!this.listeners[event]) return;
       this.listeners[event] = this.listeners[event].filter(fn => fn !== callback);
     }
+  }
+
+  // Remove all listeners for a specific event
+  removeAllListeners(event) {
+    if (event === '*') {
+      this.wildcardListeners = [];
+    } else if (event) {
+      delete this.listeners[event];
+    } else {
+      // If no event specified, remove all listeners
+      this.listeners = {};
+      this.wildcardListeners = [];
+    }
+  }
+
+  // Get the number of listeners for a specific event
+  listenerCount(event) {
+    if (event === '*') {
+      return this.wildcardListeners.length;
+    }
+    return (this.listeners[event] || []).length;
+  }
+
+  // Get all event names that have listeners
+  eventNames() {
+    const names = Object.keys(this.listeners).filter(name => this.listeners[name].length > 0);
+    if (this.wildcardListeners.length > 0) {
+      names.push('*');
+    }
+    return names;
   }
 
   // Emit event with optional payload
@@ -43,6 +82,22 @@ export class EventBus {
         console.error('Error in wildcard event listener:', err);
       }
     });
+  }
+
+  // Check if there are any listeners for a specific event
+  hasListeners(event) {
+    if (event === '*') {
+      return this.wildcardListeners.length > 0;
+    }
+    return (this.listeners[event] || []).length > 0;
+  }
+
+  // Get a snapshot of all listeners (useful for debugging)
+  getListeners(event) {
+    if (event === '*') {
+      return [...this.wildcardListeners];
+    }
+    return [...(this.listeners[event] || [])];
   }
 }
 

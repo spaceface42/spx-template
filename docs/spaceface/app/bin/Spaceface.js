@@ -20,7 +20,7 @@ export class Spaceface {
       // debug: () => import('../../system/usr/bin/InspectorXray.js'),
       partialLoader: () => import('../../system/sbin/PartialLoader.js'),
       // event-based screensaver
-      screensaver: () => import('../../system/features/Screensaver/ScreensaverControllerEvent.js'),
+      screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
       serviceWorker: () => import('../../system/bin/ServiceWorkerManager.js'),
       // randomTheme: () => import('../RandomTheme/RandomThemeLoader.js'),
     };
@@ -162,13 +162,13 @@ export class Spaceface {
     try {
       switch (this.pageType) {
         case 'home':
-          const { initHome } = await import('./_home.js');
-          if (initHome) await initHome();
+          // const { initHome } = await import('./_home.js');
+          // if (initHome) await initHome();
           break;
 
         case 'app':
-          const { initApp } = await import('./_app.js');
-          if (initApp) await initApp();
+          // const { initApp } = await import('./_app.js');
+          // if (initApp) await initApp();
           break;
 
         default:
