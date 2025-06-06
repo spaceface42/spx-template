@@ -89,8 +89,6 @@ export class Spaceface {
         this.slideshow = slideshow;
     }
 
-
-
   async initScreensaver() {
     if (!this.config.features.screensaver) return;
 
@@ -102,7 +100,7 @@ export class Spaceface {
     screensaverDiv.id = uniqueId;
     screensaverDiv.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      z-index: 1; display: none;
+      z-index: 999; display: none;
     `;
     document.body.appendChild(screensaverDiv);
 
@@ -205,7 +203,7 @@ export class Spaceface {
         this.initPartialLoader(),
         this.initSlidePlayer(),
         this.initScreensaver(),
-        this.initDebug(),
+        // this.initDebug(),
         this.initServiceWorker()
       ];
 

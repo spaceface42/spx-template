@@ -1,47 +1,45 @@
 {
   "spaceface": {
-    "app": {
-      "main.js": null,
-      "Spaceface.js": null
-    },
     "system": {
-      "bin": {
-        "AsyncImageLoader.js": null,
-        "EventBus.js": null,
-        "InactivityWatcher.js": null,
-        "PerformanceMonitor.js": null,
-        "ResizeManager.js": null,
-        "ServiceWorkerManager.js": null
-      },
+      "bin": [
+        "AsyncImageLoader.js",
+        "EventBus.js",
+        "InactivityService.js",
+        "InactivityWatcher.js",
+        "PerformanceMonitor.js",
+        "ResizeManager.js"
+      ],
       "features": {
-        "AudioPlayer": {
-          "BackgroundAudioPlayer.js": null
-        },
-        "FloatingImages": {
-          "FloatingImage.js": null,
-          "FloatingImagesManager.js": null
-        },
-        "Screensaver": {
-          "ScreensaverController.js": null
-        }
+        "AudioPlayer": [
+          "BackgroundAudioPlayer.js"
+        ],
+        "FloatingImages": [
+          "FloatingImage.js",
+          "FloatingImagesManager.js"
+        ],
+        "Screensaver": [
+          "ScreensaverController.js"
+        ],
+        "SlidePlayer": [
+          "SlidePlayer.js"
+        ]
       },
-      "sbin": {
-        "DeviceDetect.js": null,
-        "DomReadyPromise.js": null,
-        "InactivityWatcher.js": null,
-        "MouseTracker.js": null,
-        "PartialFetcher.js": null,
-        "PartialLoader.js": null
-      },
+      "sbin": [
+        "DeviceDetect.js",
+        "DomReadyPromise.js",
+        "MouseTracker.js",
+        "PartialFetcher.js",
+        "PartialLoader.js"
+      ],
       "usr": {
-        "bin": {
-          "id.js": null,
-          "index.js": null,
-          "InspectorXray.js": null,
-          "logging.js": null,
-          "math.js": null,
-          "timing.js": null
-        }
+        "bin": [
+          "InspectorXray.js",
+          "id.js",
+          "index.js",
+          "logging.js",
+          "math.js",
+          "timing.js"
+        ]
       }
     }
   }

@@ -1,41 +1,39 @@
-/web-root
-│
-├── spaceface/
-│   ├── app/
-│   │   ├── main.js
-│   │   └── Spaceface.js
-│   │
-│   ├── system/
-│   │   ├── bin/
-│   │   │   ├── AsyncImageLoader.js
-│   │   │   ├── EventBus.js
-│   │   │   ├── InactivityWatcher.js
-│   │   │   ├── PerformanceMonitor.js
-│   │   │   ├── ResizeManager.js
-│   │   │   └── ServiceWorkerManager.js
-│   │   │
-│   │   ├── features/
-│   │   │   ├── AudioPlayer/
-│   │   │   │   └── BackgroundAudioPlayer.js
-│   │   │   ├── FloatingImages/
-│   │   │   │   ├── FloatingImage.js
-│   │   │   │   └── FloatingImagesManager.js
-│   │   │   └── Screensaver/
-│   │   │       └── ScreensaverController.js
-│   │   │
-│   │   ├── sbin/
-│   │   │   ├── DeviceDetect.js
-│   │   │   ├── DomReadyPromise.js
-│   │   │   ├── InactivityWatcher.js
-│   │   │   ├── MouseTracker.js
-│   │   │   ├── PartialFetcher.js
-│   │   │   └── PartialLoader.js
-│   │   │
-│   │   └── usr/
-│   │       └── bin/
-│   │           ├── id.js
-│   │           ├── index.js
-│   │           ├── InspectorXray.js
-│   │           ├── logging.js
-│   │           ├── math.js
-│   │           └── timing.js
+spaceface/
+└── system/
+    ├── bin/
+    │   ├── AsyncImageLoader.js
+    │   ├── EventBus.js
+    │   ├── InactivityService.js
+    │   ├── InactivityWatcher.js
+    │   ├── PerformanceMonitor.js
+    │   └── ResizeManager.js
+    │
+    ├── features/
+    │   ├── AudioPlayer/
+    │   │   └── BackgroundAudioPlayer.js
+    │   │
+    │   ├── FloatingImages/
+    │   │   ├── FloatingImage.js
+    │   │   └── FloatingImagesManager.js
+    │   │
+    │   ├── Screensaver/
+    │   │   └── ScreensaverController.js
+    │   │
+    │   └── SlidePlayer/
+    │       └── SlidePlayer.js
+    │
+    ├── sbin/
+    │   ├── DeviceDetect.js
+    │   ├── DomReadyPromise.js
+    │   ├── MouseTracker.js
+    │   ├── PartialFetcher.js
+    │   └── PartialLoader.js
+    │
+    └── usr/
+        └── bin/
+            ├── InspectorXray.js
+            ├── id.js
+            ├── index.js
+            ├── logging.js
+            └── math.js
+            └── timing.js
