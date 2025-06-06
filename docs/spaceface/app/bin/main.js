@@ -1,6 +1,10 @@
 import { eventBus } from '../../system/bin/EventBus.js'; // adjust path if needed
 import { logMessage } from '../../system/usr/bin/logging.js'; // your existing logger
 
+
+
+
+/*
 const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
 
 if (isDev) {
@@ -19,6 +23,16 @@ if (isDev) {
     }
   });
 }
+*/
+
+// Listen to all events:
+eventBus.on('*', (eventName, payload) => {
+  console.log(`[Wildcard listener] Event: ${eventName}`, payload);
+});
+
+
+
+
 
 // Set up event logging right away
 const eventsToLog = [

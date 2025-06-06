@@ -46,7 +46,7 @@ export class InactivityWatcher {
     this.#clearInactivityTimer();
     this.#inactivityTimer = setTimeout(() => {
       this.#isInactive = true;
-      eventBus.emit('inactivity:detected');
+      eventBus.emit('user:inactive');
     }, this.#inactivityDelay);
   }
 
@@ -60,7 +60,7 @@ export class InactivityWatcher {
   #handleActivity() {
     if (this.#isInactive) {
       this.#isInactive = false;
-      eventBus.emit('inactivity:active');
+      eventBus.emit('user:active');
     }
     this.#startInactivityTimer();
   }

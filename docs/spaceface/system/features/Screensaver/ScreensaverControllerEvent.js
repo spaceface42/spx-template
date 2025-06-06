@@ -1,8 +1,8 @@
-import { InactivityService } from '../../sbin/InactivityService.js';
+import { InactivityService } from '../../bin/InactivityService.js';
 
 import { PartialFetcher } from '../../sbin/PartialFetcher.js';
 import { FloatingImagesManager } from '../FloatingImages/FloatingImagesManager.js';
-import { eventBus } from '../../core/eventBus.js';
+import { eventBus } from '../../bin/EventBus.js';
 
 export class ScreensaverController {
   constructor({ partialUrl, targetSelector, inactivityDelay = 30000, onError = null }) {
@@ -22,11 +22,12 @@ export class ScreensaverController {
     if (this._destroyed) return;
 
     try {
-      this.watcher = new InactivityWatcher({ inactivityDelay: this.inactivityDelay });
+      // this.watcher = new InactivityWatcher({ inactivityDelay: this.inactivityDelay });
+      this.watcher = new InactivityService({ inactivityDelay: this.inactivityDelay });
 
       // Listen for events emitted by the watcher
-      eventBus.addEventListener('user:inactive', this._onInactivity);
-      eventBus.addEventListener('user:active', this._onActivity);
+      eventBus.on('user:inactive', this._onInactivity);
+      eventBus.on('user:active', this._onActivity);
     } catch (error) {
       this.handleError('Failed to initialize inactivity watcher', error);
     }
@@ -79,8 +80,8 @@ export class ScreensaverController {
         this.watcher = null;
       }
 
-      eventBus.removeEventListener('user:inactive', this._onInactivity);
-      eventBus.removeEventListener('user:active', this._onActivity);
+      eventBus.off('user:inactive', this._onInactivity);
+      eventBus.off('user:active', this._onActivity);
     } catch (error) {
       this.handleError('Failed to destroy screensaver controller', error);
     }

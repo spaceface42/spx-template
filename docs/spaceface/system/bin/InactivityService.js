@@ -1,4 +1,4 @@
-import { InactivityWatcher } from './InactivityWatcher.js';
+import { InactivityWatcher } from './InactivityWatcherEvent.js';
 
 let instance = null;
 
