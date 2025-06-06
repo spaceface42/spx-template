@@ -1,3 +1,4 @@
+import { eventBus } from '../../bin/EventBus.js';
 import { AsyncImageLoader } from '../../bin/AsyncImageLoader.js';
 
 export class SlidePlayer {
@@ -53,9 +54,6 @@ export class SlidePlayer {
     await this.loader.waitForImagesToLoad();
 
     this.slides = this.container.querySelectorAll('.slide');
-
-
-
 
     // Create or update dots dynamically
     let dotsWrapper = this.container.querySelector('.dots');
@@ -142,6 +140,8 @@ goToSlide(index) {
 
   this.slides[this.currentIndex].classList.add('active');
   this.dots[this.currentIndex]?.classList.add('active');
+
+  eventBus.emit('slideplayer:slideChanged', { index: this.currentIndex });
 }
 
   nextSlide() {
