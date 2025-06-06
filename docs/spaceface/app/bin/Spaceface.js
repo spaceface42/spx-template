@@ -22,7 +22,6 @@ export class Spaceface {
       slideplayer: () => import('../../system/features/SlidePlayer/SlidePlayer.js'),
       screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
       serviceWorker: () => import('../../system/bin/ServiceWorkerManager.js'),
-      // randomTheme: () => import('../RandomTheme/RandomThemeLoader.js'),
     };
 
     this.loadedModules = new Map();
@@ -120,23 +119,6 @@ export class Spaceface {
     eventBus.emit('log', { level: 'info', args: ['Screensaver initialized:', uniqueId] });
   }
 
-  async initRandomTheme() {
-    if (!this.config.features.randomTheme) return;
-
-    const module = await this.loadFeatureModule('randomTheme');
-    if (!module?.RandomThemeLoader) return;
-
-    const loader = new module.RandomThemeLoader(
-      this.config.features.randomTheme.themes || [
-        '/spaceface/spacesuit/random/one.css',
-        '/spaceface/spacesuit/random/two.css',
-        '/spaceface/spacesuit/random/three.css'
-      ]
-    );
-    await loader.loadRandomTheme();
-    eventBus.emit('log', { level: 'info', args: ['Random theme loaded'] });
-  }
-
   async initDebug() {
     if (this.config.production) return;
 
@@ -223,7 +205,6 @@ export class Spaceface {
         this.initPartialLoader(),
         this.initSlidePlayer(),
         this.initScreensaver(),
-        this.initRandomTheme(),
         this.initDebug(),
         this.initServiceWorker()
       ];
@@ -234,7 +215,7 @@ export class Spaceface {
       ]);
 
       if (coreResults.status === 'fulfilled') {
-        const featureNames = ['partialLoader', 'screensaver', 'randomTheme', 'debug', 'serviceWorker'];
+        const featureNames = ['partialLoader', 'screensaver', 'debug', 'serviceWorker'];
         coreResults.value.forEach((result, i) => {
           if (result.status === 'rejected') {
             eventBus.emit('log', { level: 'warn', args: [`${featureNames[i]} initialization failed:`, result.reason] });
