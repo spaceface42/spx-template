@@ -3,12 +3,12 @@ import { eventBus } from './EventBus.js';
 /**
  * Emits inactivity and activity events based on user input.
  * Events emitted:
- *   - 'inactivity:detected'
- *   - 'inactivity:active'
+ *   - 'user:inactive'
+ *   - 'user:active'
  *
  * Example usage:
- *   eventBus.on('inactivity:detected', () => startScreensaver());
- *   eventBus.on('inactivity:active', () => stopScreensaver());
+ *   eventBus.on('user:inactive', () => startScreensaver());
+ *   eventBus.on('user:active', () => stopScreensaver());
  */
 export class InactivityWatcher {
   #inactivityDelay;
