@@ -1,13 +1,8 @@
-import { eventBus } from '../../bin/EventBus.js';
-import { AsyncImageLoader } from '../../bin/AsyncImageLoader.js';
+import { eventBus } from '../../../bin/EventBus.js';
+import { AsyncImageLoader } from '../../../bin/AsyncImageLoader.js';
+import { EventBinder } from '../../bin/EventBinder.js';
 
 export class SlidePlayer {
-  /**
-   * @param {string | HTMLElement} containerSelector
-   * @param {Object} options
-   * @param {number} options.interval - Autoplay interval in ms
-   * @param {boolean} options.includePicture - Whether to support <picture> tags
-   */
   constructor(containerSelector, { interval = 5000, includePicture = false } = {}) {
     this.container = typeof containerSelector === 'string'
       ? document.querySelector(containerSelector)
@@ -30,6 +25,7 @@ export class SlidePlayer {
     this.isDragging = false;
 
     this.loader = new AsyncImageLoader(this.container, { includePicture });
+    this.eventBinder = new EventBinder();
 
     this.ready = this.init();
   }
@@ -38,17 +34,14 @@ export class SlidePlayer {
     await this.loader.waitForImagesToLoad();
 
     this.slides = this.container.querySelectorAll('.slide');
-
-    // Create or update dots dynamically
     let dotsWrapper = this.container.querySelector('.dots');
 
-    // If it exists, clear it — else create and append it
     if (!dotsWrapper) {
       dotsWrapper = document.createElement('div');
       dotsWrapper.className = 'dots';
       this.container.appendChild(dotsWrapper);
     } else {
-      dotsWrapper.innerHTML = ''; // Clear manually created dots
+      dotsWrapper.innerHTML = '';
     }
 
     this.dots = [];
@@ -71,56 +64,46 @@ export class SlidePlayer {
       this.dots.push(dot);
     });
 
-    // Mark first dot active
     this.dots[0]?.classList.add('active');
 
-    // Swipe & mouse drag
-    this.container.addEventListener('touchstart', e => {
+    this.eventBinder.bindDOM(this.container, 'touchstart', e => {
       this.touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
 
-    this.container.addEventListener('touchend', e => {
+    this.eventBinder.bindDOM(this.container, 'touchend', e => {
       this.touchEndX = e.changedTouches[0].screenX;
       this.handleSwipe(this.touchStartX, this.touchEndX);
     });
 
-    this.container.addEventListener('mousedown', this.onMouseDown);
-    this.container.addEventListener('mousemove', this.onMouseMove);
-    this.container.addEventListener('mouseup', this.onMouseUp);
-    this.container.addEventListener('mouseleave', this.onMouseLeave);
+    this.eventBinder.bindDOM(this.container, 'mousedown', this.onMouseDown);
+    this.eventBinder.bindDOM(this.container, 'mousemove', this.onMouseMove);
+    this.eventBinder.bindDOM(this.container, 'mouseup', this.onMouseUp);
+    this.eventBinder.bindDOM(this.container, 'mouseleave', this.onMouseLeave);
+    this.eventBinder.bindDOM(document, 'keydown', this.onKeyDown);
 
-    document.addEventListener('keydown', this.onKeyDown);
-
-    this.container.addEventListener('mouseenter', () => {
+    this.eventBinder.bindDOM(this.container, 'mouseenter', () => {
       this.isPaused = true;
     });
-    this.container.addEventListener('mouseleave', () => {
+    this.eventBinder.bindDOM(this.container, 'mouseleave', () => {
       this.isPaused = false;
       this.lastTimestamp = performance.now();
     });
 
-    document.addEventListener('visibilitychange', () => {
+    this.eventBinder.bindDOM(document, 'visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         this.lastTimestamp = performance.now();
       }
     });
 
-    // pause on inactivity
-    this.handleUserInactive = () => {
+    this.eventBinder.bindBus('user:inactive', () => {
       this.isPaused = true;
-      eventBus.emit('slideplayer: Paused due to inactivity', { index: this.currentIndex });
-    };
+    });
 
-    this.handleUserActive = () => {
+    this.eventBinder.bindBus('user:active', () => {
       this.isPaused = false;
       this.lastTimestamp = performance.now();
-      eventBus.emit('slideplayer: Resumed after inactivity', { index: this.currentIndex });
-    };
+    });
 
-    eventBus.on('user:inactive', this.handleUserInactive);
-    eventBus.on('user:active', this.handleUserActive);
-    // pause on inactivity
-  
     this.rafId = requestAnimationFrame(this.animate.bind(this));
   }
 
@@ -136,19 +119,19 @@ export class SlidePlayer {
     this.rafId = requestAnimationFrame(this.animate.bind(this));
   }
 
-goToSlide(index) {
-  if (index < 0 || index >= this.slides.length) return;
+  goToSlide(index) {
+    if (index < 0 || index >= this.slides.length) return;
 
-  this.slides[this.currentIndex].classList.remove('active');
-  this.dots[this.currentIndex]?.classList.remove('active');
+    this.slides[this.currentIndex].classList.remove('active');
+    this.dots[this.currentIndex]?.classList.remove('active');
 
-  this.currentIndex = index;
+    this.currentIndex = index;
 
-  this.slides[this.currentIndex].classList.add('active');
-  this.dots[this.currentIndex]?.classList.add('active');
+    this.slides[this.currentIndex].classList.add('active');
+    this.dots[this.currentIndex]?.classList.add('active');
 
-  eventBus.emit('slideplayer:slideChanged', { index: this.currentIndex });
-}
+    eventBus.emit('slideplayer:slideChanged', { index: this.currentIndex });
+  }
 
   nextSlide() {
     this.goToSlide((this.currentIndex + 1) % this.slides.length);
@@ -208,18 +191,7 @@ goToSlide(index) {
     });
     this.dotClickHandlers = [];
 
-    this.container.removeEventListener('touchstart', this.touchStartHandler);
-    this.container.removeEventListener('touchend', this.touchEndHandler);
-    this.container.removeEventListener('mousedown', this.onMouseDown);
-    this.container.removeEventListener('mousemove', this.onMouseMove);
-    this.container.removeEventListener('mouseup', this.onMouseUp);
-    this.container.removeEventListener('mouseleave', this.onMouseLeave);
-    document.removeEventListener('keydown', this.onKeyDown);
-    document.removeEventListener('visibilitychange', this.visibilityHandler);
-
-    eventBus.off('user:inactive', this.handleUserInactive);
-    eventBus.off('user:active', this.handleUserActive);
-
+    this.eventBinder.unbindAll();
     this.loader.destroy();
   }
 }
