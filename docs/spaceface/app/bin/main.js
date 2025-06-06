@@ -60,7 +60,7 @@ eventsToLog.forEach(eventName => {
 
 // Listen to all events:
 eventBus.on('*', (eventName, payload) => {
-  console.log(`████████ [ any ×͜× listener ] Event: ${eventName}`, payload);
+  console.log(`████████ [ any ×͜× listener ] Event: ${eventName}`, payload ?? '(no payload)');
 });
 
 
@@ -72,6 +72,10 @@ import { Spaceface } from './Spaceface.js';
 
 const app = new Spaceface({
   features: {
+    slideplayer: {
+      interval: 5000,
+      includePicture: false
+    },
     screensaver: { delay: 5000 },
     serviceWorker: true,
     partialLoader: true,

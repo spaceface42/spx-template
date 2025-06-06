@@ -19,7 +19,7 @@ export class Spaceface {
     this.featureModules = {
       // debug: () => import('../../system/usr/bin/InspectorXray.js'),
       partialLoader: () => import('../../system/sbin/PartialLoader.js'),
-      // event-based screensaver
+      slideplayer: () => import('../../system/features/SlidePlayer/SlidePlayer.js'),
       screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
       serviceWorker: () => import('../../system/bin/ServiceWorkerManager.js'),
       // randomTheme: () => import('../RandomTheme/RandomThemeLoader.js'),
@@ -61,12 +61,36 @@ export class Spaceface {
 
   async initInactivityWatcher() {
     if (!this.config.features.screensaver) return;
-    if (this.inactivityWatcher) return; // Already initialized
+    if (this.inactivityWatcher) return;
 
     this.inactivityWatcher = new InactivityService({
       inactivityDelay: this.config.features.screensaver.delay || 3000,
     });
   }
+
+    async initSlidePlayer() {
+
+        await DomReadyPromise.ready();
+
+        if (!this.config.features.slideplayer) return;
+
+        const module = await this.loadFeatureModule('slideplayer');
+        if (!module?.SlidePlayer) return;
+
+        const slideshow = new module.SlidePlayer('.slideshow-container', {
+            interval: this.config.features.slideplayer.interval || 5000,
+            includePicture: this.config.features.slideplayer.includePicture || false
+        });
+
+        // Await the init() Promise that started in constructor
+        await slideshow.ready;
+
+        eventBus.emit('log', { level: 'info', args: ['SlidePlayer loaded'] });
+
+        this.slideshow = slideshow;
+    }
+
+
 
   async initScreensaver() {
     if (!this.config.features.screensaver) return;
@@ -197,6 +221,7 @@ export class Spaceface {
       // Init screensaver and other core features in parallel
       const coreFeatures = [
         this.initPartialLoader(),
+        this.initSlidePlayer(),
         this.initScreensaver(),
         this.initRandomTheme(),
         this.initDebug(),
