@@ -77,7 +77,7 @@ const app = new Spaceface({
       interval: 5000,
       includePicture: false
     },
-    screensaver: { delay: 5000 },
+    screensaver: { delay: 12000 },
     serviceWorker: true,
   }
 });
