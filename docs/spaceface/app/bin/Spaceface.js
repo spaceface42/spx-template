@@ -3,6 +3,7 @@ import spx from '../../lib/spx/index.js';
 import { generateId } from '../../system/usr/bin/id.js';
 import { eventBus } from '../../system/bin/EventBus.js';
 import { DomReadyPromise } from '../../system/sbin/DomReadyPromise.js';
+import { InactivityService } from '../../system/bin/InactivityService.js';
 
 export class Spaceface {
   constructor(options = {}) {
@@ -18,12 +19,15 @@ export class Spaceface {
     this.featureModules = {
       // debug: () => import('../../system/usr/bin/InspectorXray.js'),
       partialLoader: () => import('../../system/sbin/PartialLoader.js'),
-      screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
+      // event-based screensaver
+      screensaver: () => import('../../system/features/Screensaver/ScreensaverControllerEvent.js'),
       serviceWorker: () => import('../../system/bin/ServiceWorkerManager.js'),
       // randomTheme: () => import('../RandomTheme/RandomThemeLoader.js'),
     };
 
     this.loadedModules = new Map();
+    this.inactivityWatcher = null;
+    this.screensaverController = null;
   }
 
   detectPageType() {
@@ -55,6 +59,15 @@ export class Spaceface {
     return this.loadedModules.get(featureName);
   }
 
+  async initInactivityWatcher() {
+    if (!this.config.features.screensaver) return;
+    if (this.inactivityWatcher) return; // Already initialized
+
+    this.inactivityWatcher = new InactivityService({
+      inactivityDelay: this.config.features.screensaver.delay || 3000,
+    });
+  }
+
   async initScreensaver() {
     if (!this.config.features.screensaver) return;
 
@@ -70,13 +83,13 @@ export class Spaceface {
     `;
     document.body.appendChild(screensaverDiv);
 
-    const controller = new module.ScreensaverController({
+    this.screensaverController = new module.ScreensaverController({
       partialUrl: '/content/screensaver/screensaver.html',
       targetSelector: `#${uniqueId}`,
       inactivityDelay: this.config.features.screensaver.delay || 3000
     });
-    if (typeof controller.init === 'function') {
-      await controller.init();
+    if (typeof this.screensaverController.init === 'function') {
+      await this.screensaverController.init();
     }
 
     eventBus.emit('screensaver:initialized', uniqueId);
@@ -178,6 +191,10 @@ export class Spaceface {
       await DomReadyPromise.ready();
       eventBus.emit('log', { level: 'info', args: ['DOM ready'] });
 
+      // Init inactivity watcher first to start emitting events for screensaver
+      await this.initInactivityWatcher();
+
+      // Init screensaver and other core features in parallel
       const coreFeatures = [
         this.initPartialLoader(),
         this.initScreensaver(),
@@ -199,7 +216,7 @@ export class Spaceface {
           }
         });
       }
-      
+
       const endTime = performance.now();
       eventBus.emit('log', { level: 'info', args: [`App initialization completed in ${(endTime - this.startTime).toFixed(2)}ms`] });
 

@@ -1,4 +1,5 @@
-import { InactivityWatcher } from '../../bin/InactivityWatcher.js';
+import { InactivityService } from '../../sbin/InactivityService.js';
+
 import { PartialFetcher } from '../../sbin/PartialFetcher.js';
 import { FloatingImagesManager } from '../FloatingImages/FloatingImagesManager.js';
 import { eventBus } from '../../core/eventBus.js';
