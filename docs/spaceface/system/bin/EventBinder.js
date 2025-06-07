@@ -1,4 +1,4 @@
-import { eventBus } from '../../bin/EventBus.js';
+import { eventBus } from './EventBus.js';
 
 export class EventBinder {
   constructor(debug = false) {

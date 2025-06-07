@@ -1,6 +1,7 @@
 import { eventBus } from '../../bin/EventBus.js';
+import { EventBinder } from '../../bin/EventBinder.js';
 import { AsyncImageLoader } from '../../bin/AsyncImageLoader.js';
-import { EventBinder } from './EventBinder.js';
+
 
 export class SlidePlayer {
   /**
@@ -123,6 +124,11 @@ export class SlidePlayer {
 
     this.eventBinder.bindBus('user:inactive', this.handleUserInactive);
     this.eventBinder.bindBus('user:active', this.handleUserActive);
+
+    // Automatic cleanup on page unload
+    this.eventBinder.bindDOM(window, 'beforeunload', () => {
+      this.destroy();
+    });
   
     this.rafId = requestAnimationFrame(this.animate.bind(this));
   }
