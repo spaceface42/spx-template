@@ -19,7 +19,7 @@ export class Spaceface {
     this.featureModules = {
       // debug: () => import('../../system/usr/bin/InspectorXray.js'),
       partialLoader: () => import('../../system/sbin/PartialLoader.js'),
-      slideplayer: () => import('../../system/features/SlidePlayer/SlidePlayer.js'),
+      slideplayer: () => import('../../system/features/SlidePlayer/SlidePlayerEventBinder.js'),
       screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
       serviceWorker: () => import('../../system/bin/ServiceWorkerManager.js'),
     };
