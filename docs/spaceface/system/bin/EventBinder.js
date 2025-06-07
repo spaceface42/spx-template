@@ -11,24 +11,36 @@ export class EventBinder {
   bindBus(event, handler) {
     eventBus.on(event, handler);
     this._busBindings.push({ event, handler });
-    
+
     if (this._debug) {
       console.log(`EventBinder: Bound bus event "${event}"`);
     }
   }
 
-  // DOM binding
+  // DOM binding with normalized options and AbortController
   bindDOM(target, event, handler, options = false) {
     if (!target || typeof target.addEventListener !== 'function') {
-      console.error('EventBinder: Invalid target for DOM binding', target);
+      console.warn('EventBinder: Invalid target for DOM binding', target);
       return;
     }
 
-    target.addEventListener(event, handler, options);
-    this._domBindings.push({ target, event, handler, options });
-    
-    if (this._debug) {
-      console.log(`EventBinder: Bound DOM event "${event}" to`, target);
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    // Normalize options to object form and include signal
+    const normalizedOptions = typeof options === 'boolean'
+      ? { capture: options, signal }
+      : { ...options, signal };
+
+    try {
+      target.addEventListener(event, handler, normalizedOptions);
+      this._domBindings.push({ target, event, handler, options: normalizedOptions, controller });
+
+      if (this._debug) {
+        console.log(`EventBinder: Bound DOM event "${event}" to`, target);
+      }
+    } catch (err) {
+      console.error('EventBinder: Failed to bind event:', err);
     }
   }
 
@@ -51,19 +63,15 @@ export class EventBinder {
     });
     this._busBindings = [];
 
-    // Clean up DOM bindings
-    this._domBindings.forEach(({ target, event, handler, options }) => {
+    // Abort DOM event controllers
+    this._domBindings.forEach(({ controller, event, target }) => {
       try {
-        if (target && typeof target.removeEventListener === 'function') {
-          target.removeEventListener(event, handler, options);
-          if (this._debug) {
-            console.log(`EventBinder: Unbound DOM event "${event}" from`, target);
-          }
-        } else {
-          console.warn('EventBinder: Target no longer valid for event removal', target);
+        controller?.abort();
+        if (this._debug) {
+          console.log(`EventBinder: Aborted DOM event "${event}" from`, target);
         }
       } catch (error) {
-        console.error(`EventBinder: Error unbinding DOM event "${event}":`, error);
+        console.error(`EventBinder: Error aborting DOM event "${event}":`, error);
       }
     });
     this._domBindings = [];
@@ -84,7 +92,36 @@ export class EventBinder {
   }
 
   // Enable/disable debug logging
-  setDebug(enabled) {
-    this._debug = enabled;
+_debugLog(level, ...args) {
+  if (!this._debug) return;
+
+  const message = {
+    source: 'EventBinder',
+    level,
+    time: new Date(),
+    args,
+  };
+
+  // Optional: forward to your global logger if available
+  if (typeof window !== 'undefined' && window.dispatchEvent && typeof CustomEvent === 'function') {
+    window.dispatchEvent(new CustomEvent('*', { detail: message }));
   }
+
+  // Also log to the console for convenience
+  const prefix = '[EventBinder]';
+  const timestamp = message.time.toISOString();
+
+  switch (level) {
+    case 'log':
+      console.log(prefix, timestamp, ...args);
+      break;
+    case 'warn':
+      console.warn(prefix, timestamp, ...args);
+      break;
+    case 'error':
+      console.error(prefix, timestamp, ...args);
+      break;
+  }
+}
+
 }

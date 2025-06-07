@@ -34,7 +34,8 @@ export class SlidePlayer {
     this.loader = new AsyncImageLoader(this.container, { includePicture });
     
     // Initialize EventBinder for automatic cleanup
-    this.eventBinder = new EventBinder();
+    // this.eventBinder = new EventBinder();
+    this.eventBinder = new EventBinder(true);
 
     this.ready = this.init();
   }

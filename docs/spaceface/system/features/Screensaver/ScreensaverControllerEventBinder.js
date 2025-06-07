@@ -15,7 +15,8 @@ export class ScreensaverController {
     this._destroyed = false;
 
     // Initialize EventBinder
-    this.eventBinder = new EventBinder();
+    // this.eventBinder = new EventBinder();
+    this.eventBinder = new EventBinder(true);
 
     this._onInactivity = this.showScreensaver.bind(this);
     this._onActivity = this.hideScreensaver.bind(this);
