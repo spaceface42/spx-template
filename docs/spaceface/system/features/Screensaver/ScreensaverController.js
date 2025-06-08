@@ -2,6 +2,7 @@ import { eventBus } from '../../bin/EventBus.js';
 import { InactivityService } from '../../bin/InactivityService.js';
 import { PartialFetcher } from '../../sbin/PartialFetcher.js';
 import { FloatingImagesManager } from '../FloatingImages/FloatingImagesManager.js';
+import { EventBinder } from '../../bin/EventBinder.js';
 
 export class ScreensaverController {
   constructor({ partialUrl, targetSelector, inactivityDelay = 30000, onError = null }) {
@@ -13,6 +14,10 @@ export class ScreensaverController {
     this.onError = onError;
     this._destroyed = false;
 
+    // Initialize EventBinder
+    // this.eventBinder = new EventBinder();
+    this.eventBinder = new EventBinder(true);
+
     this._onInactivity = this.showScreensaver.bind(this);
     this._onActivity = this.hideScreensaver.bind(this);
   }
@@ -21,12 +26,12 @@ export class ScreensaverController {
     if (this._destroyed) return;
 
     try {
-      // this.watcher = new InactivityWatcher({ inactivityDelay: this.inactivityDelay });
       this.watcher = new InactivityService({ inactivityDelay: this.inactivityDelay });
 
-      // Listen for events emitted by the watcher
-      eventBus.on('user:inactive', this._onInactivity);
-      eventBus.on('user:active', this._onActivity);
+      // Use EventBinder instead of manual eventBus binding
+      this.eventBinder.bindBus('user:inactive', this._onInactivity);
+      this.eventBinder.bindBus('user:active', this._onActivity);
+
     } catch (error) {
       this.handleError('Failed to initialize inactivity watcher', error);
     }
@@ -70,17 +75,20 @@ export class ScreensaverController {
   }
 
   destroy() {
+    if (this._destroyed) return;
     this._destroyed = true;
 
     try {
       this.hideScreensaver();
+      
       if (this.watcher) {
         this.watcher.destroy();
         this.watcher = null;
       }
 
-      eventBus.off('user:inactive', this._onInactivity);
-      eventBus.off('user:active', this._onActivity);
+      // Use EventBinder to clean up all listeners automatically
+      this.eventBinder.unbindAll();
+
     } catch (error) {
       this.handleError('Failed to destroy screensaver controller', error);
     }
