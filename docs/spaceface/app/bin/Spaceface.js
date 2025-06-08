@@ -89,33 +89,43 @@ export class Spaceface {
         this.slideshow = slideshow;
     }
 
-  async initScreensaver() {
-    if (!this.config.features.screensaver) return;
+async initScreensaver() {
+  const config = this.config.features.screensaver;
+  if (!config) return;
 
-    const module = await this.loadFeatureModule('screensaver');
-    if (!module?.ScreensaverController) return;
-
-    const uniqueId = generateId('screensaver', 9);
-    const screensaverDiv = document.createElement('div');
-    screensaverDiv.id = uniqueId;
-    screensaverDiv.style.cssText = `
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      z-index: 999; display: none;
-    `;
-    document.body.appendChild(screensaverDiv);
-
-    this.screensaverController = new module.ScreensaverController({
-      partialUrl: '/content/screensaver/screensaver.html',
-      targetSelector: `#${uniqueId}`,
-      inactivityDelay: this.config.features.screensaver.delay || 3000
+  if (!config.partialUrl) {
+    eventBus.emit('log', {
+      level: 'error',
+      args: ['Screensaver partialUrl is missing in configuration.']
     });
-    if (typeof this.screensaverController.init === 'function') {
-      await this.screensaverController.init();
-    }
-
-    eventBus.emit('screensaver:initialized', uniqueId);
-    eventBus.emit('log', { level: 'info', args: ['Screensaver initialized:', uniqueId] });
+    return;
   }
+
+  const module = await this.loadFeatureModule('screensaver');
+  if (!module?.ScreensaverController) return;
+
+  const uniqueId = generateId('screensaver', 9);
+  const screensaverDiv = document.createElement('div');
+  screensaverDiv.id = uniqueId;
+  screensaverDiv.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 999; display: none;
+  `;
+  document.body.appendChild(screensaverDiv);
+
+  this.screensaverController = new module.ScreensaverController({
+    partialUrl: config.partialUrl,
+    targetSelector: `#${uniqueId}`,
+    inactivityDelay: config.delay || 3000
+  });
+
+  if (typeof this.screensaverController.init === 'function') {
+    await this.screensaverController.init();
+  }
+
+  eventBus.emit('screensaver:initialized', uniqueId);
+  eventBus.emit('log', { level: 'info', args: ['Screensaver initialized:', uniqueId] });
+}
 
   async initDebug() {
     if (this.config.production) return;

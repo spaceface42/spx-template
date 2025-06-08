@@ -35,7 +35,10 @@ const app = new Spaceface({
       interval: 5000,
       includePicture: false
     },
-    screensaver: { delay: 12000 },
+    screensaver: { 
+      delay: 6500,
+      partialUrl: '/content/feature/screensaver/index.html'
+    },
     serviceWorker: true,
   }
 });
