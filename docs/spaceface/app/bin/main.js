@@ -1,27 +1,18 @@
 import { eventBus } from '../../system/bin/EventBus.js';
 
-// const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
+const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
 
 const eventsToLog = [
   '*',
 ];
 
-// if (isDev) {
+if (isDev) {
   eventsToLog.forEach(eventName => {
     eventBus.on(eventName, (eventName, payload) => {
       console.log(`████████ [ any ×͜× listener ] Event: ${eventName}`, payload ?? '(no payload)');
     });
   });
-// }
-
-/*
-// v3
-// Listen to all events:
-eventBus.on('*', (eventName, payload) => {
-  console.log(`████████ [ any ×͜× listener ] Event: ${eventName}`, payload ?? '(no payload)');
-});
-*/
-
+}
 
 
 
@@ -44,3 +35,6 @@ const app = new Spaceface({
 });
 
 app.init();
+
+// Setup SPX
+// const domReady = app.setupSPX();
