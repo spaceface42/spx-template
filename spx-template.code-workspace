@@ -8,6 +8,9 @@
         },
         {
             "path": "docs/spaceface/system"
+        },
+        {
+            "path": "docs/spaceface/app"
         }
     ],
     "settings": {
