@@ -23,6 +23,7 @@
         "files.eol": "\n",
         "liveServer.settings.CustomBrowser": "chrome",
         "liveServer.settings.multiRootWorkspaceName": "spx-template",
-        "liveServer.settings.root": "/docs"
+        "liveServer.settings.root": "/docs",
+        "cSpell.words": ["slideplayer", "spaceface"]
     }
 }

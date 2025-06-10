@@ -26,7 +26,7 @@ body {
 }
 
 /* currently there is no need to define this,
-as the layout works withoult thus also */
+as the layout works without thus also */
 headerX {
   flex: 0 0 auto;           /* take only as much space as needed */
   flex-direction: column;   /* optional: keeps header items stacked */
@@ -80,7 +80,7 @@ nav a {
 
 /* debug */
 header, main, footer {
-    /* background-image: url("./debug/marching-ants-of-manhattan.svg"); */
+    background-image: url("./debug/marching-ants-of-manhattan.svg");
 }
 
 /*
@@ -88,7 +88,7 @@ header, main, footer {
 */
 
 /**
- * tipography
+ * typography
  */
 @font-face {
     font-family: spaceface;
