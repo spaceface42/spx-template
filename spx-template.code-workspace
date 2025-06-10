@@ -7,9 +7,11 @@
             "path": "docs"
         },
         {
+            "name": "__________________________________system",
             "path": "docs/spaceface/system"
         },
         {
+            "name": "__________________________________app",
             "path": "docs/spaceface/app"
         }
     ],
