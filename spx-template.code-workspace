@@ -19,7 +19,6 @@
         "emmet.syntaxProfiles": {
             "html": "xhtml"
         },
-        "spx.enable": false,
         "editor.wordWrap": "on",
         "git.confirmSync": true,
         "files.eol": "\n",
