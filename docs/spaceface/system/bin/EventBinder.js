@@ -5,6 +5,7 @@ export class EventBinder {
     this._busBindings = [];
     this._domBindings = [];
     this._debug = debug;
+    this._domTargets = new WeakMap(); // Use WeakMap to store DOM targets
   }
 
   // EventBus binding
@@ -35,6 +36,7 @@ export class EventBinder {
     try {
       target.addEventListener(event, handler, normalizedOptions);
       this._domBindings.push({ target, event, handler, options: normalizedOptions, controller });
+      this._domTargets.set(target, { event, handler, options: normalizedOptions, controller }); // Store target info
 
       if (this._debug) {
         console.log(`EventBinder: Bound DOM event "${event}" to`, target);
@@ -50,31 +52,49 @@ export class EventBinder {
       console.log(`EventBinder: Unbinding ${this._busBindings.length} bus events and ${this._domBindings.length} DOM events`);
     }
 
-    // Clean up EventBus bindings
-    this._busBindings.forEach(({ event, handler }) => {
-      try {
-        eventBus.off(event, handler);
-        if (this._debug) {
-          console.log(`EventBinder: Unbound bus event "${event}"`);
+    try {
+      // Clean up EventBus bindings
+      this._busBindings.forEach(({ event, handler }) => {
+        try {
+          eventBus.off(event, handler);
+          if (this._debug) {
+            console.log(`EventBinder: Unbound bus event "${event}"`);
+          }
+        } catch (error) {
+          console.error(`EventBinder: Error unbinding bus event "${event}":`, error);
         }
-      } catch (error) {
-        console.error(`EventBinder: Error unbinding bus event "${event}":`, error);
-      }
-    });
-    this._busBindings = [];
+      });
 
-    // Abort DOM event controllers
-    this._domBindings.forEach(({ controller, event, target }) => {
-      try {
-        controller?.abort();
-        if (this._debug) {
-          console.log(`EventBinder: Aborted DOM event "${event}" from`, target);
+      // Abort DOM event controllers
+      this._domBindings.forEach(({ controller, event, target }) => {
+        try {
+          controller?.abort();
+          if (this._debug) {
+            console.log(`EventBinder: Aborted DOM event "${event}" from`, target);
+          }
+        } catch (error) {
+          console.error(`EventBinder: Error aborting DOM event "${event}":`, error);
         }
-      } catch (error) {
-        console.error(`EventBinder: Error aborting DOM event "${event}":`, error);
-      }
-    });
-    this._domBindings = [];
+      });
+
+      // Clean up DOM event listeners using WeakMap
+      this._domTargets.forEach(({ event, handler, options }, target) => {
+        if (target) {
+          try {
+            target.removeEventListener(event, handler, options);
+            if (this._debug) {
+              console.log(`EventBinder: Removed DOM event "${event}" from`, target);
+            }
+          } catch (error) {
+            console.error(`EventBinder: Error removing DOM event "${event}":`, error);
+          }
+        }
+      });
+    } finally {
+      this._busBindings = [];
+      this._domBindings = [];
+      this._domTargets = new WeakMap(); // Clear the WeakMap
+    }
   }
 
   // Get stats about bound events
@@ -92,36 +112,24 @@ export class EventBinder {
   }
 
   // Enable/disable debug logging
-_debugLog(level, ...args) {
-  if (!this._debug) return;
+  _debugLog(level, ...args) {
+    if (!this._debug) return;
 
-  const message = {
-    source: 'EventBinder',
-    level,
-    time: new Date(),
-    args,
-  };
+    const message = {
+      source: 'EventBinder',
+      level,
+      time: new Date(),
+      args,
+    };
 
-  // Optional: forward to your global logger if available
-  if (typeof window !== 'undefined' && window.dispatchEvent && typeof CustomEvent === 'function') {
-    window.dispatchEvent(new CustomEvent('*', { detail: message }));
+    // Optional: forward to your global logger if available.  Use a more specific event name.
+    if (typeof window !== 'undefined' && window.dispatchEvent && typeof CustomEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('eventbinder.message', { detail: message }));
+    }
+
+    // Log to the console
+    const prefix = '[EventBinder]';
+    const timestamp = message.time.toISOString();
+    console[level](prefix, timestamp, ...args);
   }
-
-  // Also log to the console for convenience
-  const prefix = '[EventBinder]';
-  const timestamp = message.time.toISOString();
-
-  switch (level) {
-    case 'log':
-      console.log(prefix, timestamp, ...args);
-      break;
-    case 'warn':
-      console.warn(prefix, timestamp, ...args);
-      break;
-    case 'error':
-      console.error(prefix, timestamp, ...args);
-      break;
-  }
-}
-
 }
