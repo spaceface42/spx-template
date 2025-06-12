@@ -4,6 +4,7 @@ import { generateId } from '../../system/usr/bin/id.js';
 import { eventBus } from '../../system/bin/EventBus.js';
 import { DomReadyPromise } from '../../system/sbin/DomReadyPromise.js';
 import { InactivityService } from '../../system/bin/InactivityService.js';
+import { AppConfig } from './AppConfig.js';
 
 const EVENT_LOG = 'log'; // Define a constant for the log event
 
