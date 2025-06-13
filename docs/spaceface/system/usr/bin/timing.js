@@ -7,13 +7,15 @@ export function debounce(func, delay) {
     };
 }
 
-export function throttle(fn, wait = 16) {
-    let lastTime = 0;
+export function throttle(fn) {
+    let isThrottled = false;
     return function throttled(...args) {
-        const now = performance.now();
-        if (now - lastTime >= wait) {
-            lastTime = now;
-            fn.apply(this, args);
+        if (!isThrottled) {
+            isThrottled = true;
+            requestAnimationFrame(() => {
+                fn.apply(this, args);
+                isThrottled = false;
+            });
         }
     };
 }
