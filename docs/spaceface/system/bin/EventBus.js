@@ -70,7 +70,7 @@ export class EventBus {
       try {
         fn(payload);
       } catch (err) {
-        console.error(`Error in event listener for "${event}":`, err);
+        this._handleError(`Error in event listener for "${event}":`, err);
       }
     });
 
@@ -79,7 +79,7 @@ export class EventBus {
       try {
         fn(event, payload);
       } catch (err) {
-        console.error('Error in wildcard event listener:', err);
+        this._handleError('Error in wildcard event listener:', err);
       }
     });
   }
@@ -98,6 +98,13 @@ export class EventBus {
       return [...this.wildcardListeners];
     }
     return [...(this.listeners[event] || [])];
+  }
+
+  // Centralized error handling
+  _handleError(message, error) {
+    console.error(message, error);
+    // Optional: You could also dispatch a custom event here
+    // window.dispatchEvent(new CustomEvent('eventbus.error', { detail: { message, error } }));
   }
 }
 
