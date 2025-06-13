@@ -26,9 +26,11 @@ export class AsyncImageLoader {
         if (!container || !(container instanceof Element)) {
             throw new Error('ImageLoader: container must be a valid DOM Element.');
         }
+        const defaultOptions = { includePicture: false };
+        this.options = { ...defaultOptions, ...options };
+        this.includePicture = this.options.includePicture;
         this.container = container;
         this._imageCache = new WeakMap(); // Use WeakMap for automatic cleanup
-        this.includePicture = options.includePicture || false;
     }
 
     /**
