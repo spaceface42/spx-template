@@ -4,7 +4,7 @@
 class ResizeManager {
     static #instance = null;
 
-    constructor() {
+    constructor(customEvents = ['resize']) {
         if (ResizeManager.#instance) {
             return ResizeManager.#instance;
         }
@@ -15,7 +15,7 @@ class ResizeManager {
         this.isThrottled = false;
 
         this.boundHandler = () => this.#handleWindowResize();
-        window.addEventListener('resize', this.boundHandler, { passive: true });
+        customEvents.forEach(event => window.addEventListener(event, this.boundHandler, { passive: true }));
 
         ResizeManager.#instance = this;
     }
