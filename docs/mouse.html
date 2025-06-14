@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Box Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .box {
+            border: 2px solid red;
+            height: 100px;
+            width: 100px;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+
+<div id="ex1" class="container">
+  <div id="ex1-layer" class="box"></div>
+</div>
+
+<script type="module">
+import { BoxAnimator } from './eye.js';
+
+const ex1Layer = document.getElementById("ex1-layer");
+new BoxAnimator(ex1Layer, 20, 0.15);
+</script>
+
+</body>
+</html>

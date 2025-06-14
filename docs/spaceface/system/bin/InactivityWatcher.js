@@ -1,4 +1,5 @@
 import { eventBus } from './EventBus.js';
+import { throttle } from '../usr/bin/timing.js';
 
 /**
  * Emits inactivity and activity events based on user input.
@@ -7,7 +8,7 @@ import { eventBus } from './EventBus.js';
  *   - 'user:active'
  *
  * Example usage:
- *   eventBus.on('user:inactive', () => startScreensaver());
+ *   eventBus.on('user:inactive', (data) => startScreensaver(data.duration));
  *   eventBus.on('user:active', () => stopScreensaver());
  */
 export class InactivityWatcher {
@@ -15,7 +16,7 @@ export class InactivityWatcher {
   #inactivityTimer = null;
   #isInactive = false;
   #activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
-  #handleUserActivity = this.#handleActivity.bind(this);
+  #handleUserActivity = throttle(this.#handleActivity.bind(this), 100);
 
   /**
    * @param {Object} options
@@ -46,7 +47,7 @@ export class InactivityWatcher {
     this.#clearInactivityTimer();
     this.#inactivityTimer = setTimeout(() => {
       this.#isInactive = true;
-      eventBus.emit('user:inactive');
+      eventBus.emit('user:inactive', { duration: this.#inactivityDelay });
     }, this.#inactivityDelay);
   }
 
