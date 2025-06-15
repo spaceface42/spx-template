@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced Hamburger Menu</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+    header {
+      background: #222;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .menu-toggle span {
+      display: block;
+      height: 3px;
+      background: white;
+      border-radius: 2px;
+      transition: background-color 0.3s ease; /* Added transition */
+    }
+
+    .menu-toggle.active span {
+      background-color: #ddd; /* Change color when active */
+    }
+
+    nav ul {
+      display: flex;
+      gap: 1rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      transition: color 0.3s ease; /* Added transition */
+    }
+
+    nav a:hover,
+    nav a:focus {
+      color: #ddd; /* Change color on hover/focus */
+    }
+
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: flex;
+      }
+
+      nav ul {
+        display: none;
+        position: absolute;
+        top: 70px;
+        right: 20px;
+        background: #222;
+        flex-direction: column;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        transition: transform 0.3s ease; /* Added transition */
+        transform: translateX(100%); /* Initially off-screen */
+      }
+
+      nav ul.active {
+        display: flex;
+        transform: translateX(0); /* Slide in when active */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">MySite</div>
+    <button class="menu-toggle" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <nav>
+      <ul id="menu">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Projects</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <script type="module">
+    import { debounce } from './spaceface/system/usr/bin/timing.js';
+
+    class HamburgerMenu {
+      constructor() {
+        this.toggle = document.querySelector('.menu-toggle');
+        this.menu = document.getElementById('menu');
+        this.focusableElements = this.menu.querySelectorAll('a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select');
+        this.firstFocusableElement = this.focusableElements[0];
+        this.lastFocusableElement = this.focusableElements[this.focusableElements.length - 1];
+        this.isOpen = false;
+
+        this.init();
+      }
+
+      init() {
+        this.toggle.addEventListener('click', this.toggleMenu.bind(this));
+        this.menu.addEventListener('keydown', this.handleTab.bind(this));
+
+        // Debounce the handleResize method
+        this.debouncedHandleResize = debounce(this.handleResize.bind(this), 150);
+        window.addEventListener('resize', this.debouncedHandleResize);
+
+        this.handleResize(); // Initial check
+      }
+
+      toggleMenu() {
+        this.isOpen = !this.isOpen;
+        this.toggle.setAttribute('aria-expanded', this.isOpen);
+        this.menu.classList.toggle('active', this.isOpen);
+        this.toggle.classList.toggle('active', this.isOpen);
+
+        if (this.isOpen) {
+          this.firstFocusableElement.focus();
+        }
+      }
+
+      handleTab(e) {
+        if (e.key === 'Tab') {
+          if (e.shiftKey) {
+            if (document.activeElement === this.firstFocusableElement) {
+              e.preventDefault();
+              this.lastFocusableElement.focus();
+            }
+          } else {
+            if (document.activeElement === this.lastFocusableElement) {
+              e.preventDefault();
+              this.firstFocusableElement.focus();
+            }
+          }
+        }
+      }
+
+      handleResize() {
+        const isMobile = window.innerWidth <= 768;
+        if (!isMobile && this.isOpen) {
+          this.toggleMenu(); // Close menu on desktop
+        }
+      }
+    }
+
+    const hamburgerMenu = new HamburgerMenu();
+  </script>
+
+</body>
+</html>
