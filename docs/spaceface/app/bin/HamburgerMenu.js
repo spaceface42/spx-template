@@ -14,12 +14,13 @@ class HamburgerMenu {
 
     this.toggle = document.querySelector(this.options.menuSelector);
     this.menu = document.getElementById(this.options.menuId);
-    this.menuItems = this.menu.querySelectorAll('a'); // Get all menu items
+    this.menuItems = Array.from(this.menu.querySelectorAll('a')); // Get all menu items as an array
     this.focusableElements = this.menu.querySelectorAll('a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select');
     this.firstFocusableElement = this.focusableElements[0];
     this.lastFocusableElement = this.focusableElements[this.focusableElements.length - 1];
     this.isOpen = false;
     this.eventBinder = new EventBinder(); // Create EventBinder instance
+    this.menuItemClickHandlers = []; // Array to store bound click handlers
 
     this.init();
   }
@@ -31,7 +32,9 @@ class HamburgerMenu {
     // Add click listener to menu items
     if (this.options.closeOnItemClick) {
       this.menuItems.forEach(item => {
-        this.eventBinder.bindDOM(item, 'click', this.toggleMenu.bind(this));
+        const boundHandler = this.toggleMenu.bind(this); // Bind the handler
+        this.eventBinder.bindDOM(item, 'click', boundHandler); // Bind using EventBinder
+        this.menuItemClickHandlers.push(boundHandler); // Store the bound handler
       });
     }
 
