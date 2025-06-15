@@ -114,15 +114,18 @@
 
   <script type="module">
     import { HamburgerMenu } from '/spaceface/app/bin/HamburgerMenu.js';
+    import { DomReadyPromise } from '/spaceface/system/sbin/DomReadyPromise.js';
 
-  const hamburgerMenu = new HamburgerMenu({
-    menuSelector: '.my-menu-toggle', // Optional: Custom toggle selector
-    menuId: 'my-menu', // Optional: Custom menu ID
-    breakpoint: 992, // Optional: Custom breakpoint
-    activeClass: 'is-active', // Optional: Custom active class
-  });
+    DomReadyPromise.ready().then(() => {
 
-</script>
+      const hamburgerMenu = new HamburgerMenu({
+        menuSelector: '.menu-toggle',
+        menuId: 'menu',
+        breakpoint: 992,
+        activeClass: 'active',
+      });
+      
+    });
   </script>
 
 </body>
