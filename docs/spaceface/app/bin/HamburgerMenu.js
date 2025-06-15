@@ -1,6 +1,5 @@
-
-import { debounce } from './spaceface/system/usr/bin/timing.js';
-import { EventBinder } from './spaceface/system/bin/EventBinder.js'; // Import EventBinder
+import { EventBinder } from '/spaceface/system/bin/EventBinder.js'; // Import EventBinder
+import { resizeManager } from '/spaceface/system/bin/ResizeManager.js'; // Import ResizeManager
 
 export class HamburgerMenu {
     constructor() {
@@ -19,9 +18,8 @@ export class HamburgerMenu {
     this.eventBinder.bindDOM(this.toggle, 'click', this.toggleMenu.bind(this));
     this.menu.addEventListener('keydown', this.handleTab.bind(this));
 
-    // Debounce the handleResize method
-    this.debouncedHandleResize = debounce(this.handleResize.bind(this), 150);
-    this.eventBinder.bindDOM(window, 'resize', this.debouncedHandleResize);
+    // Use resizeManager instead of direct window resize listener
+    this.unsubscribeResize = resizeManager.onWindow(this.handleResize.bind(this));
 
     this.handleResize(); // Initial check
     }
@@ -54,15 +52,18 @@ export class HamburgerMenu {
     }
 
     handleResize() {
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = resizeManager.getWindow().width <= 768;
     if (!isMobile && this.isOpen) {
         this.toggleMenu(); // Close menu on desktop
     }
     }
 
     destroy() {
-    this.eventBinder.unbindAll(); // Unbind all events
+    this.eventBinder.unbindAll(); // Unbind all DOM events
+    if (this.unsubscribeResize) {
+        this.unsubscribeResize(); // Unsubscribe from resizeManager
+    }
     }
 }
 
-
+const hamburgerMenu = new HamburgerMenu();
