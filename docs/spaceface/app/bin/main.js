@@ -4,7 +4,7 @@ const isDev = window.location.hostname === 'localhost' || window.location.hostna
 
 // Add specific events to log
 const eventsToLog = [
-  'partial:loaded:*', // Logs all partial loaded events
+  'partial:loaded', // Logs all partial loaded events
   'partials:allLoaded', // Logs when all partials are loaded
   '*', // Logs all events (wildcard)
 ];
@@ -16,6 +16,24 @@ if (isDev) {
     });
   });
 }
+
+/////////////
+
+if (isDev) {
+  eventsToLog.forEach(eventName => {
+    eventBus.on(eventName, (eventName, payload) => {
+      console.log(`████████ [ any ×͜× listener ] Event: ${eventName}`, payload ?? '(no payload)');
+    });
+  });
+
+  // Add listener for "nextSlide" event
+  eventBus.on('nextSlide', (payload) => {
+    console.log(`████████ [ Slide Listener ] Event: nextSlide`, payload ?? '(no payload)');
+  });
+}
+
+
+// console.log(eventBus.listeners);
 
 // Now import and init your main app class (Spaceface or similar)
 import { Spaceface } from './Spaceface.js';

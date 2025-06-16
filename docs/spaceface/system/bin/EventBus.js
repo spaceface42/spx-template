@@ -12,6 +12,7 @@ export class EventBus {
       if (!this.listeners[event]) this.listeners[event] = [];
       this.listeners[event].push(callback);
     }
+    // console.log(`Listener registered for event: ${event}`, this.listeners);
   }
 
   // Register a listener that will only be called once
