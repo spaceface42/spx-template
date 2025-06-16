@@ -5,7 +5,7 @@
  */
 import { debounce } from '../usr/bin/timing.js';
 import { DomReadyPromise } from './DomReadyPromise.js';
-import { eventBus } from '../bin/EventBus.js';
+import { eventBus } from './EventBus.js';
 
 export class PartialLoader {
     constructor(options = {}) {

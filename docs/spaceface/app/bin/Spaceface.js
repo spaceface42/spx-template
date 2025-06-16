@@ -2,8 +2,8 @@ import spx from '../../lib/spx/index.js';
 
 import { generateId } from '../../system/usr/bin/id.js';
 import { eventBus } from '../../system/bin/EventBus.js';
-import { DomReadyPromise } from '../../system/sbin/DomReadyPromise.js';
-import { InactivityService } from '../../system/bin/InactivityService.js';
+import { DomReadyPromise } from '../../system/bin/DomReadyPromise.js';
+import { InactivityService } from '../../system/sbin/InactivityService.js';
 import { AppConfig } from './AppConfig.js';
 
 const EVENT_LOG = 'log'; // Define a constant for the log event
@@ -20,10 +20,10 @@ export class Spaceface {
 
     this.featureModules = {
       // debug: () => import('../../system/usr/bin/InspectorXray.js'),
-      partialLoader: () => import('../../system/sbin/PartialLoader.js'),
+      partialLoader: () => import('../../system/bin/PartialLoader.js'),
       slideplayer: () => import('../../system/features/SlidePlayer/SlidePlayer.js'),
       screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
-      serviceWorker: () => import('../../system/bin/ServiceWorkerManager.js'),
+      serviceWorker: () => import('../../system/sbin/ServiceWorkerManager.js'),
     };
 
     this.loadedModules = new Map();

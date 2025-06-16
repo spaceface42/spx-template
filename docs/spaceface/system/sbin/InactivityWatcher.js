@@ -1,4 +1,4 @@
-import { eventBus } from './EventBus.js';
+import { eventBus } from '../bin/EventBus.js';
 import { throttle } from '../usr/bin/timing.js';
 
 /**

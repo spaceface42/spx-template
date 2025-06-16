@@ -1,6 +1,6 @@
 import { eventBus } from '../../bin/EventBus.js';
 import { EventBinder } from '../../bin/EventBinder.js';
-import { AsyncImageLoader } from '../../bin/AsyncImageLoader.js';
+import { AsyncImageLoader } from '../../sbin/AsyncImageLoader.js';
 
 
 export class SlidePlayer {
@@ -32,7 +32,7 @@ export class SlidePlayer {
     this.isDragging = false;
 
     this.loader = new AsyncImageLoader(this.container, { includePicture });
-    
+
     // Initialize EventBinder for automatic cleanup
     // this.eventBinder = new EventBinder();
     this.eventBinder = new EventBinder(true);
@@ -99,7 +99,7 @@ export class SlidePlayer {
     this.eventBinder.bindDOM(this.container, 'mouseenter', () => {
       this.isPaused = true;
     });
-    
+
     this.eventBinder.bindDOM(this.container, 'mouseleave', () => {
       this.isPaused = false;
       this.lastTimestamp = performance.now();
@@ -130,7 +130,7 @@ export class SlidePlayer {
     this.eventBinder.bindDOM(window, 'beforeunload', () => {
       this.destroy();
     });
-  
+
     this.rafId = requestAnimationFrame(this.animate.bind(this));
   }
 

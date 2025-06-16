@@ -1,6 +1,6 @@
 import { eventBus } from '../../../bin/EventBus.js';
-import { AsyncImageLoader } from '../../../bin/AsyncImageLoader.js';
-import { EventBinder } from '../../bin/EventBinder.js';
+import { AsyncImageLoader } from '../../../sbin/AsyncImageLoader.js';
+import { EventBinder } from './EventBinder.js';
 
 export class SlidePlayer {
   constructor(containerSelector, { interval = 5000, includePicture = false } = {}) {

@@ -1,6 +1,6 @@
 import { eventBus } from '../../bin/EventBus.js';
-import { InactivityService } from '../../bin/InactivityService.js';
-import { PartialFetcher } from '../../sbin/PartialFetcher.js';
+import { InactivityService } from '../../sbin/InactivityService.js';
+import { PartialFetcher } from '../../bin/PartialFetcher.js';
 import { FloatingImagesManager } from '../FloatingImages/FloatingImagesManager.js';
 import { EventBinder } from '../../bin/EventBinder.js';
 
@@ -80,7 +80,7 @@ export class ScreensaverController {
 
     try {
       this.hideScreensaver();
-      
+
       if (this.watcher) {
         this.watcher.destroy();
         this.watcher = null;
