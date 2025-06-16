@@ -13,9 +13,9 @@ export class EventBinder {
     eventBus.on(event, handler);
     this._busBindings.push({ event, handler });
 
-    if (this._debug) {
-      console.log(`EventBinder: Bound bus event "${event}"`);
-    }
+    //if (this._debug) {
+    //  console.log(`EventBinder: Bound bus event "${event}"`);
+    //}
   }
 
   // DOM binding with normalized options and AbortController
@@ -48,18 +48,18 @@ export class EventBinder {
 
   // Remove all tracked bindings
   unbindAll() {
-    if (this._debug) {
-      console.log(`EventBinder: Unbinding ${this._busBindings.length} bus events and ${this._domBindings.length} DOM events`);
-    }
+    //if (this._debug) {
+    //  console.log(`EventBinder: Unbinding ${this._busBindings.length} bus events and ${this._domBindings.length} DOM events`);
+    //}
 
     try {
       // Clean up EventBus bindings
       this._busBindings.forEach(({ event, handler }) => {
         try {
           eventBus.off(event, handler);
-          if (this._debug) {
-            console.log(`EventBinder: Unbound bus event "${event}"`);
-          }
+          //if (this._debug) {
+          //  console.log(`EventBinder: Unbound bus event "${event}"`);
+          //}
         } catch (error) {
           console.error(`EventBinder: Error unbinding bus event "${event}":`, error);
         }
@@ -69,9 +69,9 @@ export class EventBinder {
       this._domBindings.forEach(({ controller, event, target }) => {
         try {
           controller?.abort();
-          if (this._debug) {
-            console.log(`EventBinder: Aborted DOM event "${event}" from`, target);
-          }
+          //if (this._debug) {
+          //  console.log(`EventBinder: Aborted DOM event "${event}" from`, target);
+          //}
         } catch (error) {
           console.error(`EventBinder: Error aborting DOM event "${event}":`, error);
         }
