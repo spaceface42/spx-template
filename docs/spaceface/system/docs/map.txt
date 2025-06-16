@@ -1,39 +1,39 @@
-spaceface/
-└── system/
-    ├── bin/
-    │   ├── AsyncImageLoader.js
-    │   ├── EventBus.js
-    │   ├── InactivityService.js
-    │   ├── InactivityWatcher.js
-    │   ├── PerformanceMonitor.js
-    │   └── ResizeManager.js
-    │
-    ├── features/
-    │   ├── AudioPlayer/
-    │   │   └── BackgroundAudioPlayer.js
-    │   │
-    │   ├── FloatingImages/
-    │   │   ├── FloatingImage.js
-    │   │   └── FloatingImagesManager.js
-    │   │
-    │   ├── Screensaver/
-    │   │   └── ScreensaverController.js
-    │   │
-    │   └── SlidePlayer/
-    │       └── SlidePlayer.js
-    │
-    ├── sbin/
-    │   ├── DeviceDetect.js
-    │   ├── DomReadyPromise.js
-    │   ├── MouseTracker.js
-    │   ├── PartialFetcher.js
-    │   └── PartialLoader.js
-    │
-    └── usr/
-        └── bin/
-            ├── InspectorXray.js
-            ├── id.js
-            ├── index.js
-            ├── logging.js
-            └── math.js
-            └── timing.js
+system
+├── README.md
+├── bin
+│   ├── DeviceDetect.js
+│   ├── EventBinder.js
+│   ├── PartialFetcher.js
+│   ├── DomReadyPromise.js
+│   ├── EventBus.js
+│   ├── PartialLoader.js
+├── docs
+│   ├── event-eventbinder.js
+│   ├── map.json
+│   ├── map.txt
+├── features
+│   ├── AudioPlayer
+│   │   └── BackgroundAudioPlayer.js
+│   ├── FloatingImages
+│   │   ├── FloatingImage.js
+│   │   └── FloatingImagesManager.js
+│   ├── Screensaver
+│   │   └── ScreensaverController.js
+│   ├── SlidePlayer
+│   │   ├── SlidePlayer.js
+├── sbin
+│   ├── AsyncImageLoader.js
+│   ├── InactivityWatcher.js
+│   ├── PerformanceMonitor.js
+│   ├── ServiceWorkerManager.js
+│   ├── InactivityService.js
+│   ├── MouseTracker.js
+│   └── ResizeManager.js
+├── usr
+│   └── bin
+│       ├── InspectorXray.js
+│       ├── index.js
+│       ├── math.js
+│       ├── id.js
+│       ├── logging.js
+│       └── timing.js
