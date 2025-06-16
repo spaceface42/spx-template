@@ -2,8 +2,11 @@ import { eventBus } from '../../system/bin/EventBus.js';
 
 const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
 
+// Add specific events to log
 const eventsToLog = [
-  '*',
+  'partial:loaded:*', // Logs all partial loaded events
+  'partials:allLoaded', // Logs when all partials are loaded
+  '*', // Logs all events (wildcard)
 ];
 
 if (isDev) {
@@ -13,8 +16,6 @@ if (isDev) {
     });
   });
 }
-
-
 
 // Now import and init your main app class (Spaceface or similar)
 import { Spaceface } from './Spaceface.js';
@@ -26,7 +27,7 @@ const app = new Spaceface({
       interval: 5000,
       includePicture: false
     },
-    screensaver: { 
+    screensaver: {
       delay: 6500,
       partialUrl: '/content/feature/screensaver/index.html'
     },
