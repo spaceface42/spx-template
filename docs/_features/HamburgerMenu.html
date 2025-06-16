@@ -91,6 +91,19 @@
         transform: translateX(0); /* Slide in when active */
       }
     }
+
+    /* Example custom styles (optional) */
+    .my-menu-list {
+      border: 1px solid yellow;
+    }
+
+    .my-menu-item {
+      padding: 0.5em;
+    }
+
+    .my-menu-link {
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -113,18 +126,29 @@
   </header>
 
   <script type="module">
-    import { HamburgerMenu } from '/spaceface/app/bin/HamburgerMenu.js';
+    import { HamburgerMenu } from '/spaceface/app/ui/HamburgerMenu.js';
     import { DomReadyPromise } from '/spaceface/system/sbin/DomReadyPromise.js';
 
     DomReadyPromise.ready().then(() => {
-
+      // Your JavaScript code here
       const hamburgerMenu = new HamburgerMenu({
         menuSelector: '.menu-toggle',
         menuId: 'menu',
         breakpoint: 992,
         activeClass: 'active',
+        menuListClass: 'my-menu-list',
+        menuItemClass: 'my-menu-item',
+        menuLinkClass: 'my-menu-link',
+        onMenuOpen: (menu) => {
+          console.log('Menu opened', menu);
+        },
+        onMenuClose: (menu) => {
+          console.log('Menu closed', menu);
+        },
+        onResize: (menu, isMobile) => {
+          console.log('Resized', menu, isMobile);
+        },
       });
-      
     });
   </script>
 
