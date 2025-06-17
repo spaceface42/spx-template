@@ -17,23 +17,7 @@ if (isDev) {
   });
 }
 
-/////////////
 
-if (isDev) {
-  eventsToLog.forEach(eventName => {
-    eventBus.on(eventName, (eventName, payload) => {
-      console.log(`████████ [ any ×͜× listener ] Event: ${eventName}`, payload ?? '(no payload)');
-    });
-  });
-
-  // Add listener for "nextSlide" event
-  eventBus.on('nextSlide', (payload) => {
-    console.log(`████████ [ Slide Listener ] Event: nextSlide`, payload ?? '(no payload)');
-  });
-}
-
-
-// console.log(eventBus.listeners);
 
 // Now import and init your main app class (Spaceface or similar)
 import { Spaceface } from './Spaceface.js';
@@ -46,7 +30,7 @@ const app = new Spaceface({
       includePicture: false
     },
     screensaver: {
-      delay: 6500,
+      delay: 4500,
       partialUrl: '/content/feature/screensaver/index.html'
     },
     serviceWorker: true,

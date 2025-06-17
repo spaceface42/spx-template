@@ -111,17 +111,27 @@ export class Spaceface {
    */
   async initScreensaver() {
     const screensaverConfig = this.config.features.screensaver;
+
+    // Ensure the screensaver configuration exists and has a partialUrl
     if (!screensaverConfig || !screensaverConfig.partialUrl) {
       eventBus.emit(EVENT_LOG, {
         level: 'error',
-        args: ['Screensaver partialUrl is missing in configuration.'],
+        args: ['Screensaver configuration is missing or incomplete.'],
       });
       return;
     }
 
+    // Load the Screensaver module
     const module = await this.loadFeatureModule('screensaver');
-    if (!module?.ScreensaverController) return;
+    if (!module?.ScreensaverController) {
+      eventBus.emit(EVENT_LOG, {
+        level: 'error',
+        args: ['Failed to load ScreensaverController module.'],
+      });
+      return;
+    }
 
+    // Create a unique ID for the screensaver container
     const uniqueId = generateId('screensaver', 9);
     const screensaverDiv = document.createElement('div');
     screensaverDiv.id = uniqueId;
@@ -131,16 +141,26 @@ export class Spaceface {
     `;
     document.body.appendChild(screensaverDiv);
 
-    this.screensaverController = new module.ScreensaverController({
+    // Initialize the ScreensaverController
+    const controllerOptions = {
       partialUrl: screensaverConfig.partialUrl,
       targetSelector: `#${uniqueId}`,
-      inactivityDelay: screensaverConfig.delay || 3000,
-    });
+    };
 
+    // Only pass inactivityDelay if it is explicitly defined
+    if (screensaverConfig.delay !== undefined) {
+      controllerOptions.inactivityDelay = screensaverConfig.delay;
+      console.log(`Screensaver inactivity is UNDEFINED`);
+    }
+
+    this.screensaverController = new module.ScreensaverController(controllerOptions);
+
+    // Check if the init method exists and call it
     if (typeof this.screensaverController.init === 'function') {
       await this.screensaverController.init();
     }
 
+    // Emit events for debugging and visibility
     eventBus.emit('screensaver:initialized', uniqueId);
     eventBus.emit(EVENT_LOG, { level: 'info', args: ['Screensaver initialized:', uniqueId] });
   }
