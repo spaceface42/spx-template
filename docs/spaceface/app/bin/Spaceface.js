@@ -1,5 +1,4 @@
 import spx from '../../lib/spx/index.js';
-
 import { generateId } from '../../system/usr/bin/id.js';
 import { eventBus } from '../../system/bin/EventBus.js';
 import { DomReadyPromise } from '../../system/bin/DomReadyPromise.js';
@@ -7,8 +6,6 @@ import { InactivityService } from '../../system/sbin/InactivityService.js';
 import { AppConfig } from './AppConfig.js';
 
 const EVENT_LOG = 'log'; // Define a constant for the log event
-
-
 
 export class Spaceface {
   constructor(options = {}) {
@@ -18,87 +15,106 @@ export class Spaceface {
     this.pageType = this.detectPageType();
     this.startTime = performance.now();
 
-    this.featureModules = {
-      // debug: () => import('../../system/usr/bin/InspectorXray.js'),
-      partialLoader: () => import('../../system/bin/PartialLoader.js'),
-      slideplayer: () => import('../../system/features/SlidePlayer/SlidePlayer.js'),
-      screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
-      serviceWorker: () => import('../../system/sbin/ServiceWorkerManager.js'),
-    };
-
+    this.featureModules = this.defineFeatureModules();
     this.loadedModules = new Map();
     this.inactivityWatcher = null;
     this.screensaverController = null;
   }
 
+  /**
+   * Define feature modules for dynamic imports
+   */
+  defineFeatureModules() {
+    return {
+      partialLoader: () => import('../../system/bin/PartialLoader.js'),
+      slideplayer: () => import('../../system/features/SlidePlayer/SlidePlayer.js'),
+      screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
+      serviceWorker: () => import('../../system/sbin/ServiceWorkerManager.js'),
+      debug: () => import('../../system/usr/bin/InspectorXray.js'),
+    };
+  }
+
+  /**
+   * Detect the current page type
+   */
   detectPageType() {
     const path = window.location.pathname;
     const body = document.body;
 
-    if (body.dataset.page) {
-      return body.dataset.page;
-    }
+    if (body.dataset.page) return body.dataset.page;
     if (path === '/') return 'home';
     if (path === '/app') return 'app';
 
     return 'default';
   }
 
+  /**
+   * Load a feature module dynamically
+   */
   async loadFeatureModule(featureName) {
-    if (!this.featureModules[featureName]) {
-      return null;
-    }
+    if (!this.featureModules[featureName]) return null;
+
     if (!this.loadedModules.has(featureName)) {
       try {
         const module = await this.featureModules[featureName]();
         this.loadedModules.set(featureName, module);
       } catch (err) {
         const modulePath = this.featureModules[featureName].toString();
-        eventBus.emit(EVENT_LOG, { level: 'warn', args: [`Failed to load feature module "${featureName}" from ${modulePath}:`, err] });
+        eventBus.emit(EVENT_LOG, {
+          level: 'warn',
+          args: [`Failed to load feature module "${featureName}" from ${modulePath}:`, err],
+        });
         this.loadedModules.set(featureName, null);
       }
     }
+
     return this.loadedModules.get(featureName);
   }
 
+  /**
+   * Initialize the inactivity watcher
+   */
   async initInactivityWatcher() {
-    if (!this.config.features.screensaver) return;
-    if (this.inactivityWatcher) return;
+    const screensaverConfig = this.config.features.screensaver;
+    if (!screensaverConfig || this.inactivityWatcher) return;
 
     this.inactivityWatcher = new InactivityService({
-      inactivityDelay: this.config.features.screensaver.delay || 3000,
+      inactivityDelay: screensaverConfig.delay || 3000,
     });
   }
 
+  /**
+   * Initialize the SlidePlayer feature
+   */
   async initSlidePlayer() {
     await DomReadyPromise.ready();
 
-    if (!this.config.features.slideplayer) return;
+    const slideplayerConfig = this.config.features.slideplayer;
+    if (!slideplayerConfig) return;
 
     const module = await this.loadFeatureModule('slideplayer');
     if (!module?.SlidePlayer) return;
 
     const slideshow = new module.SlidePlayer('.slideshow-container', {
-      interval: this.config.features.slideplayer.interval || 5000,
-      includePicture: this.config.features.slideplayer.includePicture || false
+      interval: slideplayerConfig.interval || 5000,
+      includePicture: slideplayerConfig.includePicture || false,
     });
 
-    // Await the init() Promise that started in constructor
     await slideshow.ready;
 
     eventBus.emit(EVENT_LOG, { level: 'info', args: ['SlidePlayer loaded'] });
-
     this.slideshow = slideshow;
   }
 
+  /**
+   * Initialize the Screensaver feature
+   */
   async initScreensaver() {
-    const config = this.config.features.screensaver;
-    if (!config) return;
-
-    if (!config.partialUrl) {
+    const screensaverConfig = this.config.features.screensaver;
+    if (!screensaverConfig || !screensaverConfig.partialUrl) {
       eventBus.emit(EVENT_LOG, {
         level: 'error',
-        args: ['Screensaver partialUrl is missing in configuration.']
+        args: ['Screensaver partialUrl is missing in configuration.'],
       });
       return;
     }
@@ -116,9 +132,9 @@ export class Spaceface {
     document.body.appendChild(screensaverDiv);
 
     this.screensaverController = new module.ScreensaverController({
-      partialUrl: config.partialUrl,
+      partialUrl: screensaverConfig.partialUrl,
       targetSelector: `#${uniqueId}`,
-      inactivityDelay: config.delay || 3000
+      inactivityDelay: screensaverConfig.delay || 3000,
     });
 
     if (typeof this.screensaverController.init === 'function') {
@@ -129,18 +145,12 @@ export class Spaceface {
     eventBus.emit(EVENT_LOG, { level: 'info', args: ['Screensaver initialized:', uniqueId] });
   }
 
-  async initDebug() {
-    if (this.config.production) return;
-
-    const module = await this.loadFeatureModule('debug');
-    if (module?.InspectorXray) {
-      new module.InspectorXray();
-      eventBus.emit(EVENT_LOG, { level: 'info', args: ['Debug mode enabled'] });
-    }
-  }
-
+  /**
+   * Initialize the Service Worker
+   */
   async initServiceWorker() {
-    if (!this.config.features.serviceWorker) return;
+    const serviceWorkerConfig = this.config.features.serviceWorker;
+    if (!serviceWorkerConfig) return;
 
     const module = await this.loadFeatureModule('serviceWorker');
     if (!module?.default) return;
@@ -148,8 +158,8 @@ export class Spaceface {
     const swManager = new module.default('/sw.js', {}, {
       strategy: {
         images: 'cache-first',
-        others: 'network-first'
-      }
+        others: 'network-first',
+      },
     });
 
     try {
@@ -162,6 +172,9 @@ export class Spaceface {
     }
   }
 
+  /**
+   * Initialize the PartialLoader feature
+   */
   async initPartialLoader() {
     const module = await this.loadFeatureModule('partialLoader');
     if (!module?.PartialLoader) return null;
@@ -172,31 +185,36 @@ export class Spaceface {
     return loader;
   }
 
+  /**
+   * Initialize page-specific features
+   */
   async initPageFeatures() {
     eventBus.emit(EVENT_LOG, { level: 'info', args: [`Initializing features for page type: ${this.pageType}`] });
 
     try {
       switch (this.pageType) {
         case 'home':
-          // const { initHome } = await import('./_home.js');
-          // if (initHome) await initHome();
+          // Add home-specific initialization logic here
           break;
 
         case 'app':
-          // const { initApp } = await import('./_app.js');
-          // if (initApp) await initApp();
+          // Add app-specific initialization logic here
           break;
 
         default:
-          // fallback or no specific page features
+          // No specific page features
           break;
       }
+
       eventBus.emit(EVENT_LOG, { level: 'info', args: [`Page features initialized for: ${this.pageType}`] });
     } catch (error) {
       eventBus.emit(EVENT_LOG, { level: 'warn', args: [`Page feature initialization failed for ${this.pageType}:`, error] });
     }
   }
 
+  /**
+   * Initialize the application
+   */
   async init() {
     try {
       eventBus.emit(EVENT_LOG, { level: 'info', args: [`App initialization started (Page: ${this.pageType})`] });
@@ -207,40 +225,28 @@ export class Spaceface {
       await DomReadyPromise.ready();
       eventBus.emit(EVENT_LOG, { level: 'info', args: ['DOM ready'] });
 
-      // Init inactivity watcher first to start emitting events for screensaver
       await this.initInactivityWatcher();
 
-      // Init screensaver and other core features in parallel
       const coreFeatures = [
         this.initPartialLoader(),
         this.initSlidePlayer(),
         this.initScreensaver(),
-        // this.initDebug(),
-        this.initServiceWorker()
+        this.initServiceWorker(),
       ];
 
-      const [coreResults, pageResult] = await Promise.allSettled([
-        Promise.allSettled(coreFeatures),
-        this.initPageFeatures()
-      ]);
-
-      if (coreResults.status === 'fulfilled') {
-        const featureNames = ['partialLoader', 'screensaver', 'debug', 'serviceWorker'];
-        coreResults.value.forEach((result, i) => {
-          if (result.status === 'rejected') {
-            eventBus.emit(EVENT_LOG, { level: 'warn', args: [`${featureNames[i]} initialization failed:`, result.reason] });
-          }
-        });
-      }
+      await Promise.allSettled(coreFeatures);
+      await this.initPageFeatures();
 
       const endTime = performance.now();
       eventBus.emit(EVENT_LOG, { level: 'info', args: [`App initialization completed in ${(endTime - this.startTime).toFixed(2)}ms`] });
-
     } catch (error) {
       eventBus.emit(EVENT_LOG, { level: 'error', args: ['Critical app initialization error:', error] });
     }
   }
 
+  /**
+   * Setup SPX
+   */
   setupSPX() {
     return spx({
       fragments: ['main', 'footer'],
@@ -251,6 +257,9 @@ export class Spaceface {
     });
   }
 
+  /**
+   * Utility methods
+   */
   getPageType() {
     return this.pageType;
   }
