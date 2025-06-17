@@ -150,7 +150,6 @@ export class Spaceface {
     // Only pass inactivityDelay if it is explicitly defined
     if (screensaverConfig.delay !== undefined) {
       controllerOptions.inactivityDelay = screensaverConfig.delay;
-      console.log(`Screensaver inactivity is UNDEFINED`);
     }
 
     this.screensaverController = new module.ScreensaverController(controllerOptions);
