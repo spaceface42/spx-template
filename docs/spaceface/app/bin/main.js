@@ -4,14 +4,16 @@ const isDev = window.location.hostname === 'localhost' || window.location.hostna
 
 // Add specific events to log
 const eventsToLog = [
-  'partial:loaded', // Logs all partial loaded events
-  'partials:allLoaded', // Logs when all partials are loaded
+  // 'partial:loaded', // Logs all partial loaded events
+  // 'partials:allLoaded', // Logs when all partials are loaded
+  // 'user:active', // Logs all events (wildcard)
+  // 'user:inactive', // Logs all events (wildcard)
   '*', // Logs all events (wildcard)
 ];
 
 if (isDev) {
   eventsToLog.forEach(eventName => {
-    eventBus.on(eventName, (eventName, payload) => {
+    eventBus.on(eventName, (payload) => {
       console.log(`████████ [ any ×͜× listener ] Event: ${eventName}`, payload ?? '(no payload)');
     });
   });
