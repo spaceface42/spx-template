@@ -12,7 +12,8 @@ export class EventBus {
       if (!this.listeners[event]) this.listeners[event] = [];
       this.listeners[event].push(callback);
     }
-    // console.log(`Listener registered for event: ${event}`, this.listeners);
+    // debugging output
+    console.log(`EventBus: Listener registered for event "${event}"`);
   }
 
   // Register a listener that will only be called once
@@ -66,6 +67,14 @@ export class EventBus {
 
   // Emit event with optional payload
   emit(event, payload) {
+    if (!event) {
+      this._handleError('EventBus: Event name is undefined or empty', new Error('Invalid event name'));
+      return;
+    }
+
+    // debugging output
+    console.log(`EventBus: Emitting event "${event}"`, payload);
+
     // Call listeners for this event
     (this.listeners[event] || []).forEach(fn => {
       try {
@@ -104,8 +113,7 @@ export class EventBus {
   // Centralized error handling
   _handleError(message, error) {
     console.error(message, error);
-    // Optional: You could also dispatch a custom event here
-    // window.dispatchEvent(new CustomEvent('eventbus.error', { detail: { message, error } }));
+    eventBus.emit('eventbus:error', { message, error });
   }
 }
 
