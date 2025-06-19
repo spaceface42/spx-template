@@ -114,7 +114,6 @@ export class Spaceface {
   async initScreensaver() {
     const screensaverConfig = this.config.features.screensaver;
 
-    // Ensure the screensaver configuration exists and has a partialUrl
     if (!screensaverConfig || !screensaverConfig.partialUrl) {
       eventBus.emit(EVENT_LOG, {
         level: 'error',
@@ -123,7 +122,6 @@ export class Spaceface {
       return;
     }
 
-    // Load the Screensaver module
     const module = await this.loadFeatureModule('screensaver');
     if (!module?.ScreensaverController) {
       eventBus.emit(EVENT_LOG, {
@@ -133,7 +131,6 @@ export class Spaceface {
       return;
     }
 
-    // Create a unique ID for the screensaver container
     const uniqueId = generateId('screensaver', 9);
     const screensaverDiv = document.createElement('div');
     screensaverDiv.id = uniqueId;
@@ -143,25 +140,21 @@ export class Spaceface {
     `;
     document.body.appendChild(screensaverDiv);
 
-    // Initialize the ScreensaverController
     const controllerOptions = {
       partialUrl: screensaverConfig.partialUrl,
       targetSelector: `#${uniqueId}`,
     };
 
-    // Only pass inactivityDelay if it is explicitly defined
     if (screensaverConfig.delay !== undefined) {
       controllerOptions.inactivityDelay = screensaverConfig.delay;
     }
 
     this.screensaverController = new module.ScreensaverController(controllerOptions);
 
-    // Check if the init method exists and call it
     if (typeof this.screensaverController.init === 'function') {
       await this.screensaverController.init();
     }
 
-    // Emit events for debugging and visibility
     eventBus.emit('screensaver:initialized', uniqueId);
     eventBus.emit(EVENT_LOG, { level: 'info', args: ['Screensaver initialized:', uniqueId] });
   }

@@ -14,8 +14,21 @@ const eventsToLog = [
 
 if (isDev) {
   eventsToLog.forEach(eventName => {
-    eventBus.on(eventName, (payload) => {
-      console.log(`████████ [ main.js listener ] Event: ${eventName}`, payload ?? '(no payload)');
+    eventBus.on(eventName, (eventName, payload) => {
+      if (!payload) {
+        console.log(`████████ [ main.js listener ] Event: ${eventName} – (no payload)`);
+        return;
+      }
+
+      // Check if payload is a string
+      if (typeof payload === 'string') {
+        console.log(`████████ [ main.js listener ] Event: ${eventName} [LOG]`, payload);
+        return;
+      }
+
+      // Extract and log payload details for objects
+      const { level, message, args, ...otherDetails } = payload;
+      console.log(`████████ [ main.js listener ] Event: ${eventName} [${level?.toUpperCase() || 'LOG'}]`, message || args || otherDetails || '(no details)');
     });
   });
 }
