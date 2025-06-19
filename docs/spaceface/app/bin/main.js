@@ -1,4 +1,5 @@
 import { eventBus } from '../../system/bin/EventBus.js';
+import { AppConfig } from './AppConfig.js';
 
 const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
 
@@ -14,7 +15,7 @@ const eventsToLog = [
 if (isDev) {
   eventsToLog.forEach(eventName => {
     eventBus.on(eventName, (payload) => {
-      console.log(`████████ [ any ×͜× listener ] Event: ${eventName}`, payload ?? '(no payload)');
+      console.log(`████████ [ main.js listener ] Event: ${eventName}`, payload ?? '(no payload)');
     });
   });
 }

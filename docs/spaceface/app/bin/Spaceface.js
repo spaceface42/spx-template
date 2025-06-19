@@ -20,7 +20,7 @@ export class Spaceface {
     this.inactivityWatcher = null;
     this.screensaverController = null;
 
-    console.log(this.appConfig.get('hostname')); // Logs the current hostname
+    // console.log(this.appConfig.get('hostname')); // Logs the current hostname
   }
 
   /**

@@ -13,7 +13,7 @@ export class EventBus {
       this.listeners[event].push(callback);
     }
     // debugging output
-    console.log(`EventBus: Listener registered for event "${event}"`);
+    // console.log(`EventBus: Listener registered for event "${event}"`);
   }
 
   // Register a listener that will only be called once
@@ -73,7 +73,7 @@ export class EventBus {
     }
 
     // debugging output
-    console.log(`EventBus: Emitting event "${event}"`, payload);
+    // console.log(`EventBus: Emitting event "${event}"`, payload);
 
     // Call listeners for this event
     (this.listeners[event] || []).forEach(fn => {
