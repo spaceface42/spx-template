@@ -3,35 +3,50 @@ import { AppConfig } from './AppConfig.js';
 
 const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
 
-// Add specific events to log
 const eventsToLog = [
-  // 'partial:loaded', // Logs all partial loaded events
-  // 'partials:allLoaded', // Logs when all partials are loaded
-  // 'user:active', // Logs all events (wildcard)
-  // 'user:inactive', // Logs all events (wildcard)
-  '*', // Logs all events (wildcard)
+  // 'partial:loaded',
+  // 'partials:allLoaded',
+  // 'user:active',
+  // 'user:inactive',
+  '*', // Log all events
 ];
 
 if (isDev) {
   eventsToLog.forEach(eventName => {
-    eventBus.on(eventName, (eventName, payload) => {
-      if (!payload) {
-        console.log(`████████ [ main.js listener ] Event: ${eventName} – (no payload)`);
-        return;
-      }
+    if (eventName === '*') {
+      eventBus.onAny((eventName, payload) => {
+        if (!payload) {
+          console.log(`████████ [ main.js onAny ] Event: ${eventName} – (no payload)`);
+          return;
+        }
 
-      // Check if payload is a string
-      if (typeof payload === 'string') {
-        console.log(`████████ [ main.js listener ] Event: ${eventName} [LOG]`, payload);
-        return;
-      }
+        if (typeof payload === 'string') {
+          console.log(`████████ [ main.js onAny ] Event: ${eventName} [LOG]`, payload);
+          return;
+        }
 
-      // Extract and log payload details for objects
-      const { level, message, args, ...otherDetails } = payload;
-      console.log(`████████ [ main.js listener ] Event: ${eventName} [${level?.toUpperCase() || 'LOG'}]`, message || args || otherDetails || '(no details)');
-    });
+        const { level, message, args, ...otherDetails } = payload;
+        console.log(`████████ [ main.js onAny ] Event: ${eventName} [${level?.toUpperCase() || 'LOG'}]`, message || args || otherDetails || '(no details)');
+      });
+    } else {
+      eventBus.on(eventName, (payload) => {
+        if (!payload) {
+          console.log(`████████ [ main.js listener ] Event: ${eventName} – (no payload)`);
+          return;
+        }
+
+        if (typeof payload === 'string') {
+          console.log(`████████ [ main.js listener ] Event: ${eventName} [LOG]`, payload);
+          return;
+        }
+
+        const { level, message, args, ...otherDetails } = payload;
+        console.log(`████████ [ main.js listener ] Event: ${eventName} [${level?.toUpperCase() || 'LOG'}]`, message || args || otherDetails || '(no details)');
+      });
+    }
   });
 }
+
 
 
 
