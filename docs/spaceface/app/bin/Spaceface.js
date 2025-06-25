@@ -195,6 +195,10 @@ export class Spaceface {
 
     const loader = new module.PartialLoader();
     await loader.init();
+
+    // Register the partial:load event with priority 1
+    eventBus.on('partial:load', (data) => loader.loadPartial(data), 12);
+
     eventBus.emit(EVENT_LOG, { level: 'info', args: ['PartialLoader initialized'] });
     return loader;
   }
