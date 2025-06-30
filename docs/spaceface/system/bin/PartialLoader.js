@@ -203,10 +203,19 @@ export class PartialLoader {
      * Replace link element with HTML content using modern methods
      */
     replaceElement(linkElement, html) {
+        if (!(linkElement instanceof Element)) {
+            throw new Error('replaceElement: linkElement must be a DOM element');
+        }
+
+        const htmlString = html.trim();
+        if (!htmlString) return;
+
         const template = document.createElement('template');
-        template.innerHTML = html.trim();
+        template.innerHTML = htmlString;
+
         linkElement.replaceWith(...template.content.childNodes);
     }
+
 
     /**
      * Execute scripts inside the fetched partial.
