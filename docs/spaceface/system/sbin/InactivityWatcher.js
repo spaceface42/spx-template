@@ -86,7 +86,7 @@ export class InactivityWatcher {
     if (this.#isInactive) {
       this.#isInactive = false;
       this.#log('User became active again');
-      eventBus.emit('user:active');
+      eventBus.emit('user:active', { duration: this.#inactivityDelay });
     }
     this.#startInactivityTimer();
   }
