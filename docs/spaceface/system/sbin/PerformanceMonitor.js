@@ -104,7 +104,7 @@ export class PerformanceMonitor {
 
         const level = this.getPerformanceLevel();
 
-        logMessage('info', 'Performance:', level);
+        logMessage('info', `Performance: ${level}`);
 
         switch (level) {
             case 'high':
