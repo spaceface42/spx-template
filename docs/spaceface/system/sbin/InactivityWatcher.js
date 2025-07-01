@@ -15,8 +15,15 @@ export class InactivityWatcher {
   #inactivityDelay;
   #inactivityTimer = null;
   #isInactive = false;
-  #activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
-  #handleUserActivity;
+  #activityEvents = [
+    'mousemove',
+    'mousedown',
+    'keydown',
+    'keyup',
+    'keypress',
+    'touchstart',
+    'scroll'
+  ];
   #target;
   #listening = false;
   #debug = false;
@@ -90,6 +97,11 @@ export class InactivityWatcher {
     }
     this.#startInactivityTimer();
   }
+
+  #handleUserActivity = (event) => {
+    this.#log(`Activity event: ${event.type}`);
+    this.#handleActivity();
+  };
 
   /**
    * Update the inactivity delay.
