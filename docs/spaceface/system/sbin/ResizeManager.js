@@ -3,20 +3,18 @@
  */
 class ResizeManager {
     static #instance = null;
+    #destroyed = false;
 
     constructor(customEvents = ['resize']) {
         if (ResizeManager.#instance) {
             return ResizeManager.#instance;
         }
-
         this.windowCallbacks = new Set();
         this.elementObservers = new WeakMap();
         this.elementCallbacks = new WeakMap();
         this.isThrottled = false;
-
         this.boundHandler = () => this.#handleWindowResize();
         customEvents.forEach(event => window.addEventListener(event, this.boundHandler, { passive: true }));
-
         ResizeManager.#instance = this;
     }
 
@@ -45,12 +43,17 @@ class ResizeManager {
         };
     }
 
+    #ensureNotDestroyed() {
+        if (this.#destroyed) throw new Error('ResizeManager: Instance has been destroyed.');
+    }
+
     /**
      * Subscribe to window resize
      * @param {Function} callback
      * @returns {Function} unsubscribe
      */
     onWindow(callback) {
+        this.#ensureNotDestroyed();
         this.windowCallbacks.add(callback);
         return () => this.windowCallbacks.delete(callback);
     }
@@ -62,6 +65,7 @@ class ResizeManager {
      * @returns {Function} unsubscribe
      */
     onElement(element, callback) {
+        this.#ensureNotDestroyed();
         if (!this.elementCallbacks.has(element)) {
             this.elementCallbacks.set(element, new Set());
         }
@@ -89,6 +93,7 @@ class ResizeManager {
      * Get window dimensions
      */
     getWindow() {
+        this.#ensureNotDestroyed();
         return { width: window.innerWidth, height: window.innerHeight };
     }
 
@@ -96,6 +101,7 @@ class ResizeManager {
      * Get element dimensions
      */
     getElement(element) {
+        this.#ensureNotDestroyed();
         return {
             clientWidth: element.clientWidth,
             clientHeight: element.clientHeight,
@@ -114,6 +120,7 @@ class ResizeManager {
         this.elementObservers = new WeakMap();
         this.elementCallbacks = new WeakMap();
         ResizeManager.#instance = null;
+        this.#destroyed = true;
     }
 }
 
