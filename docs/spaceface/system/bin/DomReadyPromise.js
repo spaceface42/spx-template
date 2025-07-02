@@ -1,55 +1,45 @@
 /**
  * DomReadyPromise
  *
- * Utility class for waiting until the DOM is fully parsed and ready,
- * or until a specific element appears in the DOM.
+ * Utility for detecting DOM readiness or waiting for elements to appear.
  */
 export class DomReadyPromise {
     static #readyPromise = null;
 
     /**
-     * Returns a cached Promise that resolves when the DOM is ready.
+     * Resolves once DOM is fully parsed.
      * @returns {Promise<void>}
      */
     static ready() {
-        if (this.#readyPromise) return this.#readyPromise;
-
-        if (document.readyState === 'loading') {
-            this.#readyPromise = new Promise(resolve =>
-                document.addEventListener('DOMContentLoaded', resolve, { once: true })
-            );
-        } else {
-            this.#readyPromise = Promise.resolve();
-        }
-
-        return this.#readyPromise;
+        return this.#readyPromise ||= (
+            document.readyState === 'loading'
+                ? new Promise(res => document.addEventListener('DOMContentLoaded', res, { once: true }))
+                : Promise.resolve()
+        );
     }
 
     /**
-     * Waits for an element matching the selector to appear in the DOM.
-     * Resolves with the element, or rejects if not found within the timeout.
-     *
-     * @param {string} selector - CSS selector to wait for.
-     * @param {number} [timeout=5000] - Max time to wait (ms).
-     * @returns {Promise<Element>} Resolves with the found element.
+     * Waits for an element matching the selector.
+     * @param {string} selector - CSS selector to find.
+     * @param {number} timeout - Max wait time in ms.
+     * @returns {Promise<Element>}
      */
     static waitForElement(selector, timeout = 5000) {
         return new Promise((resolve, reject) => {
-            const initial = document.querySelector(selector);
-            if (initial) return resolve(initial);
+            const el = document.querySelector(selector);
+            if (el) return resolve(el);
 
-            let observer;
-            let timeoutId = setTimeout(() => {
-                if (observer) observer.disconnect();
-                reject(new Error(`Element "${selector}" not found within ${timeout}ms`));
+            const timeoutId = setTimeout(() => {
+                observer.disconnect();
+                reject(new Error(`Element "${selector}" not found in ${timeout}ms`));
             }, timeout);
 
-            observer = new MutationObserver(() => {
-                const el = document.querySelector(selector);
-                if (el) {
+            const observer = new MutationObserver(() => {
+                const found = document.querySelector(selector);
+                if (found) {
                     clearTimeout(timeoutId);
                     observer.disconnect();
-                    resolve(el);
+                    resolve(found);
                 }
             });
 
