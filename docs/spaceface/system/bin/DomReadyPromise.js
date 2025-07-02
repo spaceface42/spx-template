@@ -1,7 +1,7 @@
 /**
  * DomReadyPromise
  *
- * Utility for detecting DOM readiness or waiting for elements to appear.
+ * Utility for DOM readiness and waiting for elements.
  */
 export class DomReadyPromise {
     static #readyPromise = null;
@@ -19,31 +19,62 @@ export class DomReadyPromise {
     }
 
     /**
-     * Waits for an element matching the selector.
-     * @param {string} selector - CSS selector to find.
-     * @param {number} timeout - Max wait time in ms.
-     * @returns {Promise<Element>}
+     * Waits for one or more elements matching selector(s).
+     * @param {string|string[]} selectors - Single selector or array of selectors.
+     * @param {number} [timeout=5000] - Max wait time in ms.
+     * @param {ParentNode} [root=document] - Optional root node (can be shadowRoot).
+     * @param {AbortSignal} [signal] - Optional AbortSignal to cancel waiting.
+     * @returns {Promise<Element|Element[]>}
      */
-    static waitForElement(selector, timeout = 5000) {
+    static waitForElement(selectors, timeout = 5000, root = document, signal) {
+        const isMultiple = Array.isArray(selectors);
+        const selectorList = isMultiple ? selectors : [selectors];
+
         return new Promise((resolve, reject) => {
-            const el = document.querySelector(selector);
-            if (el) return resolve(el);
+            const found = new Map();
+            let aborted = false;
+
+            const check = () => {
+                let allFound = true;
+                for (const sel of selectorList) {
+                    const el = root.querySelector(sel);
+                    if (el) found.set(sel, el);
+                    else allFound = false;
+                }
+                if (allFound) {
+                    cleanup();
+                    resolve(isMultiple ? selectorList.map(s => found.get(s)) : found.get(selectorList[0]));
+                }
+            };
+
+            const cleanup = () => {
+                observer.disconnect();
+                clearTimeout(timeoutId);
+                if (signal) signal.removeEventListener('abort', onAbort);
+            };
+
+            const onAbort = () => {
+                aborted = true;
+                cleanup();
+                reject(new DOMException('waitForElement aborted', 'AbortError'));
+            };
+
+            if (signal) {
+                if (signal.aborted) return onAbort();
+                signal.addEventListener('abort', onAbort, { once: true });
+            }
+
+            check(); // initial
+
+            const observer = new MutationObserver(check);
+            observer.observe(root, { childList: true, subtree: true });
 
             const timeoutId = setTimeout(() => {
-                observer.disconnect();
-                reject(new Error(`Element "${selector}" not found in ${timeout}ms`));
-            }, timeout);
-
-            const observer = new MutationObserver(() => {
-                const found = document.querySelector(selector);
-                if (found) {
-                    clearTimeout(timeoutId);
-                    observer.disconnect();
-                    resolve(found);
+                cleanup();
+                if (!aborted) {
+                    reject(new Error(`Element(s) "${selectorList.join(', ')}" not found in ${timeout}ms`));
                 }
-            });
-
-            observer.observe(document.body, { childList: true, subtree: true });
+            }, timeout);
         });
     }
 }
