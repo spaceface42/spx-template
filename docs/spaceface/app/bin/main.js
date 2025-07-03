@@ -1,5 +1,5 @@
 import { eventBus } from '../../system/bin/EventBus.js';
-import { AppConfig } from './AppConfig.js';
+// import { AppConfig } from './AppConfig.js';
 
 const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('127.0.0.1');
 
@@ -16,32 +16,32 @@ if (isDev) {
     if (eventName === '*') {
       eventBus.onAny((eventName, payload) => {
         if (!payload) {
-          console.log(`████████ [ main.js onAny ] Event: ${eventName} – (no payload)`);
+          console.log(`[ main.js onAny ] Event: ${eventName} – no payload !`);
           return;
         }
 
         if (typeof payload === 'string') {
-          console.log(`████████ [ main.js onAny ] Event: ${eventName} [LOG]`, payload);
+          console.log(`[ main.js onAny ] Event: ${eventName} [LOG]`, payload);
           return;
         }
 
         const { level, message, args, ...otherDetails } = payload;
-        console.log(`████████ [ main.js onAny ] Event: ${eventName} [${level?.toUpperCase() || 'LOG'}]`, message || args || otherDetails || '(no details)');
+        console.log(`[ main.js onAny ] Event: ${eventName} [${level?.toUpperCase() || 'LOG'}]`, message || args || otherDetails || '(no details)');
       });
     } else {
       eventBus.on(eventName, (payload) => {
         if (!payload) {
-          console.log(`████████ [ main.js listener ] Event: ${eventName} – (no payload)`);
+          console.log(`[ main.js listener ] Event: ${eventName} – (no payload)`);
           return;
         }
 
         if (typeof payload === 'string') {
-          console.log(`████████ [ main.js listener ] Event: ${eventName} [LOG]`, payload);
+          console.log(`[ main.js listener ] Event: ${eventName} [LOG]`, payload);
           return;
         }
 
         const { level, message, args, ...otherDetails } = payload;
-        console.log(`████████ [ main.js listener ] Event: ${eventName} [${level?.toUpperCase() || 'LOG'}]`, message || args || otherDetails || '(no details)');
+        console.log(`[ main.js listener ] Event: ${eventName} [${level?.toUpperCase() || 'LOG'}]`, message || args || otherDetails || '(no details)');
       });
     }
   });
