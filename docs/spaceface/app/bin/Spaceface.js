@@ -7,11 +7,13 @@ import { AppConfig } from './AppConfig.js';
 
 export class Spaceface {
   static EVENT_LOG = 'log';
+  static EVENT_TELEMETRY = 'telemetry';
 
   constructor(options = {}) {
     this.appConfig = new AppConfig(options);
     this.config = this.appConfig.config;
     this.features = this.config.features ?? {};
+    this.debug = !!this.config.debug;
 
     this.pageType = this.resolvePageType();
     this.startTime = performance.now();
@@ -20,15 +22,28 @@ export class Spaceface {
     this.featureCache = new Map();
     this.inactivityWatcher = null;
     this.screensaverController = null;
+
+    this.validateConfig();
+  }
+
+  validateConfig() {
+    if (!this.config) throw new Error('Missing configuration object');
+    if (typeof this.config !== 'object') throw new Error('Invalid configuration format');
+    if (!this.config.features) this.log('warn', 'No features specified in config');
+  }
+
+  log(level, ...args) {
+    if (!this.debug && level === 'debug') return;
+    eventBus.emit(Spaceface.EVENT_LOG, { level, args });
   }
 
   defineFeatureModules() {
     return {
-      partialLoader: () => import('../../system/bin/PartialLoader.js'),
-      slideplayer: () => import('../../system/features/SlidePlayer/SlidePlayer.js'),
-      screensaver: () => import('../../system/features/Screensaver/ScreensaverController.js'),
-      serviceWorker: () => import('../../system/sbin/ServiceWorkerManager.js'),
-      debug: () => import('../../system/usr/bin/InspectorXray.js'),
+      partialLoader: () =>  import('../../system/bin/PartialLoader.js'),
+      slideplayer: () =>    import('../../system/features/SlidePlayer/SlidePlayer.js'),
+      screensaver: () =>    import('../../system/features/Screensaver/ScreensaverController.js'),
+      serviceWorker: () =>  import('../../system/sbin/ServiceWorkerManager.js'),
+      debug: () =>          import('../../system/usr/bin/InspectorXray.js'),
     };
   }
 
@@ -50,10 +65,7 @@ export class Spaceface {
         this.featureCache.set(name, module);
       } catch (err) {
         const modulePath = this.featureModules[name].toString();
-        eventBus.emit(Spaceface.EVENT_LOG, {
-          level: 'warn',
-          args: [`Failed to load "${name}" from ${modulePath}:`, err],
-        });
+        this.log('warn', `Failed to load "${name}" from ${modulePath}:`, err);
         this.featureCache.set(name, null);
       }
     }
@@ -87,17 +99,14 @@ export class Spaceface {
       await slideshow.ready;
     }
 
-    eventBus.emit(Spaceface.EVENT_LOG, { level: 'info', args: ['SlidePlayer loaded'] });
+    this.log('info', 'SlidePlayer loaded');
     this.slideshow = slideshow;
   }
 
   async initScreensaver() {
     const { screensaver } = this.features;
     if (!screensaver?.partialUrl) {
-      eventBus.emit(Spaceface.EVENT_LOG, {
-        level: 'error',
-        args: ['Screensaver configuration is missing or incomplete.'],
-      });
+      this.log('error', 'Screensaver configuration is missing or incomplete.');
       return;
     }
 
@@ -124,7 +133,7 @@ export class Spaceface {
     }
 
     eventBus.emit('screensaver:initialized', id);
-    eventBus.emit(Spaceface.EVENT_LOG, { level: 'info', args: ['Screensaver initialized:', id] });
+    this.log('info', 'Screensaver initialized:', id);
   }
 
   async initServiceWorker() {
@@ -145,10 +154,10 @@ export class Spaceface {
     try {
       await swManager.register();
       swManager.configure();
-      eventBus.emit(Spaceface.EVENT_LOG, { level: 'info', args: ['Service Worker registered and configured'] });
+      this.log('info', 'Service Worker registered and configured');
       this.swManager = swManager;
     } catch (err) {
-      eventBus.emit(Spaceface.EVENT_LOG, { level: 'error', args: [`Service Worker registration failed: ${err.message}`] });
+      this.log('error', `Service Worker registration failed: ${err.message}`);
     }
   }
 
@@ -160,12 +169,12 @@ export class Spaceface {
     const loader = new PartialLoader();
     await loader.init();
     eventBus.on('partial:load', (data) => loader.loadPartial(data), 12);
-    eventBus.emit(Spaceface.EVENT_LOG, { level: 'info', args: ['PartialLoader initialized'] });
+    this.log('info', 'PartialLoader initialized');
     return loader;
   }
 
   async initPageFeatures() {
-    eventBus.emit(Spaceface.EVENT_LOG, { level: 'info', args: [`Initializing features for page type: ${this.pageType}`] });
+    this.log('info', `Initializing features for page type: ${this.pageType}`);
 
     try {
       switch (this.pageType) {
@@ -176,19 +185,19 @@ export class Spaceface {
         default:
           break;
       }
-      eventBus.emit(Spaceface.EVENT_LOG, { level: 'info', args: [`Page features initialized for: ${this.pageType}`] });
+      this.log('info', `Page features initialized for: ${this.pageType}`);
     } catch (err) {
-      eventBus.emit(Spaceface.EVENT_LOG, { level: 'warn', args: [`Page feature initialization failed for ${this.pageType}:`, err] });
+      this.log('warn', `Page feature initialization failed for ${this.pageType}:`, err);
     }
   }
 
   async init() {
     try {
-      eventBus.emit(Spaceface.EVENT_LOG, { level: 'info', args: [`App initialization started (Page: ${this.pageType})`] });
+      this.log('info', `App initialization started (Page: ${this.pageType})`);
       document.documentElement.classList.add('js-enabled', `page-${this.pageType}`);
 
       await DomReadyPromise.ready();
-      eventBus.emit(Spaceface.EVENT_LOG, { level: 'info', args: ['DOM ready'] });
+      this.log('info', 'DOM ready');
 
       await this.initInactivityWatcher();
 
@@ -202,9 +211,15 @@ export class Spaceface {
       await this.initPageFeatures();
 
       const endTime = performance.now();
-      eventBus.emit(Spaceface.EVENT_LOG, { level: 'info', args: [`App initialized in ${(endTime - this.startTime).toFixed(2)}ms`] });
+      const duration = (endTime - this.startTime).toFixed(2);
+      this.log('info', `App initialized in ${duration}ms`);
+      eventBus.emit(Spaceface.EVENT_TELEMETRY, {
+        type: 'init:duration',
+        value: duration,
+        page: this.pageType,
+      });
     } catch (err) {
-      eventBus.emit(Spaceface.EVENT_LOG, { level: 'error', args: ['Critical app initialization error:', err] });
+      this.log('error', 'Critical app initialization error:', err);
     }
   }
 
