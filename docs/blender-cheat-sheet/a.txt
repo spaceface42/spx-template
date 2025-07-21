@@ -1,0 +1,5 @@
+Shift + R to repeat last operation u did
+
+After you press G to grab your object press B to activate snapping for one Time use
+
+
