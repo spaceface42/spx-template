@@ -11,16 +11,29 @@ export function debounce<T extends (...args: any[]) => void>(
 }
 
 export function throttle<T extends (...args: any[]) => void>(
-    fn: T
+    fn: T,
+    delay = 100
 ): (...args: Parameters<T>) => void {
-    let isThrottled = false;
+    let lastCall = 0;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+
     return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
-        if (!isThrottled) {
-            isThrottled = true;
-            requestAnimationFrame(() => {
+        const now = Date.now();
+        const remaining = delay - (now - lastCall);
+
+        if (remaining <= 0) {
+            if (timeout) {
+                clearTimeout(timeout);
+                timeout = null;
+            }
+            lastCall = now;
+            fn.apply(this, args);
+        } else if (!timeout) {
+            timeout = setTimeout(() => {
+                lastCall = Date.now();
+                timeout = null;
                 fn.apply(this, args);
-                isThrottled = false;
-            });
+            }, remaining);
         }
     };
 }
