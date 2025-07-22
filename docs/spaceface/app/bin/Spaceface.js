@@ -24,6 +24,11 @@ export class Spaceface {
     this.screensaverController = null;
 
     this.validateConfig();
+
+    // Prefetch all feature modules in parallel (fire and forget)
+    Object.keys(this.featureModules).forEach(name => {
+      this.loadFeatureModule(name);
+    });
   }
 
   validateConfig() {
