@@ -204,15 +204,17 @@ export class Spaceface {
       await DomReadyPromise.ready();
       this.log('info', 'DOM ready');
 
-      await this.initInactivityWatcher();
+      // Start all initializations in parallel
+      const inactivityPromise = this.initInactivityWatcher();
 
-      await Promise.allSettled([
+      const featurePromises = [
         this.initPartialLoader(),
         this.initSlidePlayer(),
         this.initScreensaver(),
         this.initServiceWorker(),
-      ]);
+      ];
 
+      await Promise.allSettled([...featurePromises, inactivityPromise]);
       await this.initPageFeatures();
 
       const endTime = performance.now();
