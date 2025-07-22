@@ -1,5 +1,5 @@
-import { eventBus } from "../bin/EventBus";
-import { throttle } from "../bin/timing";
+import { eventBus } from "../bin/EventBus.js";
+import { throttle } from "../bin/timing.js";
 
 type InactivityWatcherOptions = {
     inactivityDelay?: number;

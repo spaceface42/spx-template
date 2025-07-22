@@ -3,9 +3,9 @@
  * Loads HTML partials marked with link[rel="partial"] tags
  * Uses fetch API, caching, and modern JavaScript features
  */
-import { debounce } from "./timing";
-import { DomReadyPromise } from "./DomReadyPromise";
-import { eventBus } from "./EventBus";
+import { debounce } from "./timing.js";
+import { DomReadyPromise } from "./DomReadyPromise.js";
+import { eventBus } from "./EventBus.js";
 
 type PartialLoaderOptions = {
     baseUrl?: string;

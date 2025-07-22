@@ -1,4 +1,4 @@
-import { eventBus } from "./EventBus";
+import { eventBus } from "./EventBus.js";
 
 type BusBinding = {
     event: string;
