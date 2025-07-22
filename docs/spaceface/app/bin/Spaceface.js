@@ -173,7 +173,10 @@ export class Spaceface {
 
     const loader = new PartialLoader();
     await loader.init();
-    eventBus.on('partial:load', (data) => loader.loadPartial(data), 12);
+
+    // Store unsubscribe for cleanup
+    this._partialUnsub = eventBus.on('partial:load', (data) => loader.loadPartial(data), 12);
+
     this.log('info', 'PartialLoader initialized');
     return loader;
   }
@@ -250,5 +253,14 @@ export class Spaceface {
 
   isPageType(type) {
     return this.pageType === type;
+  }
+
+  destroy() {
+    // Clean up event listeners
+    if (this._partialUnsub) {
+      this._partialUnsub();
+      this._partialUnsub = null;
+    }
+    // Add other cleanup as needed
   }
 }
