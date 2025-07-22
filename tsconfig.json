@@ -2,11 +2,14 @@
     "compilerOptions": {
         "outDir": "./docs",
         "rootDir": "./src",
-        "target": "ES2020",
-        "module": "ESNext",
+        "target": "ES2022", // Use modern JS features (native private fields, etc.)
+        "module": "ES2022", // Native ESM output
         "moduleResolution": "Node",
         "strict": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "useDefineForClassFields": true, // Modern class field semantics
+        "removeComments": false,
+        "declaration": false
     },
     "include": ["src/**/*"]
 }
