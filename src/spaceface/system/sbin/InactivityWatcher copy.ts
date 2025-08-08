@@ -1,56 +1,70 @@
 import { eventBus } from "../bin/EventBus.js";
 import { throttle } from "../bin/timing.js";
+
+type InactivityWatcherOptions = {
+    inactivityDelay?: number;
+    target?: EventTarget;
+    debug?: boolean;
+};
+
+const ACTIVITY_EVENTS: readonly string[] = [
+    "mousemove",
+    "mousedown",
+    "keydown",
+    "keyup",
+    "keypress",
+    "touchstart",
+    "scroll",
+] as const;
+
+const ADD_OPTS: AddEventListenerOptions = { passive: true, capture: false };
+const REMOVE_OPTS: EventListenerOptions = { capture: false };
+
 export class InactivityWatcher {
-    static instance = null;
-    inactivityDelay;
-    inactivityTimer = null;
-    isInactive = false;
-    activityEvents = [
-        "mousemove",
-        "mousedown",
-        "keydown",
-        "keyup",
-        "keypress",
-        "touchstart",
-        "scroll",
-    ];
-    target;
-    listening = false;
-    debug = false;
-    handleUserActivity;
-    constructor({ inactivityDelay = 30000, target = document, debug = false, } = {}) {
+    private inactivityDelay: number;
+    private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+    private isInactive = false;
+    private readonly target: EventTarget;
+    private listening = false;
+    private readonly debug: boolean;
+    private readonly handleUserActivity: (event: Event) => void;
+
+    constructor({
+        inactivityDelay = 30000,
+        target = document,
+        debug = false,
+    }: InactivityWatcherOptions = {}) {
         this.inactivityDelay = Math.max(1000, inactivityDelay);
         this.target = target;
         this.debug = debug;
-        this.handleUserActivity = throttle(this.handleActivity.bind(this), 100);
+        this.handleUserActivity = throttle(() => this.handleActivity(), 100);
         this.addEventListeners();
         this.startInactivityTimer();
     }
-    static getInstance(options = {}) {
-        if (!this.instance) {
-            this.instance = new InactivityWatcher(options);
-        }
-        return this.instance;
+
+    private log(message: string) {
+        if (this.debug) console.log(`[InactivityWatcher] ${message}`);
     }
-    log(message) {
-        if (this.debug)
-            console.log(`[InactivityWatcher] ${message}`);
-    }
-    addEventListeners() {
-        if (this.listening)
-            return;
+
+    private addEventListeners() {
+        if (this.listening) return;
         this.log("Attaching event listeners...");
-        this.activityEvents.forEach(event => this.target.addEventListener(event, this.handleUserActivity, { passive: true }));
+        for (const event of ACTIVITY_EVENTS) {
+            this.target.addEventListener(event, this.handleUserActivity, ADD_OPTS);
+        }
         this.listening = true;
     }
-    removeEventListeners() {
-        if (!this.listening)
-            return;
+
+    private removeEventListeners() {
+        if (!this.listening) return;
         this.log("Removing event listeners...");
-        this.activityEvents.forEach(event => this.target.removeEventListener(event, this.handleUserActivity));
+        for (const event of ACTIVITY_EVENTS) {
+            this.target.removeEventListener(event, this.handleUserActivity, REMOVE_OPTS);
+        }
         this.listening = false;
     }
-    startInactivityTimer() {
+
+    private startInactivityTimer() {
         this.clearInactivityTimer();
         this.log(`Starting inactivity timer: ${this.inactivityDelay}ms`);
         this.inactivityTimer = setTimeout(() => {
@@ -59,14 +73,16 @@ export class InactivityWatcher {
             eventBus.emit("user:inactive", { duration: this.inactivityDelay });
         }, this.inactivityDelay);
     }
-    clearInactivityTimer() {
-        if (this.inactivityTimer) {
+
+    private clearInactivityTimer() {
+        if (this.inactivityTimer !== null) {
             this.log("Clearing inactivity timer");
             clearTimeout(this.inactivityTimer);
             this.inactivityTimer = null;
         }
     }
-    handleActivity() {
+
+    private handleActivity() {
         this.log("User activity detected");
         if (this.isInactive) {
             this.isInactive = false;
@@ -75,32 +91,37 @@ export class InactivityWatcher {
         }
         this.startInactivityTimer();
     }
-    setInactivityDelay(delay) {
+
+    setInactivityDelay(delay: number) {
         this.inactivityDelay = Math.max(1000, delay);
         this.log(`Inactivity delay updated: ${this.inactivityDelay}ms`);
         this.startInactivityTimer();
     }
-    get isInactiveUser() {
+
+    get isInactiveUser(): boolean {
         return this.isInactive;
     }
+
     triggerActivity() {
         this.log("Manual activity triggered");
         this.handleActivity();
     }
+
     pause() {
         this.log("Pausing watcher");
         this.clearInactivityTimer();
         this.removeEventListeners();
     }
+
     resume() {
         this.log("Resuming watcher");
         this.addEventListeners();
         this.startInactivityTimer();
     }
+
     destroy() {
         this.log("Destroying watcher");
         this.clearInactivityTimer();
         this.removeEventListeners();
-        InactivityWatcher.instance = null;
     }
 }

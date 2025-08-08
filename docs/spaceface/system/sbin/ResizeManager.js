@@ -1,130 +1,111 @@
-/**
- * Minimal singleton resize manager - clean, fast, focused.
- */
 class ResizeManager {
-    static #instance = null;
-    #destroyed = false;
-
+    static instance = null;
+    destroyed = false;
+    windowCallbacks = new Set();
+    elementObservers = new WeakMap();
+    elementCallbacks = new WeakMap();
+    isThrottled = false;
+    boundHandler = () => this.handleWindowResize();
+    customEvents = []; // ✅ fixes TS2564
     constructor(customEvents = ['resize']) {
-        if (ResizeManager.#instance) {
-            return ResizeManager.#instance;
+        if (ResizeManager.instance)
+            return ResizeManager.instance;
+        this.customEvents = [...new Set(customEvents)];
+        for (const event of this.customEvents) {
+            window.addEventListener(event, this.boundHandler, { passive: true });
         }
-        this.windowCallbacks = new Set();
-        this.elementObservers = new WeakMap();
-        this.elementCallbacks = new WeakMap();
-        this.isThrottled = false;
-        this.boundHandler = () => this.#handleWindowResize();
-        customEvents.forEach(event => window.addEventListener(event, this.boundHandler, { passive: true }));
-        ResizeManager.#instance = this;
+        ResizeManager.instance = this;
     }
-
-    #handleWindowResize() {
-        if (this.isThrottled) return;
-
+    handleWindowResize() {
+        if (this.isThrottled)
+            return;
         this.isThrottled = true;
         requestAnimationFrame(() => {
-            this.windowCallbacks.forEach(callback => {
-                try { callback(); } catch (e) { console.error('Resize callback error:', e); }
-            });
+            for (const callback of this.windowCallbacks) {
+                try {
+                    callback();
+                }
+                catch (e) {
+                    console.error('[ResizeManager] Window resize callback error:', e);
+                }
+            }
             this.isThrottled = false;
         });
     }
-
-    #createElementHandler(element) {
-        return (entries) => {
+    /** Shared ResizeObserver handler for all elements — avoids per-element closures */
+    elementObserverHandler = (entries) => {
+        for (const entry of entries) {
+            const element = entry.target;
             const callbacks = this.elementCallbacks.get(element);
-            if (!callbacks) return;
-
-            requestAnimationFrame(() => {
-                callbacks.forEach(callback => {
-                    try { callback(entries[0]); } catch (e) { console.error('Element resize error:', e); }
-                });
-            });
-        };
+            if (!callbacks)
+                continue;
+            for (const callback of callbacks) {
+                try {
+                    callback(entry);
+                }
+                catch (e) {
+                    console.error('[ResizeManager] Element resize callback error:', e);
+                }
+            }
+        }
+    };
+    ensureNotDestroyed() {
+        if (this.destroyed) {
+            throw new Error('ResizeManager: Instance has been destroyed.');
+        }
     }
-
-    #ensureNotDestroyed() {
-        if (this.#destroyed) throw new Error('ResizeManager: Instance has been destroyed.');
-    }
-
-    /**
-     * Subscribe to window resize
-     * @param {Function} callback
-     * @returns {Function} unsubscribe
-     */
     onWindow(callback) {
-        this.#ensureNotDestroyed();
+        this.ensureNotDestroyed();
         this.windowCallbacks.add(callback);
         return () => this.windowCallbacks.delete(callback);
     }
-
-    /**
-     * Subscribe to element resize
-     * @param {Element} element
-     * @param {Function} callback - receives ResizeObserverEntry
-     * @returns {Function} unsubscribe
-     */
     onElement(element, callback) {
-        this.#ensureNotDestroyed();
-        if (!this.elementCallbacks.has(element)) {
-            this.elementCallbacks.set(element, new Set());
-        }
-
-        const callbacks = this.elementCallbacks.get(element);
-        callbacks.add(callback);
-
-        if (!this.elementObservers.has(element)) {
-            const observer = new ResizeObserver(this.#createElementHandler(element));
+        this.ensureNotDestroyed();
+        let callbacks = this.elementCallbacks.get(element);
+        if (!callbacks) {
+            callbacks = new Set();
+            this.elementCallbacks.set(element, callbacks);
+            // Create and store observer
+            const observer = new ResizeObserver(this.elementObserverHandler);
             observer.observe(element);
             this.elementObservers.set(element, observer);
         }
-
+        callbacks.add(callback);
         return () => {
             callbacks.delete(callback);
             if (callbacks.size === 0) {
-                this.elementObservers.get(element)?.disconnect();
+                const observer = this.elementObservers.get(element);
+                if (observer)
+                    observer.disconnect();
                 this.elementObservers.delete(element);
                 this.elementCallbacks.delete(element);
             }
         };
     }
-
-    /**
-     * Get window dimensions
-     */
     getWindow() {
-        this.#ensureNotDestroyed();
+        this.ensureNotDestroyed();
         return { width: window.innerWidth, height: window.innerHeight };
     }
-
-    /**
-     * Get element dimensions
-     */
     getElement(element) {
-        this.#ensureNotDestroyed();
+        this.ensureNotDestroyed();
+        const isHTMLElement = element instanceof HTMLElement;
         return {
             clientWidth: element.clientWidth,
             clientHeight: element.clientHeight,
-            offsetWidth: element.offsetWidth,
-            offsetHeight: element.offsetHeight
+            offsetWidth: isHTMLElement ? element.offsetWidth : 0,
+            offsetHeight: isHTMLElement ? element.offsetHeight : 0,
         };
     }
-
-    /**
-     * Cleanup everything
-     */
     destroy() {
-        window.removeEventListener('resize', this.boundHandler);
-        this.elementObservers.forEach(observer => observer.disconnect());
+        for (const event of this.customEvents) {
+            window.removeEventListener(event, this.boundHandler);
+        }
         this.windowCallbacks.clear();
         this.elementObservers = new WeakMap();
         this.elementCallbacks = new WeakMap();
-        ResizeManager.#instance = null;
-        this.#destroyed = true;
+        ResizeManager.instance = null;
+        this.destroyed = true;
     }
 }
-
-// Export singleton instance
 const resizeManager = new ResizeManager();
-export { resizeManager }; // Named export
-// export default resizeManager; /
+export { resizeManager };

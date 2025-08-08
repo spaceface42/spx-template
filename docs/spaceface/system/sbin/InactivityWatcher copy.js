@@ -1,36 +1,31 @@
 import { eventBus } from "../bin/EventBus.js";
 import { throttle } from "../bin/timing.js";
+const ACTIVITY_EVENTS = [
+    "mousemove",
+    "mousedown",
+    "keydown",
+    "keyup",
+    "keypress",
+    "touchstart",
+    "scroll",
+];
+const ADD_OPTS = { passive: true, capture: false };
+const REMOVE_OPTS = { capture: false };
 export class InactivityWatcher {
-    static instance = null;
     inactivityDelay;
     inactivityTimer = null;
     isInactive = false;
-    activityEvents = [
-        "mousemove",
-        "mousedown",
-        "keydown",
-        "keyup",
-        "keypress",
-        "touchstart",
-        "scroll",
-    ];
     target;
     listening = false;
-    debug = false;
+    debug;
     handleUserActivity;
     constructor({ inactivityDelay = 30000, target = document, debug = false, } = {}) {
         this.inactivityDelay = Math.max(1000, inactivityDelay);
         this.target = target;
         this.debug = debug;
-        this.handleUserActivity = throttle(this.handleActivity.bind(this), 100);
+        this.handleUserActivity = throttle(() => this.handleActivity(), 100);
         this.addEventListeners();
         this.startInactivityTimer();
-    }
-    static getInstance(options = {}) {
-        if (!this.instance) {
-            this.instance = new InactivityWatcher(options);
-        }
-        return this.instance;
     }
     log(message) {
         if (this.debug)
@@ -40,14 +35,18 @@ export class InactivityWatcher {
         if (this.listening)
             return;
         this.log("Attaching event listeners...");
-        this.activityEvents.forEach(event => this.target.addEventListener(event, this.handleUserActivity, { passive: true }));
+        for (const event of ACTIVITY_EVENTS) {
+            this.target.addEventListener(event, this.handleUserActivity, ADD_OPTS);
+        }
         this.listening = true;
     }
     removeEventListeners() {
         if (!this.listening)
             return;
         this.log("Removing event listeners...");
-        this.activityEvents.forEach(event => this.target.removeEventListener(event, this.handleUserActivity));
+        for (const event of ACTIVITY_EVENTS) {
+            this.target.removeEventListener(event, this.handleUserActivity, REMOVE_OPTS);
+        }
         this.listening = false;
     }
     startInactivityTimer() {
@@ -60,7 +59,7 @@ export class InactivityWatcher {
         }, this.inactivityDelay);
     }
     clearInactivityTimer() {
-        if (this.inactivityTimer) {
+        if (this.inactivityTimer !== null) {
             this.log("Clearing inactivity timer");
             clearTimeout(this.inactivityTimer);
             this.inactivityTimer = null;
@@ -101,6 +100,5 @@ export class InactivityWatcher {
         this.log("Destroying watcher");
         this.clearInactivityTimer();
         this.removeEventListeners();
-        InactivityWatcher.instance = null;
     }
 }

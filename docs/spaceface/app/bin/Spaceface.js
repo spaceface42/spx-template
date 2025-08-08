@@ -2,7 +2,6 @@ import spx from '../../lib/spx/index.js';
 import { generateId } from '../../system/usr/bin/id.js';
 import { eventBus } from '../../system/bin/EventBus.js';
 import { DomReadyPromise } from '../../system/bin/DomReadyPromise.js';
-import { InactivityService } from '../../system/sbin/InactivityService.js';
 import { AppConfig } from './AppConfig.js';
 
 export class Spaceface {
@@ -82,9 +81,11 @@ export class Spaceface {
     const { screensaver } = this.features;
     if (!screensaver || this.inactivityWatcher) return;
 
-    this.inactivityWatcher = new InactivityService({
-      inactivityDelay: screensaver.delay || 3000,
-    });
+    //this.inactivityWatcher = new InactivityService({
+      //inactivityDelay: screensaver.delay || 3000,
+    //});
+    this.inactivityWatcher = InactivityWatcher.getInstance({ inactivityDelay: 3000 });
+
   }
 
   async initSlidePlayer() {

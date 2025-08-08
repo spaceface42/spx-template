@@ -1,147 +1,138 @@
 export class EventBus {
-  constructor() {
-    this.listeners = {}; // { eventName: [ { fn, priority } ] }
-    this.anyListeners = []; // [ { fn, priority } ]
-  }
-
-  // Add event listener with optional priority
-  on(event, fn, priority = 0) {
-    if (!this.listeners[event]) this.listeners[event] = [];
-    this.listeners[event].push({ fn, priority });
-    this._sortListeners(event);
-  }
-
-  // Add one-time listener
-  once(event, fn, priority = 0) {
-    const wrapper = (...args) => {
-      fn(...args);
-      this.off(event, wrapper);
-    };
-    this.on(event, wrapper, priority);
-  }
-
-  // Add listener for all events
-  onAny(fn, priority = 0) {
-    this.anyListeners.push({ fn, priority });
-    this._sortAnyListeners();
-  }
-
-  // Remove event listener
-  off(event, fn) {
-    if (!this.listeners[event]) return;
-    this.listeners[event] = this.listeners[event].filter(obj => obj.fn !== fn);
-  }
-
-  // Remove onAny listener
-  offAny(fn) {
-    this.anyListeners = this.anyListeners.filter(obj => obj.fn !== fn);
-  }
-
-  // Emit synchronously
-  emit(event, payload) {
-    if (!event) {
-      this._handleError('EventBus: Event name is undefined or empty', new Error('Invalid event name'));
-      return;
+    listeners = {};
+    anyListeners = [];
+    // Add event listener with optional priority
+    on(event, fn, priority = 0) {
+        if (!this.listeners[event])
+            this.listeners[event] = [];
+        this.listeners[event].push({ fn, priority });
+        this._sortListeners(event);
+        // Return unsubscribe function
+        return () => this.off(event, fn);
     }
-
-    for (const { fn } of this.listeners[event] || []) {
-      try {
-        fn(payload);
-      } catch (err) {
-        this._handleError(`Error in listener for "${event}":`, err);
-      }
+    // Add one-time listener
+    once(event, fn, priority = 0) {
+        const wrapper = (payload) => {
+            fn(payload);
+            this.off(event, wrapper);
+        };
+        this.on(event, wrapper, priority);
     }
-
-    for (const { fn } of this.anyListeners) {
-      try {
-        fn(event, payload);
-      } catch (err) {
-        this._handleError(`Error in onAny listener:`, err);
-      }
+    // Add listener for all events
+    onAny(fn, priority = 0) {
+        this.anyListeners.push({ fn, priority });
+        this._sortAnyListeners();
+        // Return unsubscribe function
+        return () => this.offAny(fn);
     }
-  }
-
-  // Emit and await async listeners
-  async emitAsync(event, payload) {
-    if (!event) {
-      this._handleError('EventBus: Event name is undefined or empty', new Error('Invalid event name'));
-      return;
+    // Remove event listener
+    off(event, fn) {
+        if (!this.listeners[event])
+            return;
+        this.listeners[event] = this.listeners[event].filter((obj) => obj.fn !== fn);
     }
-
-    const results = [];
-
-    for (const { fn } of this.listeners[event] || []) {
-      try {
-        results.push(await fn(payload));
-      } catch (err) {
-        this._handleError(`Async error in listener for "${event}":`, err);
-      }
+    // Remove onAny listener
+    offAny(fn) {
+        this.anyListeners = this.anyListeners.filter((obj) => obj.fn !== fn);
     }
-
-    for (const { fn } of this.anyListeners) {
-      try {
-        results.push(await fn(event, payload));
-      } catch (err) {
-        this._handleError(`Async error in onAny listener:`, err);
-      }
+    // Emit synchronously
+    emit(event, payload) {
+        if (!event) {
+            this._handleError("EventBus: Event name is undefined or empty", new Error("Invalid event name"));
+            return;
+        }
+        for (const { fn } of this.listeners[event] || []) {
+            try {
+                fn(payload);
+            }
+            catch (err) {
+                this._handleError(`Error in listener for "${event}":`, err);
+            }
+        }
+        for (const { fn } of this.anyListeners) {
+            try {
+                fn(event, payload);
+            }
+            catch (err) {
+                this._handleError(`Error in onAny listener:`, err);
+            }
+        }
     }
-
-    return results;
-  }
-
-  // Remove all listeners
-  removeAllListeners(event) {
-    if (!event) {
-      this.listeners = {};
-      this.anyListeners = [];
-    } else if (event === 'any') {
-      this.anyListeners = [];
-    } else {
-      delete this.listeners[event];
+    // Emit and await async listeners
+    async emitAsync(event, payload) {
+        if (!event) {
+            this._handleError("EventBus: Event name is undefined or empty", new Error("Invalid event name"));
+            return [];
+        }
+        const results = [];
+        for (const { fn } of this.listeners[event] || []) {
+            try {
+                results.push(await fn(payload));
+            }
+            catch (err) {
+                this._handleError(`Async error in listener for "${event}":`, err);
+            }
+        }
+        for (const { fn } of this.anyListeners) {
+            try {
+                results.push(await fn(event, payload));
+            }
+            catch (err) {
+                this._handleError(`Async error in onAny listener:`, err);
+            }
+        }
+        return results;
     }
-  }
-
-  hasListeners(event) {
-    if (event === 'any') return this.anyListeners.length > 0;
-    return (this.listeners[event] || []).length > 0;
-  }
-
-  listenerCount(event) {
-    if (event === 'any') return this.anyListeners.length;
-    return (this.listeners[event] || []).length;
-  }
-
-  eventNames() {
-    return Object.keys(this.listeners).filter(e => this.listeners[e].length > 0);
-  }
-
-  getListeners(event) {
-    if (event === 'any') return this.anyListeners.map(obj => obj.fn);
-    return (this.listeners[event] || []).map(obj => obj.fn);
-  }
-
-  _sortListeners(event) {
-    this.listeners[event].sort((a, b) => b.priority - a.priority);
-  }
-
-  _sortAnyListeners() {
-    this.anyListeners.sort((a, b) => b.priority - a.priority);
-  }
-
-  _handleError(message, error) {
-    console.error(message, error);
-    try {
-      if (message !== 'eventbus:error') {
-        this.emit('eventbus:error', { message, error });
-      }
-    } catch (e) {
-      console.error('EventBus failed to emit "eventbus:error":', e);
+    // Remove all listeners
+    removeAllListeners(event) {
+        if (!event) {
+            this.listeners = {};
+            this.anyListeners = [];
+        }
+        else if (event === "any") {
+            this.anyListeners = [];
+        }
+        else {
+            delete this.listeners[event];
+        }
     }
-  }
+    hasListeners(event) {
+        if (event === "any")
+            return this.anyListeners.length > 0;
+        return (this.listeners[event] || []).length > 0;
+    }
+    listenerCount(event) {
+        if (event === "any")
+            return this.anyListeners.length;
+        return (this.listeners[event] || []).length;
+    }
+    eventNames() {
+        return Object.keys(this.listeners).filter((e) => this.listeners[e].length > 0);
+    }
+    getListeners(event) {
+        if (event === "any")
+            return this.anyListeners.map((obj) => obj.fn);
+        return (this.listeners[event] || []).map((obj) => obj.fn);
+    }
+    _sortListeners(event) {
+        this.listeners[event].sort((a, b) => b.priority - a.priority);
+    }
+    _sortAnyListeners() {
+        this.anyListeners.sort((a, b) => b.priority - a.priority);
+    }
+    _handleError(message, error) {
+        console.error(message, error);
+        try {
+            if (message !== "eventbus:error") {
+                this.emit("eventbus:error", { message, error });
+            }
+        }
+        catch (e) {
+            console.error('EventBus failed to emit "eventbus:error":', e);
+        }
+    }
 }
-
 export const eventBus = new EventBus();
-
 /**
 
 // Standard usage

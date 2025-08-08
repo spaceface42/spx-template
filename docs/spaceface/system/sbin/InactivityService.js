@@ -1,11 +1,14 @@
-import { InactivityWatcher } from './InactivityWatcher.js';
-
-let instance = null;
-
+import { InactivityWatcher } from "./InactivityWatcher.js";
 export class InactivityService extends InactivityWatcher {
-  constructor(options = {}) {
-    if (instance) return instance; // Return existing instance if already created
-    super(options);
-    instance = this;
-  }
+    static instance = null;
+    constructor(options = {}) {
+        super(options);
+    }
+    static getInstance(options = {}) {
+        if (!this.instance) {
+            this.instance = new InactivityService(options);
+        }
+        return this.instance;
+    }
 }
+// const inactivity = InactivityWatcher.getInstance({ inactivityDelay: 5000 });
