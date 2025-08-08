@@ -1,8 +1,3 @@
-/**
- * Modern HTML Partial Loader
- * Loads HTML partials marked with link[rel="partial"] tags
- * Uses fetch API, caching, and modern JavaScript features
- */
 import { debounce } from "./timing.js";
 import { DomReadyPromise } from "./DomReadyPromise.js";
 import { eventBus } from "./EventBus.js";
@@ -14,16 +9,16 @@ export class PartialLoader {
     constructor(options = {}) {
         this.options = {
             baseUrl: "",
-            timeout: 10000,
+            timeout: 10_000,
             retryAttempts: 3,
             cacheEnabled: true,
             debug: false,
             ...options,
         };
     }
-    logDebug(message, data = null) {
+    logDebug(message, data) {
         if (this.options.debug) {
-            console.log(`[PartialLoader DEBUG]: ${message}`, data);
+            console.debug(`[PartialLoader DEBUG]: ${message}`, data);
         }
     }
     async init(container = document) {
@@ -42,9 +37,8 @@ export class PartialLoader {
     }
     async loadPartial(linkElement) {
         const src = linkElement.getAttribute("src");
-        if (!src) {
+        if (!src)
             throw new Error("Partial link missing src attribute");
-        }
         const url = this.resolveUrl(src);
         const cacheKey = url;
         try {
@@ -86,10 +80,8 @@ export class PartialLoader {
                 const html = await response.text();
                 const tempDiv = document.createElement("div");
                 tempDiv.innerHTML = html;
-                // Give tempDiv a unique id
                 tempDiv.id = `partial-${id}`;
                 container.appendChild(tempDiv);
-                // Wait for the element using its selector string
                 await DomReadyPromise.waitForElement(`#partial-${id}`);
                 this.executeScripts(tempDiv);
                 this.loadedPartials.set(id, true);
@@ -109,26 +101,21 @@ export class PartialLoader {
         try {
             const response = await fetch(url, {
                 signal: controller.signal,
-                headers: {
-                    Accept: "text/html",
-                    "Cache-Control": "no-cache",
-                },
+                headers: { Accept: "text/html", "Cache-Control": "no-cache" },
             });
             clearTimeout(timeoutId);
-            if (!response.ok) {
+            if (!response.ok)
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
             const html = await response.text();
-            if (!html.trim()) {
+            if (!html.trim())
                 throw new Error("Empty response received");
-            }
             return html;
         }
         catch (error) {
             clearTimeout(timeoutId);
             if (attempt < this.options.retryAttempts &&
-                (error.name === "AbortError" || error.name === "TypeError")) {
-                const delayTime = Math.min(Math.pow(2, attempt) * 100, 5000);
+                (error instanceof DOMException && error.name === "AbortError" || error instanceof TypeError)) {
+                const delayTime = Math.min(2 ** attempt * 100, 5000);
                 this.logDebug(`Retrying fetch for ${url} (attempt ${attempt})`);
                 await this.delay(delayTime);
                 return this.fetchPartial(url, attempt + 1);
@@ -137,9 +124,6 @@ export class PartialLoader {
         }
     }
     replaceElement(linkElement, html) {
-        if (!(linkElement instanceof Element)) {
-            throw new Error("replaceElement: linkElement must be a DOM element");
-        }
         const htmlString = html.trim();
         if (!htmlString)
             return;
@@ -159,21 +143,16 @@ export class PartialLoader {
     handleError(linkElement, error) {
         const errorElement = document.createElement("div");
         errorElement.className = "partial-error";
-        errorElement.setAttribute("data-error", error.message);
+        errorElement.dataset.error = error.message;
         errorElement.innerHTML = `<!-- Partial load failed: ${error.message} -->`;
-        if (linkElement.parentNode) {
-            linkElement.parentNode.replaceChild(errorElement, linkElement);
-        }
+        linkElement.replaceWith(errorElement);
     }
     isPartialLoaded(id) {
         return this.loadedPartials.has(id);
     }
     resolveUrl(src) {
-        if (src.startsWith("http://") ||
-            src.startsWith("https://") ||
-            src.startsWith("//")) {
+        if (/^(https?:)?\/\//.test(src))
             return src;
-        }
         const base = this.options.baseUrl.replace(/\/$/, "");
         const path = src.startsWith("/") ? src : `/${src}`;
         return base + path;
@@ -205,10 +184,7 @@ export class PartialLoader {
             this.init(container).catch(console.error);
         }, 100);
         const observer = new MutationObserver(debouncedInit);
-        observer.observe(container, {
-            childList: true,
-            subtree: true,
-        });
+        observer.observe(container, { childList: true, subtree: true });
         return observer;
     }
 }

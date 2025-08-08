@@ -4,6 +4,7 @@
  * Utility for DOM readiness and waiting for elements.
  */
 export class DomReadyPromise {
+    /** Cached promise for DOM ready state */
     static #readyPromise = null;
     /**
      * Resolves once DOM is fully parsed.
@@ -12,13 +13,14 @@ export class DomReadyPromise {
     static ready() {
         return (this.#readyPromise ||=
             document.readyState === "loading"
-                ? new Promise((res) => document.addEventListener("DOMContentLoaded", () => res(), { once: true }))
+                ? new Promise((resolve) => document.addEventListener("DOMContentLoaded", () => resolve(), { once: true }))
                 : Promise.resolve());
     }
     /**
      * Waits for one or more elements matching selector(s).
+     * Resolves when found or rejects on timeout/abort.
      * @param selectors - Single selector or array of selectors.
-     * @param timeout - Max wait time in ms.
+     * @param timeout - Max wait time in ms (0 for no timeout).
      * @param root - Optional root node (can be shadowRoot).
      * @param signal - Optional AbortSignal to cancel waiting.
      * @returns Promise<Element | Element[]>
@@ -26,50 +28,81 @@ export class DomReadyPromise {
     static waitForElement(selectors, timeout = 5000, root = document, signal) {
         const isMultiple = Array.isArray(selectors);
         const selectorList = isMultiple ? selectors : [selectors];
+        const found = new Map();
         return new Promise((resolve, reject) => {
-            const found = new Map();
             let aborted = false;
-            const check = () => {
-                let allFound = true;
-                for (const sel of selectorList) {
-                    const el = root.querySelector(sel);
-                    if (el)
-                        found.set(sel, el);
-                    else
-                        allFound = false;
-                }
-                if (allFound) {
-                    cleanup();
-                    resolve(isMultiple
-                        ? selectorList.map((s) => found.get(s))
-                        : found.get(selectorList[0]));
-                }
-            };
+            let timeoutId = null;
+            let observer = null;
+            /** Cleanup resources */
             const cleanup = () => {
-                observer.disconnect();
-                clearTimeout(timeoutId);
-                if (signal)
-                    signal.removeEventListener("abort", onAbort);
+                observer?.disconnect();
+                if (timeoutId)
+                    clearTimeout(timeoutId);
+                signal?.removeEventListener("abort", onAbort);
             };
+            /** Abort handler */
             const onAbort = () => {
                 aborted = true;
                 cleanup();
                 reject(new DOMException("waitForElement aborted", "AbortError"));
             };
+            /** Element check */
+            const check = () => {
+                let allFound = true;
+                for (const sel of selectorList) {
+                    try {
+                        const el = root.querySelector(sel);
+                        if (el)
+                            found.set(sel, el);
+                        else
+                            allFound = false;
+                    }
+                    catch (err) {
+                        cleanup();
+                        reject(new Error(`Invalid selector "${sel}": ${err}`));
+                        return true; // stop checking
+                    }
+                }
+                if (allFound) {
+                    cleanup();
+                    resolve(isMultiple
+                        ? selectorList.map(s => found.get(s))
+                        : found.get(selectorList[0]));
+                    return true;
+                }
+                return false;
+            };
+            // Attach abort handling
             if (signal) {
                 if (signal.aborted)
                     return onAbort();
                 signal.addEventListener("abort", onAbort, { once: true });
             }
-            check(); // initial
-            const observer = new MutationObserver(check);
-            observer.observe(root, { childList: true, subtree: true });
-            const timeoutId = setTimeout(() => {
-                cleanup();
-                if (!aborted) {
-                    reject(new Error(`Element(s) "${selectorList.join(", ")}" not found in ${timeout}ms`));
+            // Immediate check before observing
+            if (check())
+                return;
+            // Observe DOM changes
+            let scheduled = false;
+            const scheduleCheck = () => {
+                if (!scheduled) {
+                    scheduled = true;
+                    requestAnimationFrame(() => {
+                        scheduled = false;
+                        check();
+                    });
                 }
-            }, timeout);
+            };
+            observer = new MutationObserver(scheduleCheck);
+            observer.observe(root, { childList: true, subtree: true });
+            // Timeout handling (unless timeout = 0)
+            if (timeout > 0) {
+                timeoutId = setTimeout(() => {
+                    cleanup();
+                    if (!aborted) {
+                        reject(new Error(`Element(s) "${selectorList.join(", ")}" not found in ${timeout}ms`));
+                    }
+                }, timeout);
+            }
         });
     }
 }

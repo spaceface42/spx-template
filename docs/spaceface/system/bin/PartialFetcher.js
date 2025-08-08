@@ -5,11 +5,13 @@ export class PartialFetcher {
      * Emits lifecycle events: partial:load:start, partial:load:success, partial:load:error, partial:load:complete
      * @param url - The URL of the partial HTML.
      * @param targetSelector - The selector for the container to inject into.
+     * @param options - Optional settings.
      */
-    static async load(url, targetSelector) {
+    static async load(url, targetSelector, options = {}) {
+        const { replace = true, signal } = options;
         eventBus.emit("partial:load:start", { url, targetSelector });
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, { signal });
             if (!response.ok) {
                 throw new Error(`Fetch failed with status ${response.status}`);
             }
@@ -20,7 +22,12 @@ export class PartialFetcher {
             }
             const template = document.createElement("template");
             template.innerHTML = html;
-            container.replaceChildren(...Array.from(template.content.childNodes));
+            if (replace) {
+                container.replaceChildren(...template.content.childNodes);
+            }
+            else {
+                container.append(...template.content.childNodes);
+            }
             eventBus.emit("partial:load:success", {
                 url,
                 targetSelector,
@@ -29,6 +36,7 @@ export class PartialFetcher {
         }
         catch (error) {
             eventBus.emit("partial:load:error", { url, targetSelector, error });
+            throw error; // re-throw so caller can handle
         }
         finally {
             eventBus.emit("partial:load:complete", { url, targetSelector });
