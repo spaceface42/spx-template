@@ -12,10 +12,10 @@ export class ScreensaverController {
     watcher = null;
     onError;
     _destroyed = false;
-    _partialLoaded = false;
     eventBinder;
     _onInactivity;
     _onActivity;
+    _partialLoaded = false;
 
     constructor({ partialUrl, targetSelector, inactivityDelay = 12000, onError = null }) {
         this.partialUrl = partialUrl;
@@ -69,7 +69,12 @@ export class ScreensaverController {
                 return;
             }
 
+            // Reset opacity for animation replay
+            container.style.opacity = '0';
             container.style.display = '';
+            void container.offsetWidth; // Force reflow
+            container.style.transition = 'opacity 0.5s ease';
+            container.style.opacity = '1';
 
             if (!this.screensaverManager) {
                 this.screensaverManager = new FloatingImagesManager(container);
@@ -92,7 +97,13 @@ export class ScreensaverController {
 
         try {
             const container = document.querySelector(this.targetSelector);
-            if (container) container.style.display = 'none';
+            if (container) {
+                container.style.transition = 'opacity 0.5s ease';
+                container.style.opacity = '0';
+                setTimeout(() => {
+                    if (container) container.style.display = 'none';
+                }, 500);
+            }
 
             if (this.screensaverManager) {
                 if (typeof this.screensaverManager.pause === 'function') {
@@ -117,11 +128,6 @@ export class ScreensaverController {
         this._destroyed = true;
 
         this.hideScreensaver();
-
-        if (this.screensaverManager) {
-            this.screensaverManager.destroy();
-            this.screensaverManager = null;
-        }
 
         if (this.watcher) {
             this.watcher.destroy();
