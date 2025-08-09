@@ -135,3 +135,35 @@ export type ElementDimensions = {
 
 
 
+//
+// AsyncImageLoader-related types
+
+export interface AsyncImageLoaderOptions {
+    includePicture?: boolean;
+}
+
+export interface ImageSourceData {
+    srcset: string;
+    type: string;
+    media: string;
+}
+
+export interface ImageMetadata {
+    element: HTMLImageElement;
+    src: string;
+    alt: string;
+    href: string | null;
+    sources: ImageSourceData[];
+}
+
+//
+export type InactivityWatcherOptions = {
+    inactivityDelay?: number;
+    target?: EventTarget;
+    debug?: boolean;
+};
+
+export type WatcherState = {
+    listening: boolean;
+    destroyed: boolean;
+};

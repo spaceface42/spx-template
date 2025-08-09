@@ -1,20 +1,8 @@
-interface AsyncImageLoaderOptions {
-    includePicture?: boolean;
-}
-
-interface ImageSourceData {
-    srcset: string;
-    type: string;
-    media: string;
-}
-
-interface ImageMetadata {
-    element: HTMLImageElement;
-    src: string;
-    alt: string;
-    href: string | null;
-    sources: ImageSourceData[];
-}
+import {
+    AsyncImageLoaderOptions,
+    ImageSourceData,
+    ImageMetadata
+} from '../types.js';
 
 export class AsyncImageLoader {
     private container: Element | null;

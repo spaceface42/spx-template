@@ -1,13 +1,9 @@
 import { eventBus } from "../bin/EventBus.js";
 import { throttle } from "../bin/timing.js";
+import { BaseWatcher } from "./BaseWatcher.js";
+import { InactivityWatcherOptions } from "../types.js";
 
-type InactivityWatcherOptions = {
-    inactivityDelay?: number;
-    target?: EventTarget;
-    debug?: boolean;
-};
-
-export class InactivityWatcher {
+export class InactivityWatcher extends BaseWatcher {
     private static instance: InactivityWatcher | null = null;
 
     private inactivityDelay: number;
@@ -22,9 +18,6 @@ export class InactivityWatcher {
         "touchstart",
         "scroll",
     ];
-    private target: EventTarget;
-    private listening = false;
-    private debug = false;
     private readonly handleUserActivity: (event: Event) => void;
 
     private constructor({
@@ -32,9 +25,9 @@ export class InactivityWatcher {
         target = document,
         debug = false,
     }: InactivityWatcherOptions = {}) {
+        super(target, debug);
+
         this.inactivityDelay = Math.max(1000, inactivityDelay);
-        this.target = target;
-        this.debug = debug;
         this.handleUserActivity = throttle(this.handleActivity.bind(this), 100);
         this.addEventListeners();
         this.startInactivityTimer();
@@ -47,11 +40,7 @@ export class InactivityWatcher {
         return this.instance;
     }
 
-    private log(message: string) {
-        if (this.debug) console.log(`[InactivityWatcher] ${message}`);
-    }
-
-    private addEventListeners() {
+    protected addEventListeners() {
         if (this.listening) return;
         this.log("Attaching event listeners...");
         this.activityEvents.forEach(event =>
@@ -60,7 +49,7 @@ export class InactivityWatcher {
         this.listening = true;
     }
 
-    private removeEventListeners() {
+    protected removeEventListeners() {
         if (!this.listening) return;
         this.log("Removing event listeners...");
         this.activityEvents.forEach(event =>
@@ -124,10 +113,9 @@ export class InactivityWatcher {
         this.startInactivityTimer();
     }
 
-    destroy() {
-        this.log("Destroying watcher");
+    public override destroy() {
+        super.destroy();
         this.clearInactivityTimer();
-        this.removeEventListeners();
         InactivityWatcher.instance = null;
     }
 }

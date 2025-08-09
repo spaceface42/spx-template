@@ -1,6 +1,7 @@
 import { eventBus } from "../bin/EventBus.js";
 import { throttle } from "../bin/timing.js";
-export class InactivityWatcher {
+import { BaseWatcher } from "./BaseWatcher.js";
+export class InactivityWatcher extends BaseWatcher {
     static instance = null;
     inactivityDelay;
     inactivityTimer = null;
@@ -14,14 +15,10 @@ export class InactivityWatcher {
         "touchstart",
         "scroll",
     ];
-    target;
-    listening = false;
-    debug = false;
     handleUserActivity;
     constructor({ inactivityDelay = 30000, target = document, debug = false, } = {}) {
+        super(target, debug);
         this.inactivityDelay = Math.max(1000, inactivityDelay);
-        this.target = target;
-        this.debug = debug;
         this.handleUserActivity = throttle(this.handleActivity.bind(this), 100);
         this.addEventListeners();
         this.startInactivityTimer();
@@ -31,10 +28,6 @@ export class InactivityWatcher {
             this.instance = new InactivityWatcher(options);
         }
         return this.instance;
-    }
-    log(message) {
-        if (this.debug)
-            console.log(`[InactivityWatcher] ${message}`);
     }
     addEventListeners() {
         if (this.listening)
@@ -98,9 +91,8 @@ export class InactivityWatcher {
         this.startInactivityTimer();
     }
     destroy() {
-        this.log("Destroying watcher");
+        super.destroy();
         this.clearInactivityTimer();
-        this.removeEventListeners();
         InactivityWatcher.instance = null;
     }
 }
