@@ -12,6 +12,7 @@ export class ScreensaverController {
     watcher = null;
     onError;
     _destroyed = false;
+    _partialLoaded = false;
     eventBinder;
     _onInactivity;
     _onActivity;
@@ -23,8 +24,8 @@ export class ScreensaverController {
         this.onError = onError;
 
         this.eventBinder = new EventBinder(true);
-        this._onInactivity = () => this.showScreensaver();
-        this._onActivity = () => this.hideScreensaver();
+        this._onInactivity = this.showScreensaver.bind(this);
+        this._onActivity = this.hideScreensaver.bind(this);
 
         eventBus.emit('screensaver:log', {
             level: 'info',
@@ -57,7 +58,11 @@ export class ScreensaverController {
         if (this._destroyed) return;
 
         try {
-            await PartialFetcher.load(this.partialUrl, this.targetSelector);
+            if (!this._partialLoaded) {
+                await PartialFetcher.load(this.partialUrl, this.targetSelector);
+                this._partialLoaded = true;
+            }
+
             const container = document.querySelector(this.targetSelector);
             if (!container) {
                 this.handleError(`Target selector "${this.targetSelector}" not found`);
@@ -65,9 +70,13 @@ export class ScreensaverController {
             }
 
             container.style.display = '';
-            if (this.screensaverManager) this.screensaverManager.destroy();
-            this.screensaverManager = new FloatingImagesManager(container);
-            this.screensaverManager.resetAllImagePositions();
+
+            if (!this.screensaverManager) {
+                this.screensaverManager = new FloatingImagesManager(container);
+                this.screensaverManager.resetAllImagePositions();
+            } else if (typeof this.screensaverManager.resume === 'function') {
+                this.screensaverManager.resume();
+            }
 
             eventBus.emit('screensaver:log', {
                 level: 'info',
@@ -86,8 +95,12 @@ export class ScreensaverController {
             if (container) container.style.display = 'none';
 
             if (this.screensaverManager) {
-                this.screensaverManager.destroy();
-                this.screensaverManager = null;
+                if (typeof this.screensaverManager.pause === 'function') {
+                    this.screensaverManager.pause();
+                } else {
+                    this.screensaverManager.destroy();
+                    this.screensaverManager = null;
+                }
             }
 
             eventBus.emit('screensaver:log', {
@@ -105,6 +118,11 @@ export class ScreensaverController {
 
         this.hideScreensaver();
 
+        if (this.screensaverManager) {
+            this.screensaverManager.destroy();
+            this.screensaverManager = null;
+        }
+
         if (this.watcher) {
             this.watcher.destroy();
             this.watcher = null;
@@ -112,6 +130,7 @@ export class ScreensaverController {
 
         this.eventBinder.unbindAll();
         this.onError = null;
+        this._partialLoaded = false;
 
         eventBus.emit('screensaver:log', {
             level: 'info',
