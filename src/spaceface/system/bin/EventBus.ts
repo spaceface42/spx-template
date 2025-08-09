@@ -1,32 +1,31 @@
-type Listener<T = any> = {
-    fn: (payload: T) => any;
-    priority: number;
-};
+import {
+    Listener,
+    AnyListener,
+    UnsubscribeFn,
+    EventBusErrorPayload,
+    IEventBus
+} from "../types.js";
 
-type AnyListener = {
-    fn: (event: string, payload: any) => any;
-    priority: number;
-};
-
-export class EventBus {
+export class EventBus implements IEventBus {
     private listeners: Record<string, Listener[]> = {};
     private anyListeners: AnyListener[] = [];
 
-    // Add event listener with optional priority
     on<T = any>(
         event: string,
         fn: (payload: T) => any,
         priority = 0
-    ): () => void {
+    ): UnsubscribeFn {
         if (!this.listeners[event]) this.listeners[event] = [];
         this.listeners[event].push({ fn, priority });
         this._sortListeners(event);
-        // Return unsubscribe function
         return () => this.off(event, fn);
     }
 
-    // Add one-time listener
-    once<T = any>(event: string, fn: (payload: T) => any, priority = 0): void {
+    once<T = any>(
+        event: string,
+        fn: (payload: T) => any,
+        priority = 0
+    ): void {
         const wrapper = (payload: T) => {
             fn(payload);
             this.off(event, wrapper);
@@ -34,15 +33,15 @@ export class EventBus {
         this.on(event, wrapper, priority);
     }
 
-    // Add listener for all events
-    onAny(fn: (event: string, payload: any) => any, priority = 0): () => void {
+    onAny(
+        fn: (event: string, payload: any) => any,
+        priority = 0
+    ): UnsubscribeFn {
         this.anyListeners.push({ fn, priority });
         this._sortAnyListeners();
-        // Return unsubscribe function
         return () => this.offAny(fn);
     }
 
-    // Remove event listener
     off(event: string, fn: (payload: any) => any): void {
         if (!this.listeners[event]) return;
         this.listeners[event] = this.listeners[event].filter(
@@ -50,12 +49,10 @@ export class EventBus {
         );
     }
 
-    // Remove onAny listener
     offAny(fn: (event: string, payload: any) => any): void {
         this.anyListeners = this.anyListeners.filter((obj) => obj.fn !== fn);
     }
 
-    // Emit synchronously
     emit<T = any>(event: string, payload?: T): void {
         if (!event) {
             this._handleError(
@@ -82,7 +79,6 @@ export class EventBus {
         }
     }
 
-    // Emit and await async listeners
     async emitAsync<T = any>(event: string, payload?: T): Promise<any[]> {
         if (!event) {
             this._handleError(
@@ -116,7 +112,6 @@ export class EventBus {
         return results;
     }
 
-    // Remove all listeners
     removeAllListeners(event?: string): void {
         if (!event) {
             this.listeners = {};
@@ -161,7 +156,7 @@ export class EventBus {
         console.error(message, error);
         try {
             if (message !== "eventbus:error") {
-                this.emit("eventbus:error", { message, error });
+                this.emit<EventBusErrorPayload>("eventbus:error", { message, error });
             }
         } catch (e) {
             console.error('EventBus failed to emit "eventbus:error":', e);
@@ -170,31 +165,3 @@ export class EventBus {
 }
 
 export const eventBus = new EventBus();
-
-/**
-
-// Standard usage
-eventBus.on('ready', data => console.log('READY', data));
-
-// With priority (higher = earlier)
-eventBus.on('ready', () => console.log('priority 10'), 10);
-eventBus.on('ready', () => console.log('priority 1'), 1);
-
-// onAny
-eventBus.onAny((event, data) => console.log('Any:', event, data), 5);
-
-// Async
-eventBus.on('load', async (data) => {
-  await new Promise(r => setTimeout(r, 100));
-  console.log('Async load done:', data);
-});
-
-// Emit
-eventBus.emit('ready', { time: Date.now() });
-
-// Emit async
-await eventBus.emitAsync('load', { thing: 'foo' });
-
-
-
-*/

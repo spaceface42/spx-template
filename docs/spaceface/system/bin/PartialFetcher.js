@@ -3,9 +3,6 @@ export class PartialFetcher {
     /**
      * Loads HTML from a URL and injects it into the target element.
      * Emits lifecycle events: partial:load:start, partial:load:success, partial:load:error, partial:load:complete
-     * @param url - The URL of the partial HTML.
-     * @param targetSelector - The selector for the container to inject into.
-     * @param options - Optional settings.
      */
     static async load(url, targetSelector, options = {}) {
         const { replace = true, signal } = options;
@@ -35,11 +32,18 @@ export class PartialFetcher {
             });
         }
         catch (error) {
-            eventBus.emit("partial:load:error", { url, targetSelector, error });
-            throw error; // re-throw so caller can handle
+            eventBus.emit("partial:load:error", {
+                url,
+                targetSelector,
+                error,
+            });
+            throw error;
         }
         finally {
-            eventBus.emit("partial:load:complete", { url, targetSelector });
+            eventBus.emit("partial:load:complete", {
+                url,
+                targetSelector,
+            });
         }
     }
 }

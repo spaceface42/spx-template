@@ -1,19 +1,12 @@
-import { eventBus } from "./EventBus.js";
+import {
+    BusBinding,
+    DomBinding,
+    EventBinderStats,
+    IEventBinder
+} from "../types.js";
+import { eventBus } from "./EventBus";
 
-type BusBinding = {
-    event: string;
-    handler: (...args: any[]) => void;
-};
-
-type DomBinding = {
-    target: EventTarget;
-    event: string;
-    handler: EventListenerOrEventListenerObject;
-    options: AddEventListenerOptions | boolean;
-    controller: AbortController;
-};
-
-export class EventBinder {
+export class EventBinder implements IEventBinder {
     private _busBindings: BusBinding[] = [];
     private _domBindings: DomBinding[] = [];
     private _debug: boolean;
@@ -72,7 +65,6 @@ export class EventBinder {
             domBindings: this._domBindings.length,
         });
 
-        // Unbind EventBus events
         for (const { event, handler } of this._busBindings) {
             try {
                 eventBus.off(event, handler);
@@ -85,7 +77,6 @@ export class EventBinder {
             }
         }
 
-        // Abort and remove DOM events
         for (const { target, event, handler, options, controller } of this
             ._domBindings) {
             try {
@@ -100,13 +91,12 @@ export class EventBinder {
             }
         }
 
-        // Reset state
         this._busBindings.length = 0;
         this._domBindings.length = 0;
     }
 
-    getStats(): { busEvents: number; domEvents: number; totalEvents: number } {
-        const stats = {
+    getStats(): EventBinderStats {
+        const stats: EventBinderStats = {
             busEvents: this._busBindings.length,
             domEvents: this._domBindings.length,
             totalEvents: this._busBindings.length + this._domBindings.length,

@@ -1,16 +1,13 @@
 export class EventBus {
     listeners = {};
     anyListeners = [];
-    // Add event listener with optional priority
     on(event, fn, priority = 0) {
         if (!this.listeners[event])
             this.listeners[event] = [];
         this.listeners[event].push({ fn, priority });
         this._sortListeners(event);
-        // Return unsubscribe function
         return () => this.off(event, fn);
     }
-    // Add one-time listener
     once(event, fn, priority = 0) {
         const wrapper = (payload) => {
             fn(payload);
@@ -18,24 +15,19 @@ export class EventBus {
         };
         this.on(event, wrapper, priority);
     }
-    // Add listener for all events
     onAny(fn, priority = 0) {
         this.anyListeners.push({ fn, priority });
         this._sortAnyListeners();
-        // Return unsubscribe function
         return () => this.offAny(fn);
     }
-    // Remove event listener
     off(event, fn) {
         if (!this.listeners[event])
             return;
         this.listeners[event] = this.listeners[event].filter((obj) => obj.fn !== fn);
     }
-    // Remove onAny listener
     offAny(fn) {
         this.anyListeners = this.anyListeners.filter((obj) => obj.fn !== fn);
     }
-    // Emit synchronously
     emit(event, payload) {
         if (!event) {
             this._handleError("EventBus: Event name is undefined or empty", new Error("Invalid event name"));
@@ -58,7 +50,6 @@ export class EventBus {
             }
         }
     }
-    // Emit and await async listeners
     async emitAsync(event, payload) {
         if (!event) {
             this._handleError("EventBus: Event name is undefined or empty", new Error("Invalid event name"));
@@ -83,7 +74,6 @@ export class EventBus {
         }
         return results;
     }
-    // Remove all listeners
     removeAllListeners(event) {
         if (!event) {
             this.listeners = {};
@@ -133,30 +123,3 @@ export class EventBus {
     }
 }
 export const eventBus = new EventBus();
-/**
-
-// Standard usage
-eventBus.on('ready', data => console.log('READY', data));
-
-// With priority (higher = earlier)
-eventBus.on('ready', () => console.log('priority 10'), 10);
-eventBus.on('ready', () => console.log('priority 1'), 1);
-
-// onAny
-eventBus.onAny((event, data) => console.log('Any:', event, data), 5);
-
-// Async
-eventBus.on('load', async (data) => {
-  await new Promise(r => setTimeout(r, 100));
-  console.log('Async load done:', data);
-});
-
-// Emit
-eventBus.emit('ready', { time: Date.now() });
-
-// Emit async
-await eventBus.emitAsync('load', { thing: 'foo' });
-
-
-
-*/

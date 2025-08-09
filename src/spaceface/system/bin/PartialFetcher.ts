@@ -1,24 +1,19 @@
 import { eventBus } from "./EventBus.js";
+import { PartialFetchOptions, PartialFetchEventPayload } from "../types.js";
 
 export class PartialFetcher {
     /**
      * Loads HTML from a URL and injects it into the target element.
      * Emits lifecycle events: partial:load:start, partial:load:success, partial:load:error, partial:load:complete
-     * @param url - The URL of the partial HTML.
-     * @param targetSelector - The selector for the container to inject into.
-     * @param options - Optional settings.
      */
     static async load(
         url: string,
         targetSelector: string,
-        options: {
-            replace?: boolean; // default true
-            signal?: AbortSignal;
-        } = {}
+        options: PartialFetchOptions = {}
     ): Promise<void> {
         const { replace = true, signal } = options;
 
-        eventBus.emit("partial:load:start", { url, targetSelector });
+        eventBus.emit("partial:load:start", <PartialFetchEventPayload>{ url, targetSelector });
 
         try {
             const response = await fetch(url, { signal });
@@ -42,16 +37,23 @@ export class PartialFetcher {
                 container.append(...template.content.childNodes);
             }
 
-            eventBus.emit("partial:load:success", {
+            eventBus.emit("partial:load:success", <PartialFetchEventPayload>{
                 url,
                 targetSelector,
                 html,
             });
         } catch (error) {
-            eventBus.emit("partial:load:error", { url, targetSelector, error });
-            throw error; // re-throw so caller can handle
+            eventBus.emit("partial:load:error", <PartialFetchEventPayload>{
+                url,
+                targetSelector,
+                error,
+            });
+            throw error;
         } finally {
-            eventBus.emit("partial:load:complete", { url, targetSelector });
+            eventBus.emit("partial:load:complete", <PartialFetchEventPayload>{
+                url,
+                targetSelector,
+            });
         }
     }
 }

@@ -1,4 +1,4 @@
-import { eventBus } from "./EventBus.js";
+import { eventBus } from "./EventBus";
 export class EventBinder {
     _busBindings = [];
     _domBindings = [];
@@ -45,7 +45,6 @@ export class EventBinder {
             busBindings: this._busBindings.length,
             domBindings: this._domBindings.length,
         });
-        // Unbind EventBus events
         for (const { event, handler } of this._busBindings) {
             try {
                 eventBus.off(event, handler);
@@ -55,7 +54,6 @@ export class EventBinder {
                 console.error(`EventBinder: Failed to unbind bus event "${event}"`, error);
             }
         }
-        // Abort and remove DOM events
         for (const { target, event, handler, options, controller } of this
             ._domBindings) {
             try {
@@ -67,7 +65,6 @@ export class EventBinder {
                 console.error(`EventBinder: Failed to unbind DOM event "${event}"`, error);
             }
         }
-        // Reset state
         this._busBindings.length = 0;
         this._domBindings.length = 0;
     }

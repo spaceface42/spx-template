@@ -2,19 +2,7 @@ import { debounce } from "./timing.js";
 import { DomReadyPromise } from "./DomReadyPromise.js";
 import { eventBus } from "./EventBus.js";
 
-interface PartialLoaderOptions {
-    baseUrl?: string;
-    timeout?: number;
-    retryAttempts?: number;
-    cacheEnabled?: boolean;
-    debug?: boolean;
-}
-
-interface PartialInfo {
-    id: string;
-    url: string;
-    container: HTMLElement;
-}
+import { PartialLoaderOptions, PartialInfo, PartialLoadResult } from "../types.js";
 
 export class PartialLoader {
     private cache = new Map<string, string>();
@@ -58,7 +46,7 @@ export class PartialLoader {
         return Array.from(container.querySelectorAll<HTMLLinkElement>('link[rel="partial"][src]'));
     }
 
-    async loadPartial(linkElement: HTMLLinkElement): Promise<{ success: boolean; url: string; cached: boolean }> {
+    async loadPartial(linkElement: HTMLLinkElement): Promise<PartialLoadResult> {
         const src = linkElement.getAttribute("src");
         if (!src) throw new Error("Partial link missing src attribute");
 
