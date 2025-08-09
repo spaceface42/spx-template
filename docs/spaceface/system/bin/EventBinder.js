@@ -1,4 +1,4 @@
-import { eventBus } from "./EventBus";
+import { eventBus } from "./EventBus.js";
 export class EventBinder {
     _busBindings = [];
     _domBindings = [];

@@ -4,7 +4,7 @@ import {
     EventBinderStats,
     IEventBinder
 } from "../types.js";
-import { eventBus } from "./EventBus";
+import { eventBus } from "./EventBus.js";
 
 export class EventBinder implements IEventBinder {
     private _busBindings: BusBinding[] = [];

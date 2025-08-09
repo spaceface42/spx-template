@@ -6,6 +6,7 @@ export class PartialLoader {
     loadingPromises = new Map();
     loadedPartials = new Map();
     options;
+    maxCacheSize = 50; // LRU cache limit
     constructor(options = {}) {
         this.options = {
             baseUrl: "",
@@ -26,64 +27,20 @@ export class PartialLoader {
         if (partialLinks.length === 0)
             return [];
         this.logDebug("Initializing partials", partialLinks);
-        const loadPromises = partialLinks.map((link) => this.loadPartial(link));
+        const loadPromises = partialLinks.map(link => this._loadPartialElement(link));
         const results = await Promise.allSettled(loadPromises);
         eventBus.emit("partials:allLoaded", { partials: partialLinks });
         this.logDebug("All partials loaded", results);
         return results;
     }
-    findPartialLinks(container) {
-        return Array.from(container.querySelectorAll('link[rel="partial"][src]'));
-    }
-    async loadPartial(linkElement) {
-        const src = linkElement.getAttribute("src");
-        if (!src)
-            throw new Error("Partial link missing src attribute");
-        const url = this.resolveUrl(src);
-        const cacheKey = url;
-        try {
-            if (this.loadingPromises.has(cacheKey)) {
-                return await this.loadingPromises.get(cacheKey);
-            }
-            if (this.options.cacheEnabled && this.cache.has(cacheKey)) {
-                const cachedHtml = this.cache.get(cacheKey);
-                this.replaceElement(linkElement, cachedHtml);
-                this.logDebug(`Loaded from cache: ${url}`);
-                return { success: true, url, cached: true };
-            }
-            const loadingPromise = this.fetchPartial(url);
-            this.loadingPromises.set(cacheKey, loadingPromise);
-            const html = await loadingPromise;
-            if (this.options.cacheEnabled) {
-                this.cache.set(cacheKey, html);
-            }
-            this.replaceElement(linkElement, html);
-            this.loadingPromises.delete(cacheKey);
-            this.logDebug(`Partial loaded: ${url}`);
-            eventBus.emit(`partial:loaded:${url}`, { url, linkElement });
-            return { success: true, url, cached: false };
-        }
-        catch (error) {
-            this.loadingPromises.delete(cacheKey);
-            console.error(`Failed to load partial: ${url}`, error);
-            this.handleError(linkElement, error);
-            eventBus.emit(`partial:error:${url}`, { url, error });
-            throw error;
-        }
-    }
     async loadPartials(partials) {
         const promises = partials.map(async ({ id, url, container }) => {
             try {
-                const response = await fetch(url);
-                if (!response.ok)
-                    throw new Error(`Failed to fetch partial: ${url}`);
-                const html = await response.text();
                 const tempDiv = document.createElement("div");
-                tempDiv.innerHTML = html;
                 tempDiv.id = `partial-${id}`;
+                await this._loadPartialByUrl(url, tempDiv);
                 container.appendChild(tempDiv);
                 await DomReadyPromise.waitForElement(`#partial-${id}`);
-                this.executeScripts(tempDiv);
                 this.loadedPartials.set(id, true);
                 eventBus.emit(`partial:loaded:${id}`, { id, url, container });
             }
@@ -94,6 +51,48 @@ export class PartialLoader {
         });
         await Promise.all(promises);
         eventBus.emit("partials:allLoaded", { partials });
+    }
+    findPartialLinks(container) {
+        return Array.from(container.querySelectorAll('link[rel="partial"][src]'));
+    }
+    async _loadPartialElement(linkElement) {
+        const src = linkElement.getAttribute("src");
+        if (!src)
+            throw new Error("Partial link missing src attribute");
+        const url = this.resolveUrl(src);
+        try {
+            await this._loadPartialByUrl(url, linkElement);
+            return { success: true, url, cached: this.cache.has(url) };
+        }
+        catch (error) {
+            this.handleError(linkElement, error);
+            throw error;
+        }
+    }
+    async _loadPartialByUrl(url, targetElement) {
+        const cacheKey = url;
+        // Already loading?
+        if (this.loadingPromises.has(cacheKey)) {
+            await this.loadingPromises.get(cacheKey);
+            return;
+        }
+        // From cache
+        if (this.options.cacheEnabled && this.cache.has(cacheKey)) {
+            this.replaceElement(targetElement, this.cache.get(cacheKey));
+            this.logDebug(`Loaded from cache: ${url}`);
+            return;
+        }
+        // Fetch new
+        const loadingPromise = this.fetchPartial(url);
+        this.loadingPromises.set(cacheKey, loadingPromise);
+        const html = await loadingPromise;
+        this.loadingPromises.delete(cacheKey);
+        if (this.options.cacheEnabled) {
+            this.addToCache(cacheKey, html);
+        }
+        this.replaceElement(targetElement, html);
+        this.logDebug(`Partial loaded: ${url}`);
+        eventBus.emit(`partial:loaded:${url}`, { url, targetElement });
     }
     async fetchPartial(url, attempt = 1) {
         const controller = new AbortController();
@@ -114,7 +113,7 @@ export class PartialLoader {
         catch (error) {
             clearTimeout(timeoutId);
             if (attempt < this.options.retryAttempts &&
-                (error instanceof DOMException && error.name === "AbortError" || error instanceof TypeError)) {
+                ((error instanceof DOMException && error.name === "AbortError") || error instanceof TypeError)) {
                 const delayTime = Math.min(2 ** attempt * 100, 5000);
                 this.logDebug(`Retrying fetch for ${url} (attempt ${attempt})`);
                 await this.delay(delayTime);
@@ -123,32 +122,39 @@ export class PartialLoader {
             throw error;
         }
     }
-    replaceElement(linkElement, html) {
+    replaceElement(target, html) {
         const htmlString = html.trim();
         if (!htmlString)
             return;
         const template = document.createElement("template");
         template.innerHTML = htmlString;
-        linkElement.replaceWith(...template.content.childNodes);
+        target.replaceWith(...template.content.childNodes);
+        // Execute any scripts from the replaced content
+        if (target.parentElement) {
+            this.executeScripts(target.parentElement);
+        }
     }
-    executeScripts(partial) {
-        const scripts = partial.querySelectorAll("script");
-        scripts.forEach((script) => {
+    executeScripts(container) {
+        const scripts = container.querySelectorAll("script");
+        scripts.forEach(oldScript => {
             const newScript = document.createElement("script");
-            newScript.textContent = script.textContent;
-            document.body.appendChild(newScript);
-            document.body.removeChild(newScript);
+            // Copy all attributes
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+            // Inline script content
+            if (oldScript.textContent) {
+                newScript.textContent = oldScript.textContent;
+            }
+            oldScript.replaceWith(newScript);
         });
     }
-    handleError(linkElement, error) {
+    handleError(target, error) {
         const errorElement = document.createElement("div");
         errorElement.className = "partial-error";
         errorElement.dataset.error = error.message;
         errorElement.innerHTML = `<!-- Partial load failed: ${error.message} -->`;
-        linkElement.replaceWith(errorElement);
-    }
-    isPartialLoaded(id) {
-        return this.loadedPartials.has(id);
+        target.replaceWith(errorElement);
     }
     resolveUrl(src) {
         if (/^(https?:)?\/\//.test(src))
@@ -157,8 +163,18 @@ export class PartialLoader {
         const path = src.startsWith("/") ? src : `/${src}`;
         return base + path;
     }
+    addToCache(key, value) {
+        if (this.cache.size >= this.maxCacheSize) {
+            const oldestKey = this.cache.keys().next().value;
+            this.cache.delete(oldestKey);
+        }
+        this.cache.set(key, value);
+    }
+    isPartialLoaded(id) {
+        return this.loadedPartials.has(id);
+    }
     delay(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
     async preload(urls) {
         const preloadPromises = urls.map(async (url) => {
@@ -167,7 +183,7 @@ export class PartialLoader {
                 try {
                     const html = await this.fetchPartial(resolvedUrl);
                     if (this.options.cacheEnabled) {
-                        this.cache.set(resolvedUrl, html);
+                        this.addToCache(resolvedUrl, html);
                     }
                 }
                 catch (error) {
