@@ -2,25 +2,28 @@ class ResizeManager {
     static instance = null;
     destroyed = false;
     windowCallbacks = new Set();
-    elementObservers = new Map();
+    elementObservers = new WeakMap();
+    observerSet = new Set();
     elementCallbacks = new WeakMap();
     isThrottled = false;
-    boundHandler;
+    boundHandler = () => this.handleWindowResize();
     customEvents;
-    /** Private to enforce singleton pattern */
     constructor(customEvents = ['resize']) {
         this.customEvents = [...new Set(customEvents)];
-        this.boundHandler = () => this.handleWindowResize();
         for (const event of this.customEvents) {
             window.addEventListener(event, this.boundHandler, { passive: true });
         }
     }
-    /** Get the singleton instance */
-    static getInstance(customEvents) {
+    static getInstance(customEvents = ['resize']) {
         if (!ResizeManager.instance) {
             ResizeManager.instance = new ResizeManager(customEvents);
         }
         return ResizeManager.instance;
+    }
+    ensureNotDestroyed() {
+        if (this.destroyed) {
+            throw new Error('ResizeManager: Instance has been destroyed.');
+        }
     }
     handleWindowResize() {
         if (this.isThrottled)
@@ -38,7 +41,6 @@ class ResizeManager {
             this.isThrottled = false;
         });
     }
-    /** Shared ResizeObserver handler for all elements */
     elementObserverHandler = (entries) => {
         for (const entry of entries) {
             const element = entry.target;
@@ -55,11 +57,6 @@ class ResizeManager {
             }
         }
     };
-    ensureNotDestroyed() {
-        if (this.destroyed) {
-            throw new Error('ResizeManager: Instance has been destroyed.');
-        }
-    }
     onWindow(callback) {
         this.ensureNotDestroyed();
         this.windowCallbacks.add(callback);
@@ -74,14 +71,17 @@ class ResizeManager {
             const observer = new ResizeObserver(this.elementObserverHandler);
             observer.observe(element);
             this.elementObservers.set(element, observer);
+            this.observerSet.add(observer);
         }
         callbacks.add(callback);
         return () => {
             callbacks.delete(callback);
             if (callbacks.size === 0) {
                 const observer = this.elementObservers.get(element);
-                if (observer)
+                if (observer) {
                     observer.disconnect();
+                    this.observerSet.delete(observer);
+                }
                 this.elementObservers.delete(element);
                 this.elementCallbacks.delete(element);
             }
@@ -105,14 +105,15 @@ class ResizeManager {
         for (const event of this.customEvents) {
             window.removeEventListener(event, this.boundHandler);
         }
+        for (const observer of this.observerSet) {
+            observer.disconnect();
+        }
+        this.observerSet.clear();
         this.windowCallbacks.clear();
-        this.elementObservers.forEach((observer) => observer.disconnect());
-        this.elementObservers.clear();
+        this.elementObservers = new WeakMap();
         this.elementCallbacks = new WeakMap();
-        ResizeManager.instance = null;
         this.destroyed = true;
+        ResizeManager.instance = null;
     }
 }
-/** Export the singleton instance */
-const resizeManager = ResizeManager.getInstance();
-export { resizeManager, ResizeManager };
+export const resizeManager = ResizeManager.getInstance();

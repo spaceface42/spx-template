@@ -117,3 +117,21 @@ export interface IEventBinder {
     hasBindings(): boolean;
 }
 
+//
+
+// ResizeManager-related types
+
+export type ResizeCallback = () => void;
+
+export type ElementResizeCallback = (entry: ResizeObserverEntry) => void;
+
+export type ElementDimensions = {
+    clientWidth: number;
+    clientHeight: number;
+    offsetWidth: number;
+    offsetHeight: number;
+};
+
+
+
+
