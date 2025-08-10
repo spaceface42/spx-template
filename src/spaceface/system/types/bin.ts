@@ -1,3 +1,12 @@
+import type { EventBinder } from "../bin/EventBinder.js";
+
+export interface PartialFetchOptions {
+    replace?: boolean;
+    signal?: AbortSignal;
+    withBindings?: (binder: EventBinder) => void;
+    debugBindings?: boolean;
+}
+
 export type WaitForElementOptions = {
   timeout?: number;
   root?: ParentNode;
@@ -29,10 +38,10 @@ export interface PartialLoadResult {
     cached: boolean;
 }
 
-export interface PartialFetchOptions {
-    replace?: boolean; // default true
-    signal?: AbortSignal;
-}
+
+
+
+
 
 export interface PartialFetchEventPayload {
     url: string;

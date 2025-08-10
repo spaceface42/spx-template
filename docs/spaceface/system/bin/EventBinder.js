@@ -1,23 +1,23 @@
 import { eventBus } from "./EventBus.js";
 export class EventBinder {
-    _busBindings = [];
-    _domBindings = [];
-    _debug;
+    busBindings = [];
+    domBindings = [];
+    debugMode;
     constructor(debug = false) {
-        this._debug = debug;
+        this.debugMode = debug;
     }
-    _emitDebug(method, details) {
-        if (this._debug) {
+    debug(method, details) {
+        if (this.debugMode) {
             eventBus.emit("debug:EventBinder", { method, details });
         }
     }
     bindBus(event, handler) {
         eventBus.on(event, handler);
-        this._busBindings.push({ event, handler });
-        this._emitDebug("bindBus", { event, handler });
+        this.busBindings.push({ event, handler });
+        this.debug("bindBus", { event, handler });
     }
     bindDOM(target, event, handler, options = false) {
-        if (!(target && "addEventListener" in target)) {
+        if (!(target instanceof EventTarget)) {
             console.warn("EventBinder: Invalid DOM target", target);
             return;
         }
@@ -27,59 +27,75 @@ export class EventBinder {
             : { ...options, signal: controller.signal };
         try {
             target.addEventListener(event, handler, normalizedOptions);
-            this._domBindings.push({
+            this.domBindings.push({
                 target,
                 event,
                 handler,
                 options: normalizedOptions,
                 controller,
             });
-            this._emitDebug("bindDOM", { event, handler, target });
+            this.debug("bindDOM", { event, handler, target });
         }
         catch (err) {
-            console.error("EventBinder: Failed to bind DOM event", err);
+            console.error(`EventBinder: Failed to bind DOM event "${event}"`, err);
         }
     }
     unbindAll() {
-        this._emitDebug("unbindAll", {
-            busBindings: this._busBindings.length,
-            domBindings: this._domBindings.length,
+        this.debug("unbindAll", {
+            busBindings: this.busBindings.length,
+            domBindings: this.domBindings.length,
         });
-        for (const { event, handler } of this._busBindings) {
+        // Unbind EventBus bindings
+        for (const { event, handler } of this.busBindings) {
             try {
                 eventBus.off(event, handler);
-                this._emitDebug("unbindBus", { event, handler });
+                this.debug("unbindBus", { event, handler });
             }
             catch (error) {
                 console.error(`EventBinder: Failed to unbind bus event "${event}"`, error);
             }
         }
-        for (const { target, event, handler, options, controller } of this
-            ._domBindings) {
+        // Unbind DOM bindings
+        for (const { target, event, handler, options, controller } of this.domBindings) {
             try {
                 controller.abort();
                 target.removeEventListener(event, handler, options);
-                this._emitDebug("unbindDOM", { event, target });
+                this.debug("unbindDOM", { event, target });
             }
             catch (error) {
                 console.error(`EventBinder: Failed to unbind DOM event "${event}"`, error);
             }
         }
-        this._busBindings.length = 0;
-        this._domBindings.length = 0;
+        this.busBindings = [];
+        this.domBindings = [];
     }
     getStats() {
         const stats = {
-            busEvents: this._busBindings.length,
-            domEvents: this._domBindings.length,
-            totalEvents: this._busBindings.length + this._domBindings.length,
+            busEvents: this.busBindings.length,
+            domEvents: this.domBindings.length,
+            totalEvents: this.busBindings.length + this.domBindings.length,
         };
-        this._emitDebug("getStats", stats);
+        this.debug("getStats", stats);
         return stats;
     }
     hasBindings() {
-        const has = this._busBindings.length > 0 || this._domBindings.length > 0;
-        this._emitDebug("hasBindings", { has });
+        const has = this.busBindings.length > 0 || this.domBindings.length > 0;
+        this.debug("hasBindings", { has });
         return has;
     }
+    /** Factory method: creates an EventBinder and auto-unbinds when callback ends */
+    static withAutoUnbind(callback, debug = false) {
+        const binder = new EventBinder(debug);
+        const result = callback(binder);
+        // If callback returns a Promise, clean up after it resolves/rejects
+        if (result instanceof Promise) {
+            return result.finally(() => binder.unbindAll());
+        }
+        else {
+            binder.unbindAll();
+            return result;
+        }
+    }
 }
+// Optionally export a default instance
+export const eventBinder = new EventBinder();
