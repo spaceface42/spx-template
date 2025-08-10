@@ -3,11 +3,11 @@ import { FloatingImage } from './FloatingImage.js';
 import { resizeManager } from '../../sbin/ResizeManager.js';
 import { AsyncImageLoader } from '../../sbin/AsyncImageLoader.js';
 import { PerformanceMonitor } from '../../sbin/PerformanceMonitor.js';
-import { PerformanceSettings } from '../../sbin/types.js';
+import { PerformanceSettings, 
+         ContainerDimensions, 
+         FloatingImagesManagerOptions } from '../../types/features.js';
 
-export interface FloatingImagesManagerOptions {
-    maxImages?: number;
-}
+
 
 export class FloatingImagesManager {
     readonly container: HTMLElement;
@@ -30,46 +30,53 @@ export class FloatingImagesManager {
         this.container = typeof containerOrId === 'string'
             ? document.getElementById(containerOrId)!
             : containerOrId;
+
         if (!this.container) {
             throw new Error('Container not found');
         }
-        (this.container as any).manager = this;
+
         this.performanceMonitor = new PerformanceMonitor();
         this.images = [];
         this.speedMultiplier = 1;
         this.isInViewport = true;
         this._destroyed = false;
         this._animationId = null;
+
         this.performanceSettings = this.performanceMonitor.getRecommendedSettings();
         this.maxImages = options.maxImages ?? this.performanceSettings.maxImages;
+
+        // Intersection observer to pause when out of view
         this.intersectionObserver = new IntersectionObserver(entries => {
             this.isInViewport = entries[0].isIntersecting;
         }, { threshold: 0 });
         this.intersectionObserver.observe(this.container);
+
         this.setupResizeHandling();
         this.imageLoader = new AsyncImageLoader(this.container);
         this.updateContainerDimensions();
-        this.initializeImages();
-        this.animate();
+
+        // Initialize asynchronously and start animation when ready
+        this.initializeImages().then(() => this.animate());
     }
 
-    setupResizeHandling() {
+    private setupResizeHandling() {
         this.unsubscribeWindow = resizeManager.onWindow(() => this.handleResize());
         this.unsubscribeElement = resizeManager.onElement(this.container, () => this.handleResize());
     }
 
-    updateContainerDimensions() {
+    private updateContainerDimensions() {
         const dims = resizeManager.getElement(this.container);
         this.containerWidth = dims.clientWidth;
         this.containerHeight = dims.clientHeight;
     }
 
-    async initializeImages() {
+    private async initializeImages() {
         try {
             const imageElements = await this.imageLoader.waitForImagesToLoad('.floating-image');
             const limitedImages = imageElements.slice(0, this.maxImages);
+            const dims = this.getDimensions();
             limitedImages.forEach(imgElement => {
-                this.addExistingImage(imgElement);
+                this.addExistingImage(imgElement, dims);
             });
         }
         catch (error) {
@@ -77,13 +84,17 @@ export class FloatingImagesManager {
         }
     }
 
-    addExistingImage(imgElement: HTMLElement) {
+    private getDimensions(): ContainerDimensions {
+        return { width: this.containerWidth, height: this.containerHeight };
+    }
+
+    private addExistingImage(imgElement: HTMLElement, dims: ContainerDimensions) {
         if (this.images.length >= this.maxImages) {
             console.warn('Maximum number of images reached, skipping additional images');
             return;
         }
         const performanceSettings = this.performanceMonitor.getRecommendedSettings();
-        const floatingImage = new FloatingImage(imgElement, this.container, {
+        const floatingImage = new FloatingImage(imgElement, dims, {
             useSubpixel: performanceSettings.useSubpixel
         });
         this.images.push(floatingImage);
@@ -93,63 +104,54 @@ export class FloatingImagesManager {
         this.speedMultiplier = clamp(this.speedMultiplier * factor, 0.2, 5);
     }
 
-    handleResize() {
+    private handleResize() {
         if (this._destroyed) return;
         this.updateContainerDimensions();
-        this.images = this.images.filter(image => {
-            const isValid = image.update(0, false);
-            if (isValid) {
-                const element = image._elementRef?.deref();
-                if (element) {
-                    image.size.width = element.offsetWidth;
-                    image.size.height = element.offsetHeight;
-                }
-                image.x = clamp(image.x, 0, this.containerWidth - image.size.width);
-                image.y = clamp(image.y, 0, this.containerHeight - image.size.height);
-                image.updatePosition();
-                return true;
-            } else {
-                image.destroy();
-                return false;
-            }
-        });
+        const dims = this.getDimensions();
+
+        for (let i = 0; i < this.images.length; i++) {
+            const image = this.images[i];
+            image.updateSize();
+            image.clampPosition(dims);
+            image.updatePosition();
+        }
     }
 
-    animate() {
-        if (this._destroyed) return;
-        const shouldSkipFrame = this.performanceMonitor.update();
-        if (shouldSkipFrame || !this.isInViewport || this.speedMultiplier === 0) {
-            this._animationId = requestAnimationFrame(() => this.animate());
-            return;
-        }
-        if ((this.performanceMonitor as any).frameCount % 60 === 0) {
-            this.performanceSettings = this.performanceMonitor.getRecommendedSettings();
-        }
-        const validImages: FloatingImage[] = [];
-        this.images.forEach(image => {
-            const isValid = image.update(this.speedMultiplier * this.performanceSettings.speedMultiplier, false);
-            if (isValid) {
-                validImages.push(image);
-            }
-        });
-        if (validImages.length !== this.images.length) {
-            this.images.forEach(image => {
-                if (!validImages.includes(image)) {
-                    image.destroy();
-                }
-            });
-            this.images = validImages;
-        }
-        this.images.forEach(image => image.updatePosition());
+private animate() {
+    if (this._destroyed) return;
+
+    const shouldSkipFrame = this.performanceMonitor.update();
+    if (shouldSkipFrame || !this.isInViewport || this.speedMultiplier === 0) {
         this._animationId = requestAnimationFrame(() => this.animate());
+        return;
     }
+
+    if (this.performanceMonitor.getFrameCount() % 60 === 0) {
+        this.performanceSettings = this.performanceMonitor.getRecommendedSettings();
+    }
+
+    const multiplier = this.speedMultiplier * this.performanceSettings.speedMultiplier;
+    const dims = this.getDimensions();
+    const updatedImages: FloatingImage[] = [];
+
+    for (let i = 0; i < this.images.length; i++) {
+        const img = this.images[i];
+        if (img.update(multiplier, dims, false)) {
+            img.updatePosition();
+            updatedImages.push(img);
+        } else {
+            img.destroy();
+        }
+    }
+
+    this.images = updatedImages;
+    this._animationId = requestAnimationFrame(() => this.animate());
+}
+
 
     resetAllImagePositions() {
-        this.images.forEach(image => {
-            if (typeof image.resetPosition === 'function') {
-                image.resetPosition();
-            }
-        });
+        const dims = this.getDimensions();
+        this.images.forEach(image => image.resetPosition(dims));
     }
 
     destroy() {
@@ -170,7 +172,7 @@ export class FloatingImagesManager {
             this.imageLoader.destroy();
             this.imageLoader = null!;
         }
-        // this.container = null!;
         this.performanceMonitor = null!;
+        (this.container as any).manager = null;
     }
 }

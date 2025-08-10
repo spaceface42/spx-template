@@ -1,5 +1,5 @@
 import { logMessage } from '../usr/bin/logging.js';
-import { PerformanceSettings } from './types.js';
+import { PerformanceSettings } from '../types/features.js';
 
 type PerformanceLevel = 'high' | 'medium' | 'low';
 
