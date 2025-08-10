@@ -177,7 +177,7 @@ export class PerformanceMonitor {
     }
 
     // inside PerformanceMonitor.ts
-    get frameCountPublic(): number {
+    public getFrameCount(): number {
         return this.frameCount;
     }
 

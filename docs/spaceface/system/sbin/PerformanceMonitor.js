@@ -142,7 +142,7 @@ export class PerformanceMonitor {
         this.cachedSettings = null;
     }
     // inside PerformanceMonitor.ts
-    get frameCountPublic() {
+    getFrameCount() {
         return this.frameCount;
     }
 }
