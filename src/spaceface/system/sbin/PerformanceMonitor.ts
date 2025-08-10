@@ -175,4 +175,10 @@ export class PerformanceMonitor {
         this.lastLevelUpdate = 0;
         this.cachedSettings = null;
     }
+
+    // inside PerformanceMonitor.ts
+    get frameCountPublic(): number {
+        return this.frameCount;
+    }
+
 }
