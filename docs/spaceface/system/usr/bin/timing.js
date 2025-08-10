@@ -1,15 +1,14 @@
 export function debounce(func, delay = 300) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
         const context = this;
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(context, args), delay);
     };
 }
-
 export function throttle(fn) {
     let isThrottled = false;
-    return function throttled(...args) {
+    return function (...args) {
         if (!isThrottled) {
             isThrottled = true;
             requestAnimationFrame(() => {
