@@ -125,6 +125,10 @@ export class PerformanceMonitor {
     getCurrentFPS() {
         return Math.round(this.fps * 10) / 10;
     }
+    // inside PerformanceMonitor.ts
+    getFrameCount() {
+        return this.frameCount;
+    }
     /**
      * Resets the performance monitor state
      */
@@ -140,9 +144,5 @@ export class PerformanceMonitor {
         this.cachedPerformanceLevel = 'high';
         this.lastLevelUpdate = 0;
         this.cachedSettings = null;
-    }
-    // inside PerformanceMonitor.ts
-    getFrameCount() {
-        return this.frameCount;
     }
 }
