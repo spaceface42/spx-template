@@ -12,17 +12,17 @@ export interface ScreensaverControllerOptions {
 }
 
 export class ScreensaverController {
-    private partialUrl: string;
-    private targetSelector: string;
-    private inactivityDelay: number;
+    private readonly partialUrl: string;
+    private readonly targetSelector: string;
+    private readonly inactivityDelay: number;
     private screensaverManager: FloatingImagesManager | null = null;
     private watcher: InactivityWatcher | null = null;
     private onError?: (message: string, error: unknown) => void;
     private _destroyed = false;
-    private eventBinder: EventBinder;
+    private readonly eventBinder: EventBinder;
     private _partialLoaded = false;
-    private _onInactivity: () => void;
-    private _onActivity: () => void;
+    private readonly _onInactivity: () => void;
+    private readonly _onActivity: () => void;
 
     constructor({ partialUrl, targetSelector, inactivityDelay = 12000, onError }: ScreensaverControllerOptions) {
         this.partialUrl = partialUrl;
