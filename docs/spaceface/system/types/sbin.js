@@ -1,0 +1,2 @@
+// ResizeManager-related types
+export {};

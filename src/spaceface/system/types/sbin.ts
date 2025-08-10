@@ -1,8 +1,3 @@
-// filepath: c:\Users\ezsol\OneDrive\Documents\GitHub\spx-template\src\spaceface\system\sbin\types.ts
-
-
-
-//
 
 // ResizeManager-related types
 
@@ -18,9 +13,6 @@ export type ElementDimensions = {
 };
 
 
-
-
-//
 // AsyncImageLoader-related types
 
 export interface AsyncImageLoaderOptions {
@@ -52,13 +44,5 @@ export type WatcherState = {
     listening: boolean;
     destroyed: boolean;
 };
-
-
-
-
-
-
-
-
 
 

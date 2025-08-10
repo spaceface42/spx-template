@@ -1,7 +1,7 @@
 import { eventBus } from "../bin/EventBus.js";
 import { throttle } from "../bin/timing.js";
 import { BaseWatcher } from "./BaseWatcher.js";
-import { InactivityWatcherOptions } from "./types.js";
+import { InactivityWatcherOptions } from "../types/sbin.js";
 
 export class InactivityWatcher extends BaseWatcher {
     private static instance: InactivityWatcher | null = null;

@@ -2,7 +2,7 @@ import {
     AsyncImageLoaderOptions,
     ImageSourceData,
     ImageMetadata
-} from './types.js';
+} from '../types/sbin.js';
 
 export class AsyncImageLoader {
     private container: Element | null;
