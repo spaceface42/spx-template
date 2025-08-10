@@ -3,13 +3,7 @@ import { InactivityWatcher } from '../../sbin/InactivityWatcher.js';
 import { PartialFetcher } from '../../bin/PartialFetcher.js';
 import { FloatingImagesManager } from '../FloatingImages/FloatingImagesManager.js';
 import { EventBinder } from '../../bin/EventBinder.js';
-
-export interface ScreensaverControllerOptions {
-    partialUrl: string;
-    targetSelector: string;
-    inactivityDelay?: number;
-    onError?: (message: string, error: unknown) => void;
-}
+import { ScreensaverControllerOptions } from '../../types/features.js';
 
 export class ScreensaverController {
     private readonly partialUrl: string;

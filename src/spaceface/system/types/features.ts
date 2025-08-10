@@ -21,3 +21,10 @@ export interface ContainerDimensions {
 export interface FloatingImageOptions {
     useSubpixel?: boolean;
 }
+
+export interface ScreensaverControllerOptions {
+    partialUrl: string;
+    targetSelector: string;
+    inactivityDelay?: number;
+    onError?: (message: string, error: unknown) => void;
+}
