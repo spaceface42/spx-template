@@ -4,22 +4,17 @@
  */
 export class DomReadyPromise {
     static #readyPromise = null;
-    /**
-     * Resolves once DOM is fully parsed.
-     */
     static ready() {
-        return this.#readyPromise ||= (document.readyState === 'loading'
-            ? new Promise(resolve => {
+        return this.#readyPromise ??= (document.readyState !== 'loading'
+            ? Promise.resolve()
+            : new Promise(resolve => {
                 document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
-            })
-            : Promise.resolve());
+            }));
     }
-    /**
-     * Waits for one or more elements matching selector(s).
-     */
     static waitForElement(selectors, { timeout = 5000, root = document, signal } = {}) {
         const isMultiple = Array.isArray(selectors);
         const selectorList = isMultiple ? selectors : [selectors];
+        const length = selectorList.length;
         return new Promise((resolve, reject) => {
             let timeoutId;
             const observer = new MutationObserver(() => check());
@@ -35,12 +30,15 @@ export class DomReadyPromise {
                 resolve(isMultiple ? elements : elements[0]);
             };
             const check = () => {
-                const elements = selectorList.map(sel => root.querySelector(sel));
-                if (elements.every((el) => Boolean(el))) {
-                    resolveFound(elements);
-                    return true;
+                const found = [];
+                for (let i = 0; i < length; i++) {
+                    const el = root.querySelector(selectorList[i]);
+                    if (!el)
+                        return false;
+                    found.push(el);
                 }
-                return false;
+                resolveFound(found);
+                return true;
             };
             const onAbort = () => {
                 cleanup();
@@ -52,12 +50,12 @@ export class DomReadyPromise {
                 signal.addEventListener('abort', onAbort, { once: true });
             }
             if (check())
-                return; // already found
+                return; // already found, no need to observe
             observer.observe(root, { childList: true, subtree: true });
             if (timeout > 0 && timeout !== Infinity) {
                 timeoutId = window.setTimeout(() => {
                     cleanup();
-                    reject(new Error(`Element(s) "${selectorList.join(', ')}" not found in ${timeout}ms`));
+                    reject(new DOMException(`Element(s) "${selectorList.join(', ')}" not found in ${timeout}ms`, 'TimeoutError'));
                 }, timeout);
             }
         });

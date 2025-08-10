@@ -7,28 +7,31 @@ import { WaitForElementOptions, WaitForElementResult } from '../types/bin.js';
 export class DomReadyPromise {
     static #readyPromise: Promise<void> | null = null;
 
-    /**
-     * Resolves once DOM is fully parsed.
-     */
     static ready(): Promise<void> {
-        return this.#readyPromise ||= (
-            document.readyState === 'loading'
-                ? new Promise<void>(resolve => {
+        return this.#readyPromise ??= (
+            document.readyState !== 'loading'
+                ? Promise.resolve()
+                : new Promise<void>(resolve => {
                     document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
                 })
-                : Promise.resolve()
         );
     }
 
-    /**
-     * Waits for one or more elements matching selector(s).
-     */
-    static waitForElement<T extends Element = Element>(
+    static waitForElement<T extends Element>(
+        selector: string,
+        options?: WaitForElementOptions
+    ): Promise<T>;
+    static waitForElement<T extends Element>(
+        selectors: string[],
+        options?: WaitForElementOptions
+    ): Promise<T[]>;
+    static waitForElement<T extends Element>(
         selectors: string | string[],
         { timeout = 5000, root = document, signal }: WaitForElementOptions = {}
-    ): WaitForElementResult<T> {
+    ): Promise<T | T[]> {
         const isMultiple = Array.isArray(selectors);
         const selectorList = isMultiple ? selectors : [selectors];
+        const length = selectorList.length;
 
         return new Promise((resolve, reject) => {
             let timeoutId: number | undefined;
@@ -46,12 +49,14 @@ export class DomReadyPromise {
             };
 
             const check = (): boolean => {
-                const elements = selectorList.map(sel => root.querySelector<T>(sel));
-                if (elements.every((el): el is T => Boolean(el))) {
-                    resolveFound(elements);
-                    return true;
+                const found: T[] = [];
+                for (let i = 0; i < length; i++) {
+                    const el = root.querySelector<T>(selectorList[i]);
+                    if (!el) return false;
+                    found.push(el);
                 }
-                return false;
+                resolveFound(found);
+                return true;
             };
 
             const onAbort = (): void => {
@@ -64,14 +69,17 @@ export class DomReadyPromise {
                 signal.addEventListener('abort', onAbort, { once: true });
             }
 
-            if (check()) return; // already found
+            if (check()) return; // already found, no need to observe
 
             observer.observe(root, { childList: true, subtree: true });
 
             if (timeout > 0 && timeout !== Infinity) {
                 timeoutId = window.setTimeout(() => {
                     cleanup();
-                    reject(new Error(`Element(s) "${selectorList.join(', ')}" not found in ${timeout}ms`));
+                    reject(new DOMException(
+                        `Element(s) "${selectorList.join(', ')}" not found in ${timeout}ms`,
+                        'TimeoutError'
+                    ));
                 }, timeout);
             }
         });
