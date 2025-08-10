@@ -25,11 +25,15 @@ export class PartialLoader {
     }
 
     async init(container: ParentNode = document): Promise<PromiseSettledResult<unknown>[]> {
-        const links = Array.from(container.querySelectorAll<HTMLLinkElement>('link[rel="partial"][src]'));
+        const links = container.querySelectorAll<HTMLLinkElement>('link[rel="partial"][src]');
         if (!links.length) return [];
-        this.logDebug("Found partial links", links);
 
-        const results = await Promise.allSettled(links.map(link => this.loadPartial(link)));
+        if (this.options.debug) this.logDebug("Found partial links", [...links]);
+
+        const results = await Promise.allSettled(
+            Array.from(links, link => this.loadPartial(link))
+        );
+
         eventBus.emit("partials:allLoaded", { count: results.length });
         return results;
     }
@@ -42,7 +46,9 @@ export class PartialLoader {
         const cacheKey = url;
 
         try {
-            if (this.loadingPromises.has(cacheKey)) return await this.loadingPromises.get(cacheKey)!;
+            if (this.loadingPromises.has(cacheKey)) {
+                return await this.loadingPromises.get(cacheKey)!;
+            }
 
             if (this.options.cacheEnabled && this.cache.has(cacheKey)) {
                 this.insertHTML(link, this.cache.get(cacheKey)!);
@@ -89,22 +95,26 @@ export class PartialLoader {
 
     private async fetchPartial(url: string, attempt = 1): Promise<string> {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), this.options.timeout);
+        const timeoutId = setTimeout(() => controller.abort(), this.options.timeout);
 
         try {
-            const res = await fetch(url, { signal: controller.signal, headers: { Accept: "text/html" } });
-            clearTimeout(timeout);
+            const res = await fetch(url, {
+                signal: controller.signal,
+                headers: { Accept: "text/html" }
+            });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
             const html = (await res.text()).trim();
             if (!html) throw new Error("Empty response");
             return html;
         } catch (err) {
-            clearTimeout(timeout);
             if (attempt < this.options.retryAttempts) {
                 await this.delay(Math.min(2 ** attempt * 100, 5000));
                 return this.fetchPartial(url, attempt + 1);
             }
             throw err;
+        } finally {
+            clearTimeout(timeoutId);
         }
     }
 
@@ -118,11 +128,10 @@ export class PartialLoader {
     private runScripts(container: ParentNode) {
         container.querySelectorAll("script").forEach(script => {
             const s = document.createElement("script");
+            Array.from(script.attributes).forEach(attr => s.setAttribute(attr.name, attr.value));
             if (script.src) s.src = script.src;
             else s.textContent = script.textContent;
-            Array.from(script.attributes).forEach(attr => s.setAttribute(attr.name, attr.value));
-            document.body.appendChild(s);
-            document.body.removeChild(s);
+            script.replaceWith(s); // executes when inserted
         });
     }
 
@@ -138,7 +147,8 @@ export class PartialLoader {
     }
 
     private resolveUrl(src: string) {
-        if (/^(https?:)?\/\//.test(src)) return src;
+        // Handles all absolute URLs and protocol-relative
+        if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(src) || src.startsWith("//")) return src;
         return this.options.baseUrl.replace(/\/$/, "") + (src.startsWith("/") ? src : `/${src}`);
     }
 
@@ -148,7 +158,9 @@ export class PartialLoader {
 
     watch(container: HTMLElement | Document = document.body) {
         if (!window.MutationObserver) return;
-        const observer = new MutationObserver(debounce(() => this.init(container), 100));
+        const observer = new MutationObserver(
+            debounce(() => this.init(container), 100)
+        );
         observer.observe(container, { childList: true, subtree: true });
         return observer;
     }

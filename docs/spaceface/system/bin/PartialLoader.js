@@ -21,11 +21,12 @@ export class PartialLoader {
             console.debug(`[PartialLoader] ${msg}`, data);
     }
     async init(container = document) {
-        const links = Array.from(container.querySelectorAll('link[rel="partial"][src]'));
+        const links = container.querySelectorAll('link[rel="partial"][src]');
         if (!links.length)
             return [];
-        this.logDebug("Found partial links", links);
-        const results = await Promise.allSettled(links.map(link => this.loadPartial(link)));
+        if (this.options.debug)
+            this.logDebug("Found partial links", [...links]);
+        const results = await Promise.allSettled(Array.from(links, link => this.loadPartial(link)));
         eventBus.emit("partials:allLoaded", { count: results.length });
         return results;
     }
@@ -36,8 +37,9 @@ export class PartialLoader {
         const url = this.resolveUrl(src);
         const cacheKey = url;
         try {
-            if (this.loadingPromises.has(cacheKey))
+            if (this.loadingPromises.has(cacheKey)) {
                 return await this.loadingPromises.get(cacheKey);
+            }
             if (this.options.cacheEnabled && this.cache.has(cacheKey)) {
                 this.insertHTML(link, this.cache.get(cacheKey));
                 return { success: true, url, cached: true };
@@ -81,10 +83,12 @@ export class PartialLoader {
     }
     async fetchPartial(url, attempt = 1) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), this.options.timeout);
+        const timeoutId = setTimeout(() => controller.abort(), this.options.timeout);
         try {
-            const res = await fetch(url, { signal: controller.signal, headers: { Accept: "text/html" } });
-            clearTimeout(timeout);
+            const res = await fetch(url, {
+                signal: controller.signal,
+                headers: { Accept: "text/html" }
+            });
             if (!res.ok)
                 throw new Error(`HTTP ${res.status}`);
             const html = (await res.text()).trim();
@@ -93,12 +97,14 @@ export class PartialLoader {
             return html;
         }
         catch (err) {
-            clearTimeout(timeout);
             if (attempt < this.options.retryAttempts) {
                 await this.delay(Math.min(2 ** attempt * 100, 5000));
                 return this.fetchPartial(url, attempt + 1);
             }
             throw err;
+        }
+        finally {
+            clearTimeout(timeoutId);
         }
     }
     insertHTML(replaceEl, html) {
@@ -110,13 +116,12 @@ export class PartialLoader {
     runScripts(container) {
         container.querySelectorAll("script").forEach(script => {
             const s = document.createElement("script");
+            Array.from(script.attributes).forEach(attr => s.setAttribute(attr.name, attr.value));
             if (script.src)
                 s.src = script.src;
             else
                 s.textContent = script.textContent;
-            Array.from(script.attributes).forEach(attr => s.setAttribute(attr.name, attr.value));
-            document.body.appendChild(s);
-            document.body.removeChild(s);
+            script.replaceWith(s); // executes when inserted
         });
     }
     showError(el, error) {
@@ -129,7 +134,8 @@ export class PartialLoader {
         return this.loadedPartials.has(id);
     }
     resolveUrl(src) {
-        if (/^(https?:)?\/\//.test(src))
+        // Handles all absolute URLs and protocol-relative
+        if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(src) || src.startsWith("//"))
             return src;
         return this.options.baseUrl.replace(/\/$/, "") + (src.startsWith("/") ? src : `/${src}`);
     }

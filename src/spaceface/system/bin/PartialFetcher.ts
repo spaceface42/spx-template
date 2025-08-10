@@ -15,19 +15,22 @@ export class PartialFetcher {
 
         eventBus.emit("partial:load:start", <PartialFetchEventPayload>{ url, targetSelector });
 
+        // Early container check to avoid network if target missing
+        const container = document.querySelector<HTMLElement>(targetSelector);
+        if (!container) {
+            const error = new Error(`Target container not found: ${targetSelector}`);
+            eventBus.emit("partial:load:error", { url, targetSelector, error });
+            eventBus.emit("partial:load:complete", { url, targetSelector });
+            throw error;
+        }
+
         try {
             const response = await fetch(url, { signal });
             if (!response.ok) {
                 throw new Error(`Fetch failed with status ${response.status}`);
             }
 
-            const html = (await response.text()).trim();
-            const container = document.querySelector<HTMLElement>(targetSelector);
-
-            if (!container) {
-                throw new Error(`Target container not found: ${targetSelector}`);
-            }
-
+            const html = await response.text();
             const template = document.createElement("template");
             template.innerHTML = html;
 
@@ -37,23 +40,20 @@ export class PartialFetcher {
                 container.append(...template.content.childNodes);
             }
 
-            eventBus.emit("partial:load:success", <PartialFetchEventPayload>{
+            eventBus.emit("partial:load:success", {
                 url,
                 targetSelector,
                 html,
             });
         } catch (error) {
-            eventBus.emit("partial:load:error", <PartialFetchEventPayload>{
+            eventBus.emit("partial:load:error", {
                 url,
                 targetSelector,
                 error,
             });
             throw error;
         } finally {
-            eventBus.emit("partial:load:complete", <PartialFetchEventPayload>{
-                url,
-                targetSelector,
-            });
+            eventBus.emit("partial:load:complete", { url, targetSelector });
         }
     }
 }
