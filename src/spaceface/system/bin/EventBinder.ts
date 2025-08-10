@@ -3,7 +3,7 @@ import {
     DomBinding,
     EventBinderStats,
     IEventBinder
-} from "./types.js";
+} from "../types/bin.js";
 import { eventBus } from "./EventBus.js";
 
 export class EventBinder implements IEventBinder {
