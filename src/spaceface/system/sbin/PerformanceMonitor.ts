@@ -1,12 +1,7 @@
 import { logMessage } from '../usr/bin/logging.js';
+import { PerformanceSettings } from './types.js';
 
 type PerformanceLevel = 'high' | 'medium' | 'low';
-
-interface PerformanceSettings {
-    maxImages: number;
-    speedMultiplier: number;
-    useSubpixel: boolean;
-}
 
 export class PerformanceMonitor {
     private frameCount: number;

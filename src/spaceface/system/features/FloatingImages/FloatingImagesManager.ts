@@ -3,20 +3,21 @@ import { FloatingImage } from './FloatingImage.js';
 import { resizeManager } from '../../sbin/ResizeManager.js';
 import { AsyncImageLoader } from '../../sbin/AsyncImageLoader.js';
 import { PerformanceMonitor } from '../../sbin/PerformanceMonitor.js';
+import { PerformanceSettings } from '../../sbin/types.js';
 
 export interface FloatingImagesManagerOptions {
     maxImages?: number;
 }
 
 export class FloatingImagesManager {
-    container: HTMLElement;
+    readonly container: HTMLElement;
     performanceMonitor: PerformanceMonitor;
     images: FloatingImage[];
     speedMultiplier: number;
     isInViewport: boolean;
-    _destroyed: boolean;
-    _animationId: number | null;
-    performanceSettings: any;
+    private _destroyed: boolean;
+    private _animationId: number | null;
+    performanceSettings: PerformanceSettings;
     maxImages: number;
     intersectionObserver: IntersectionObserver;
     unsubscribeWindow?: () => void;
@@ -32,6 +33,7 @@ export class FloatingImagesManager {
         if (!this.container) {
             throw new Error('Container not found');
         }
+        (this.container as any).manager = this;
         this.performanceMonitor = new PerformanceMonitor();
         this.images = [];
         this.speedMultiplier = 1;
@@ -80,7 +82,6 @@ export class FloatingImagesManager {
             console.warn('Maximum number of images reached, skipping additional images');
             return;
         }
-        (this.container as any).manager = this;
         const performanceSettings = this.performanceMonitor.getRecommendedSettings();
         const floatingImage = new FloatingImage(imgElement, this.container, {
             useSubpixel: performanceSettings.useSubpixel
@@ -169,7 +170,7 @@ export class FloatingImagesManager {
             this.imageLoader.destroy();
             this.imageLoader = null!;
         }
-        this.container = null!;
+        // this.container = null!;
         this.performanceMonitor = null!;
     }
 }

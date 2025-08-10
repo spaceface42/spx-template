@@ -26,6 +26,7 @@ export class FloatingImagesManager {
         if (!this.container) {
             throw new Error('Container not found');
         }
+        this.container.manager = this;
         this.performanceMonitor = new PerformanceMonitor();
         this.images = [];
         this.speedMultiplier = 1;
@@ -70,7 +71,6 @@ export class FloatingImagesManager {
             console.warn('Maximum number of images reached, skipping additional images');
             return;
         }
-        this.container.manager = this;
         const performanceSettings = this.performanceMonitor.getRecommendedSettings();
         const floatingImage = new FloatingImage(imgElement, this.container, {
             useSubpixel: performanceSettings.useSubpixel
@@ -159,7 +159,7 @@ export class FloatingImagesManager {
             this.imageLoader.destroy();
             this.imageLoader = null;
         }
-        this.container = null;
+        // this.container = null!;
         this.performanceMonitor = null;
     }
 }
