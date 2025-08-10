@@ -1,5 +1,5 @@
 import { eventBus } from "./EventBus.js";
-import { PartialFetchOptions, PartialFetchEventPayload } from "../types.js";
+import { PartialFetchOptions, PartialFetchEventPayload } from "./types.js";
 
 export class PartialFetcher {
     /**

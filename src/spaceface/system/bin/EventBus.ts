@@ -4,7 +4,7 @@ import {
     UnsubscribeFn,
     EventBusErrorPayload,
     IEventBus
-} from "../types.js";
+} from "./types.js";
 
 export class EventBus implements IEventBus {
     private listeners: Record<string, Listener[]> = {};

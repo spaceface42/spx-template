@@ -2,7 +2,7 @@ import {
     ResizeCallback,
     ElementResizeCallback,
     ElementDimensions
-} from '../types.js';
+} from './types.js';
 
 class ResizeManager {
     private static instance: ResizeManager | null = null;

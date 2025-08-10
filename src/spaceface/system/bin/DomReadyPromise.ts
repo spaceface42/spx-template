@@ -1,4 +1,4 @@
-import { WaitForElementOptions, WaitForElementResult } from '../types.js';
+import { WaitForElementOptions, WaitForElementResult } from './types.js';
 
 /**
  * DomReadyPromise

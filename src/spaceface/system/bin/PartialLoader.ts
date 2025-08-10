@@ -1,7 +1,7 @@
 import { debounce } from "./timing.js";
 import { DomReadyPromise } from "./DomReadyPromise.js";
 import { eventBus } from "./EventBus.js";
-import { PartialLoaderOptions, PartialInfo, PartialLoadResult } from "../types.js";
+import { PartialLoaderOptions, PartialInfo, PartialLoadResult } from "./types.js";
 
 export class PartialLoader {
     private cache = new Map<string, string>();
