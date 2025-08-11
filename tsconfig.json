@@ -11,5 +11,6 @@
         "removeComments": false,
         "declaration": false
     },
-    "include": ["src/**/*"]
+    "include": ["src/**/*"],
+    "exclude": ["docs/system/types/**/*"]
 }
