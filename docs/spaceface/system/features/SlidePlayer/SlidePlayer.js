@@ -2,10 +2,48 @@ import { eventBus } from '../../bin/EventBus.js';
 import { EventBinder } from '../../bin/EventBinder.js';
 import { AsyncImageLoader } from '../../sbin/AsyncImageLoader.js';
 
-
+/**
+ * SlidePlayer
+ * ===========
+ * A lightweight, self-contained slideshow/slider player with autoplay, swipe/drag,
+ * keyboard navigation, dot indicators, pause on hover, and full cleanup support.
+ *
+ * Features:
+ * ----------
+ * - Autoplay with configurable interval
+ * - Pause on hover / when page not visible / inactivity events
+ * - Touch swipe & mouse drag navigation
+ * - Keyboard navigation (ArrowLeft / ArrowRight)
+ * - Dot indicators (auto-generated or use your own container)
+ * - Supports <picture> tags via AsyncImageLoader
+ * - Multiple instances per page (each `.slideshow-container` becomes one player)
+ * - EventBus integration for telemetry (slide changed, pause/resume, etc.)
+ *
+ * Usage:
+ * ------
+ * // Direct (vanilla)
+ * document.querySelectorAll('.slideshow-container').forEach(node => {
+ *   new SlidePlayer(node, { interval: 5000, includePicture: false });
+ * });
+ *
+ * // With Spaceface
+ * const app = new Spaceface({
+ *   features: {
+ *     slideplayer: {
+ *       interval: 5000,
+ *       includePicture: false
+ *     }
+ *   }
+ * });
+ *
+ * Events emitted via eventBus:
+ * - "slideplayer:slideChanged" { index }
+ * - "slideplayer: Paused due to inactivity" { index }
+ * - "slideplayer: Resumed after inactivity" { index }
+ */
 export class SlidePlayer {
   /**
-   * @param {string | HTMLElement} containerSelector
+   * @param {string|HTMLElement} containerSelector - Container element or selector string
    * @param {Object} options
    * @param {number} options.interval - Autoplay interval in ms
    * @param {boolean} options.includePicture - Whether to support <picture> tags
@@ -34,7 +72,6 @@ export class SlidePlayer {
     this.loader = new AsyncImageLoader(this.container, { includePicture });
 
     // Initialize EventBinder for automatic cleanup
-    // this.eventBinder = new EventBinder();
     this.eventBinder = new EventBinder(true);
 
     this.ready = this.init();
@@ -47,18 +84,15 @@ export class SlidePlayer {
 
     // Create or update dots dynamically
     let dotsWrapper = this.container.querySelector('.dots');
-
-    // If it exists, clear it — else create and append it
     if (!dotsWrapper) {
       dotsWrapper = document.createElement('div');
       dotsWrapper.className = 'dots';
       this.container.appendChild(dotsWrapper);
     } else {
-      dotsWrapper.innerHTML = ''; // Clear manually created dots
+      dotsWrapper.innerHTML = '';
     }
 
     this.dots = [];
-
     this.slides.forEach((_, i) => {
       const dot = document.createElement('div');
       dot.className = 'dot';
@@ -69,17 +103,14 @@ export class SlidePlayer {
         this.lastTimestamp = performance.now();
       };
 
-      // Use EventBinder instead of manual addEventListener
       this.eventBinder.bindDOM(dot, 'click', handler);
-
       dotsWrapper.appendChild(dot);
       this.dots.push(dot);
     });
 
-    // Mark first dot active
     this.dots[0]?.classList.add('active');
 
-    // Swipe & mouse drag - use EventBinder
+    // Swipe & drag
     this.eventBinder.bindDOM(this.container, 'touchstart', e => {
       this.touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
@@ -94,8 +125,10 @@ export class SlidePlayer {
     this.eventBinder.bindDOM(this.container, 'mouseup', this.onMouseUp);
     this.eventBinder.bindDOM(this.container, 'mouseleave', this.onMouseLeave);
 
+    // Keyboard
     this.eventBinder.bindDOM(document, 'keydown', this.onKeyDown);
 
+    // Pause on hover
     this.eventBinder.bindDOM(this.container, 'mouseenter', () => {
       this.isPaused = true;
     });
@@ -105,13 +138,14 @@ export class SlidePlayer {
       this.lastTimestamp = performance.now();
     });
 
+    // Pause when tab is hidden
     this.eventBinder.bindDOM(document, 'visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         this.lastTimestamp = performance.now();
       }
     });
 
-    // EventBus bindings - use EventBinder
+    // EventBus bindings
     this.handleUserInactive = () => {
       this.isPaused = true;
       eventBus.emit('slideplayer: Paused due to inactivity', { index: this.currentIndex });
@@ -126,7 +160,7 @@ export class SlidePlayer {
     this.eventBinder.bindBus('user:inactive', this.handleUserInactive);
     this.eventBinder.bindBus('user:active', this.handleUserActive);
 
-    // Automatic cleanup on page unload
+    // Cleanup on unload
     this.eventBinder.bindDOM(window, 'beforeunload', () => {
       this.destroy();
     });
@@ -211,16 +245,11 @@ export class SlidePlayer {
   };
 
   async destroy() {
-    // Cancel animation frame
     if (this.rafId) {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
-
-    // Use EventBinder to clean up all listeners automatically
     this.eventBinder.unbindAll();
-
-    // Clean up loader
     if (this.loader) {
       this.loader.destroy();
     }
