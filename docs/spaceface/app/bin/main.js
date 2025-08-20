@@ -58,7 +58,8 @@ const app = new Spaceface({
     partialLoader: true,
     slideplayer: {
       interval: 5000,
-      includePicture: false
+      includePicture: false,
+      showDots: true, // 👈 new flag
     },
     screensaver: {
       delay: 4500,

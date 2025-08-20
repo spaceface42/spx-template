@@ -88,7 +88,7 @@ export class Spaceface {
 
   }
 
-  async initSlidePlayer() {
+  async initSlidePlayerX() {
     const { slideplayer } = this.features;
     if (!slideplayer) return;
 
@@ -108,6 +108,33 @@ export class Spaceface {
     this.log('info', 'SlidePlayer loaded');
     this.slideshow = slideshow;
   }
+
+async initSlidePlayer() {
+  const { slideplayer } = this.features;
+  if (!slideplayer) return;
+
+  const module = await this.loadFeatureModule('slideplayer');
+  const SlidePlayer = module?.SlidePlayer;
+  if (!SlidePlayer) return;
+
+  const containers = document.querySelectorAll('.slideshow-container');
+  this.slideshows = [];
+
+  for (const node of containers) {
+    const slideshow = new SlidePlayer(node, {
+      interval: slideplayer.interval ?? 5000,
+      includePicture: slideplayer.includePicture ?? false,
+    });
+    if (typeof slideshow.ready?.then === 'function') {
+      await slideshow.ready;
+    }
+    this.slideshows.push(slideshow);
+  }
+
+  this.log('info', `${this.slideshows.length} SlidePlayer instance(s) loaded`);
+}
+
+
 
   async initScreensaver() {
     const { screensaver } = this.features;
