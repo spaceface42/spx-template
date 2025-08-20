@@ -2,6 +2,46 @@ import { eventBus } from '../../bin/EventBus.js';
 import { EventBinder } from '../../bin/EventBinder.js';
 import { AsyncImageLoader } from '../../sbin/AsyncImageLoader.js';
 
+/**
+ * SlidePlayer
+ * ===========
+ * A lightweight, self-contained slideshow/slider player with autoplay, swipe/drag,
+ * keyboard navigation, dot indicators, pause on hover, and full cleanup support.
+ *
+ * Features:
+ * ----------
+ * - Autoplay with configurable interval
+ * - Pause on hover / when page not visible / inactivity events
+ * - Touch swipe & mouse drag navigation
+ * - Keyboard navigation (ArrowLeft / ArrowRight)
+ * - Dot indicators (auto-generated or use your own container)
+ * - Supports <picture> tags via AsyncImageLoader
+ * - Multiple instances per page (each `.slideshow-container` becomes one player)
+ * - EventBus integration for telemetry (slide changed, pause/resume, etc.)
+ *
+ * Usage:
+ * ------
+ * // Direct (vanilla)
+ * document.querySelectorAll('.slideshow-container').forEach(node => {
+ *   new SlidePlayer(node, { interval: 5000, includePicture: false });
+ * });
+ *
+ * // With Spaceface
+ * const app = new Spaceface({
+ *   features: {
+ *     slideplayer: {
+ *       interval: 5000,
+ *       includePicture: false
+ *     }
+ *   }
+ * });
+ *
+ * Events emitted via eventBus:
+ * - "slideplayer:slideChanged" { index }
+ * - "slideplayer: Paused due to inactivity" { index }
+ * - "slideplayer: Resumed after inactivity" { index }
+ */
+
 interface SlidePlayerOptions {
   interval?: number;
   includePicture?: boolean;
