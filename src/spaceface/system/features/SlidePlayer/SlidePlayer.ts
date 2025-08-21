@@ -3,319 +3,431 @@ import { EventBinder } from '../../bin/EventBinder.js';
 import { AsyncImageLoader } from '../../sbin/AsyncImageLoader.js';
 
 /**
- * SlidePlayer
- * - autoplay with configurable interval
- * - dots (auto-generated if missing)
- * - touch swipe / mouse drag / keyboard nav
- * - pause on hover + on tab hidden + on user inactivity (screensaver)
- * - robust pause handling via reason set to avoid accidental resumes
+ * SlidePlayer (Modern Architecture)
+ * ---------------------------------
+ * - Autoplay with configurable interval
+ * - Pointer events (mouse + touch unified)
+ * - Keyboard nav (ArrowLeft / ArrowRight)
+ * - Dots (auto-generated if missing)
+ * - Pause on hover, tab hidden, user inactivity (screensaver)
+ * - Robust pause control using reason set (no accidental resumes)
+ * - Emits DOM CustomEvents (per-instance) AND EventBus events (global)
+ *
+ * DOM CustomEvents fired on container:
+ * - 'slideplayer:slideChanged' -> { detail: { index: number } }
+ * - 'slideplayer:paused'       -> { detail: { reasons: string[] } }
+ * - 'slideplayer:resumed'      -> { detail: { reasons: string[] } }
+ *
+ * EventBus (global, optional consumers):
+ * - 'slideplayer:slide-changed'             -> { index }
+ * - 'slideplayer:paused-due-to-inactivity'  -> { index }
+ * - 'slideplayer:resumed-after-inactivity'  -> { index }
+ * - Also listens to:
+ *      - 'user:inactive' (pause with reason 'inactivity')
+ *      - 'user:active'   (resume reason 'inactivity')
  */
 
 interface SlidePlayerOptions {
   interval?: number;
   includePicture?: boolean;
+  /**
+   * If provided, dots are rendered into this element (found within container).
+   * If not present in DOM, a '.dots' wrapper is created automatically.
+   */
+  dotsSelector?: string;
+  /**
+   * Disable automatic dot creation (you can manage your own).
+   */
+  autoCreateDots?: boolean;
+  /**
+   * If true, the slider will not auto-play until play() is called.
+   * Default false (autoplay on).
+   */
+  startPaused?: boolean;
 }
 
 type SlideDot = HTMLDivElement;
-type PauseReason = 'hover' | 'inactivity' | 'hidden' | 'manual';
+type PauseReason = 'hover' | 'hidden' | 'inactivity' | 'manual';
 
 export class SlidePlayer {
+  /** Swipe / drag minimum in px */
   static SWIPE_THRESHOLD = 50;
 
   public readonly container: HTMLElement;
   public readonly interval: number;
   public readonly includePicture: boolean;
 
-  private currentIndex = 0;
-  private lastTimestamp = 0;
-  private rafId: number | null = null;
-  private _destroyed = false;
+  private readonly dotsSelector?: string;
+  private readonly autoCreateDots: boolean;
+  private readonly startPaused: boolean;
 
-  private touchStartX = 0;
-  private touchEndX = 0;
-  private mouseStartX = 0;
-  private mouseEndX = 0;
-  private isDragging = false;
+  // Core state
+  #currentIndex = 0;
+  #lastTimestamp = 0;
+  #rafId: number | null = null;
+  #destroyed = false;
 
-  private slides: HTMLElement[] = [];
-  private dots: SlideDot[] = [];
-  private dotsWrapper: HTMLElement | null = null;
+  // Input state (pointer-unified)
+  #isPointerDown = false;
+  #pointerStartX = 0;
+  #pointerEndX = 0;
 
-  private pauseReasons = new Set<PauseReason>();
+  // Elements
+  #slides: HTMLElement[] = [];
+  #dots: SlideDot[] = [];
+  #dotsWrapper: HTMLElement | null = null;
 
-  private loader: AsyncImageLoader;
-  private eventBinder: EventBinder;
+  // Pause system
+  #pauseReasons = new Set<PauseReason>();
+
+  // Infra
+  #loader: AsyncImageLoader;
+  #binder: EventBinder;
+
+  // Ready promise
   public readonly ready: Promise<void>;
 
   constructor(
-    containerSelector: string | HTMLElement,
-    { interval = 5000, includePicture = false }: SlidePlayerOptions = {}
+    containerOrSelector: string | HTMLElement,
+    {
+      interval = 5000,
+      includePicture = false,
+      dotsSelector,
+      autoCreateDots = true,
+      startPaused = false
+    }: SlidePlayerOptions = {}
   ) {
-    this.container =
-      typeof containerSelector === 'string'
-        ? (document.querySelector<HTMLElement>(containerSelector) as HTMLElement)
-        : containerSelector;
+    const container =
+      typeof containerOrSelector === 'string'
+        ? (document.querySelector<HTMLElement>(containerOrSelector) as HTMLElement)
+        : containerOrSelector;
 
-    if (!this.container) throw new Error('Container element not found.');
+    if (!container) throw new Error('SlidePlayer: container element not found.');
 
+    this.container = container;
     this.interval = interval;
     this.includePicture = includePicture;
+    this.dotsSelector = dotsSelector;
+    this.autoCreateDots = autoCreateDots;
+    this.startPaused = startPaused;
 
-    this.loader = new AsyncImageLoader(this.container, { includePicture });
-    this.eventBinder = new EventBinder(true);
+    this.#loader = new AsyncImageLoader(this.container, { includePicture: this.includePicture });
+    this.#binder = new EventBinder(true);
 
-    this.ready = this.init();
+    // If requested, start in paused state (manual)
+    if (this.startPaused) this.#pauseReasons.add('manual');
+
+    this.ready = this.#init();
   }
 
-  // ---------- Init / teardown ----------
+  // -------------------- Init / Destroy --------------------
 
-  private async init(): Promise<void> {
-    await this.loader.waitForImagesToLoad();
+  async #init(): Promise<void> {
+    await this.#loader.waitForImagesToLoad();
 
-    this.slides = Array.from(this.container.querySelectorAll<HTMLElement>('.slide'));
-    if (this.slides.length === 0) {
-      console.warn('[SlidePlayer] No .slide elements inside container.');
+    this.#slides = Array.from(this.container.querySelectorAll<HTMLElement>('.slide'));
+    if (this.#slides.length === 0) {
+      console.warn('[SlidePlayer] No .slide elements found in container.');
       return;
     }
 
-    // Create or re-create dots
-    this.dotsWrapper = this.container.querySelector<HTMLElement>('.dots');
-    if (!this.dotsWrapper) {
-      this.dotsWrapper = document.createElement('div');
-      this.dotsWrapper.className = 'dots';
-      this.container.appendChild(this.dotsWrapper);
-    } else {
-      this.dotsWrapper.innerHTML = '';
+    this.#setupDots();
+    this.#bindEvents();
+
+    // Activate first slide
+    this.#setActiveSlide(0);
+
+    // Start RAF loop
+    this.#lastTimestamp = performance.now();
+    this.#rafId = requestAnimationFrame(this.#animate);
+  }
+
+  public destroy(): void {
+    if (this.#destroyed) return;
+    this.#destroyed = true;
+
+    if (this.#rafId) {
+      cancelAnimationFrame(this.#rafId);
+      this.#rafId = null;
     }
 
-    this.dots = [];
-    this.slides.forEach((_, i) => {
+    this.#binder.unbindAll();
+    this.#loader.destroy();
+
+    this.#slides = [];
+    this.#dots = [];
+    this.#dotsWrapper = null;
+    this.#pauseReasons.clear();
+  }
+
+  // -------------------- DOM / Dots --------------------
+
+  #setupDots(): void {
+    // Prefer provided selector inside container
+    const selector = this.dotsSelector ?? '.dots';
+    this.#dotsWrapper = this.container.querySelector<HTMLElement>(selector) || null;
+
+    if (!this.#dotsWrapper && this.autoCreateDots) {
+      this.#dotsWrapper = document.createElement('div');
+      this.#dotsWrapper.className = 'dots';
+      this.container.appendChild(this.#dotsWrapper);
+    }
+
+    // If no wrapper at all (autoCreate disabled), skip dots
+    if (!this.#dotsWrapper) {
+      this.#dots = [];
+      return;
+    }
+
+    // Re-render dots
+    this.#dotsWrapper.innerHTML = '';
+    this.#dots = this.#slides.map((_, i) => {
       const dot = document.createElement('div');
       dot.className = 'dot';
       dot.dataset.index = i.toString();
-
-      // Keep EventListener type happy without losing strong typing
-      this.eventBinder.bindDOM(
+      this.#binder.bindDOM(
         dot,
         'click',
         (() => {
           this.goToSlide(i);
-          this.bumpTimer();
+          this.#bumpTimer();
         }) as EventListener
       );
-
-      this.dotsWrapper!.appendChild(dot);
-      this.dots.push(dot);
+      this.#dotsWrapper!.appendChild(dot);
+      return dot;
     });
-
-    // Activate first slide
-    this.setActiveSlide(0);
-
-    // Bind DOM + bus events
-    this.bindEvents();
-
-    // Start RAF loop
-    this.lastTimestamp = performance.now();
-    this.rafId = requestAnimationFrame(this.animate);
   }
 
-  public async destroy(): Promise<void> {
-    if (this._destroyed) return;
-    this._destroyed = true;
+  #setActiveSlide(index: number): void {
+    this.#slides[this.#currentIndex]?.classList.remove('active');
+    this.#dots[this.#currentIndex]?.classList.remove('active');
 
-    if (this.rafId) {
-      cancelAnimationFrame(this.rafId);
-      this.rafId = null;
+    this.#currentIndex = index;
+
+    this.#slides[this.#currentIndex]?.classList.add('active');
+    this.#dots[this.#currentIndex]?.classList.add('active');
+  }
+
+  // -------------------- RAF Loop --------------------
+
+  #animate = (timestamp: number): void => {
+    if (this.#destroyed) return;
+
+    if (!this.#lastTimestamp) this.#lastTimestamp = timestamp;
+    const elapsed = timestamp - this.#lastTimestamp;
+
+    if (!this.isPaused() && elapsed >= this.interval) {
+      this.next();
+      this.#lastTimestamp = timestamp;
     }
 
-    this.eventBinder.unbindAll();
-    this.loader.destroy();
+    this.#rafId = requestAnimationFrame(this.#animate);
+  };
 
-    this.slides = [];
-    this.dots = [];
-    this.dotsWrapper = null;
-    this.pauseReasons.clear();
+  // -------------------- Public API --------------------
+
+  public goToSlide(index: number): void {
+    if (index < 0 || index >= this.#slides.length) return;
+
+    this.#setActiveSlide(index);
+    this.#bumpTimer();
+
+    // DOM CustomEvent
+    this.#dispatch('slideplayer:slideChanged', { index: this.#currentIndex });
+    // EventBus
+    eventBus.emit('slideplayer:slide-changed', { index: this.#currentIndex });
   }
 
-  // ---------- Event binding ----------
+  public next(): void {
+    this.goToSlide((this.#currentIndex + 1) % this.#slides.length);
+  }
 
-  private bindEvents(): void {
-    // Touch (use Event and narrow with instanceof for TS)
-    this.eventBinder.bindDOM(
+  public prev(): void {
+    const prevIndex = (this.#currentIndex - 1 + this.#slides.length) % this.#slides.length;
+    this.goToSlide(prevIndex);
+  }
+
+  public play(): void {
+    const wasPaused = this.isPaused();
+    this.#pauseReasons.delete('manual');
+    if (wasPaused && !this.isPaused()) {
+      this.#dispatch('slideplayer:resumed', { reasons: Array.from(this.#pauseReasons) });
+    }
+    this.#bumpTimer();
+  }
+
+  public pause(): void {
+    const wasPaused = this.isPaused();
+    this.#pauseReasons.add('manual');
+    if (!wasPaused && this.isPaused()) {
+      this.#dispatch('slideplayer:paused', { reasons: Array.from(this.#pauseReasons) });
+    }
+  }
+
+  public isPaused(): boolean {
+    return this.#pauseReasons.size > 0;
+  }
+
+  public get currentIndex(): number {
+    return this.#currentIndex;
+  }
+
+  public get slideCount(): number {
+    return this.#slides.length;
+  }
+
+  // -------------------- Events / Integration --------------------
+
+  #bindEvents(): void {
+    // Pointer events (mouse + touch unified)
+    this.#binder.bindDOM(
       this.container,
-      'touchstart',
+      'pointerdown',
       ((e: Event) => {
-        if (e instanceof TouchEvent) {
-          this.touchStartX = e.changedTouches[0].screenX;
-        }
-      }) as EventListener,
-      { passive: true }
+        const ev = e as PointerEvent;
+        this.#isPointerDown = true;
+        this.#pointerStartX = ev.clientX;
+        this.#pointerEndX = ev.clientX;
+        // Avoid scroll interference on touch
+        (this.container as HTMLElement).style.touchAction = 'pan-y';
+      }) as EventListener
     );
 
-    this.eventBinder.bindDOM(
+    this.#binder.bindDOM(
       this.container,
-      'touchend',
+      'pointermove',
       ((e: Event) => {
-        if (e instanceof TouchEvent) {
-          this.touchEndX = e.changedTouches[0].screenX;
-          this.handleSwipe(this.touchStartX, this.touchEndX);
+        if (!this.#isPointerDown) return;
+        const ev = e as PointerEvent;
+        this.#pointerEndX = ev.clientX;
+      }) as EventListener
+    );
+
+    this.#binder.bindDOM(
+      this.container,
+      'pointerup',
+      (() => {
+        if (!this.#isPointerDown) return;
+        this.#isPointerDown = false;
+        this.#handleSwipe(this.#pointerStartX, this.#pointerEndX);
+      }) as EventListener
+    );
+
+    this.#binder.bindDOM(
+      this.container,
+      'pointerleave',
+      (() => {
+        this.#isPointerDown = false;
+      }) as EventListener
+    );
+
+    // Keyboard
+    this.#binder.bindDOM(
+      document,
+      'keydown',
+      ((e: Event) => {
+        const ev = e as KeyboardEvent;
+        if (ev.key === 'ArrowRight') {
+          this.next();
+          this.#bumpTimer();
+        } else if (ev.key === 'ArrowLeft') {
+          this.prev();
+          this.#bumpTimer();
         }
       }) as EventListener
     );
 
-    // Mouse
-    this.eventBinder.bindDOM(this.container, 'mousedown', this.onMouseDown as unknown as EventListener);
-    this.eventBinder.bindDOM(this.container, 'mousemove', this.onMouseMove as unknown as EventListener);
-    this.eventBinder.bindDOM(this.container, 'mouseup', this.onMouseUp as unknown as EventListener);
-    this.eventBinder.bindDOM(this.container, 'mouseleave', this.onMouseLeave as unknown as EventListener);
-
-    // Keyboard
-    this.eventBinder.bindDOM(document, 'keydown', this.onKeyDown as unknown as EventListener);
-
-    // Pause on hover (reason-based so it won't override inactivity)
-    this.eventBinder.bindDOM(
+    // Hover pause (reason-based)
+    this.#binder.bindDOM(
       this.container,
       'mouseenter',
-      (() => this.pause('hover')) as EventListener
+      (() => {
+        this.#pauseWithTelemetry('hover');
+      }) as EventListener
     );
-    this.eventBinder.bindDOM(
+    this.#binder.bindDOM(
       this.container,
       'mouseleave',
-      (() => this.resume('hover')) as EventListener
+      (() => {
+        this.#resumeWithTelemetry('hover');
+        this.#bumpTimer();
+      }) as EventListener
     );
 
-    // Pause while tab hidden; resume when visible (won't override inactivity)
-    this.eventBinder.bindDOM(
+    // Visibility pause
+    this.#binder.bindDOM(
       document,
       'visibilitychange',
       (() => {
         if (document.visibilityState === 'hidden') {
-          this.pause('hidden');
+          this.#pauseWithTelemetry('hidden');
         } else {
-          this.resume('hidden');
-          this.bumpTimer();
+          this.#resumeWithTelemetry('hidden');
+          this.#bumpTimer();
         }
       }) as EventListener
     );
 
-    // Screensaver / Inactivity integration (do NOT instantiate watcher here)
-    this.eventBinder.bindBus('user:inactive', () => {
-      this.pause('inactivity');
-      eventBus.emit('slideplayer:paused-due-to-inactivity', { index: this.currentIndex });
+    // Screensaver (global inactivity)
+    this.#binder.bindBus('user:inactive', () => {
+      // pause with reason 'inactivity' (will not be overridden by hover/visible)
+      const wasPaused = this.isPaused();
+      this.#pauseReasons.add('inactivity');
+      if (!wasPaused && this.isPaused()) {
+        this.#dispatch('slideplayer:paused', { reasons: Array.from(this.#pauseReasons) });
+      }
+      eventBus.emit('slideplayer:paused-due-to-inactivity', { index: this.#currentIndex });
     });
 
-    this.eventBinder.bindBus('user:active', () => {
-      this.resume('inactivity');
-      this.bumpTimer();
-      eventBus.emit('slideplayer:resumed-after-inactivity', { index: this.currentIndex });
+    this.#binder.bindBus('user:active', () => {
+      const wasPaused = this.isPaused();
+      this.#pauseReasons.delete('inactivity');
+      if (wasPaused && !this.isPaused()) {
+        this.#dispatch('slideplayer:resumed', { reasons: Array.from(this.#pauseReasons) });
+        eventBus.emit('slideplayer:resumed-after-inactivity', { index: this.#currentIndex });
+      }
+      this.#bumpTimer();
     });
 
-    // Cleanup on unload
-    this.eventBinder.bindDOM(window, 'beforeunload', (() => this.destroy()) as EventListener);
+    // Cleanup
+    this.#binder.bindDOM(window, 'beforeunload', (() => this.destroy()) as EventListener);
   }
 
-  // ---------- RAF loop ----------
-
-  private animate = (timestamp: number): void => {
-    if (this._destroyed) return;
-
-    if (!this.lastTimestamp) this.lastTimestamp = timestamp;
-    const elapsed = timestamp - this.lastTimestamp;
-
-    if (!this.isPaused() && elapsed >= this.interval) {
-      this.nextSlide();
-      this.lastTimestamp = timestamp;
+  #pauseWithTelemetry(reason: PauseReason): void {
+    const wasPaused = this.isPaused();
+    this.#pauseReasons.add(reason);
+    if (!wasPaused && this.isPaused()) {
+      this.#dispatch('slideplayer:paused', { reasons: Array.from(this.#pauseReasons) });
     }
-
-    this.rafId = requestAnimationFrame(this.animate);
-  };
-
-  // ---------- Public navigation ----------
-
-  public goToSlide(index: number): void {
-    if (index < 0 || index >= this.slides.length) return;
-    this.setActiveSlide(index);
-    this.bumpTimer();
-    eventBus.emit('slideplayer:slide-changed', { index: this.currentIndex });
   }
 
-  public nextSlide(): void {
-    this.goToSlide((this.currentIndex + 1) % this.slides.length);
+  #resumeWithTelemetry(reason: PauseReason): void {
+    const wasPaused = this.isPaused();
+    this.#pauseReasons.delete(reason);
+    if (wasPaused && !this.isPaused()) {
+      this.#dispatch('slideplayer:resumed', { reasons: Array.from(this.#pauseReasons) });
+    }
   }
 
-  public prevSlide(): void {
-    const prevIndex = (this.currentIndex - 1 + this.slides.length) % this.slides.length;
-    this.goToSlide(prevIndex);
-  }
+  // -------------------- Gestures --------------------
 
-  // ---------- Private helpers ----------
-
-  private setActiveSlide(index: number): void {
-    this.slides[this.currentIndex]?.classList.remove('active');
-    this.dots[this.currentIndex]?.classList.remove('active');
-
-    this.currentIndex = index;
-
-    this.slides[this.currentIndex]?.classList.add('active');
-    this.dots[this.currentIndex]?.classList.add('active');
-  }
-
-  private handleSwipe(startX: number, endX: number): void {
+  #handleSwipe(startX: number, endX: number): void {
     const delta = endX - startX;
     if (delta < -SlidePlayer.SWIPE_THRESHOLD) {
-      this.nextSlide();
+      this.next();
     } else if (delta > SlidePlayer.SWIPE_THRESHOLD) {
-      this.prevSlide();
+      this.prev();
     }
-    this.bumpTimer();
+    this.#bumpTimer();
   }
 
-  private bumpTimer(): void {
-    this.lastTimestamp = performance.now();
+  // -------------------- Utilities --------------------
+
+  #bumpTimer(): void {
+    this.#lastTimestamp = performance.now();
   }
 
-  // Pause system with reasons so different subsystems don’t fight each other
-  private isPaused(): boolean {
-    return this.pauseReasons.size > 0;
+  #dispatch<T extends object>(type: string, detail: T): void {
+    this.container.dispatchEvent(new CustomEvent(type, { detail, bubbles: true }));
   }
-  private pause(reason: PauseReason): void {
-    this.pauseReasons.add(reason);
-  }
-  private resume(reason: PauseReason): void {
-    this.pauseReasons.delete(reason);
-  }
-
-  // ---------- Handlers ----------
-
-  private onMouseDown = (e: MouseEvent): void => {
-    this.isDragging = true;
-    this.mouseStartX = e.clientX;
-  };
-
-  private onMouseMove = (e: MouseEvent): void => {
-    if (this.isDragging) {
-      this.mouseEndX = e.clientX;
-    }
-  };
-
-  private onMouseUp = (): void => {
-    if (this.isDragging) {
-      this.isDragging = false;
-      this.handleSwipe(this.mouseStartX, this.mouseEndX);
-    }
-  };
-
-  private onMouseLeave = (): void => {
-    this.isDragging = false;
-  };
-
-  private onKeyDown = (e: KeyboardEvent): void => {
-    if (e.key === 'ArrowRight') {
-      this.nextSlide();
-      this.bumpTimer();
-    } else if (e.key === 'ArrowLeft') {
-      this.prevSlide();
-      this.bumpTimer();
-    }
-  };
 }
